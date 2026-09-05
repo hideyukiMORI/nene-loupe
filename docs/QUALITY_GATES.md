@@ -70,7 +70,7 @@ CI で必要なゲートは、すべてローカルで実行できる。検査�
 中核の分岐カバレッジ下限を 90% とする。閾値は上げてよいが下げてはならない。下げるには ADR が要る。
 **置いていない層は「置いていない」と書く。**
 
-- 機械強制: **planned**
+- 機械強制: **active**（eng/coverage.py。core/application全cppと対象内ヘッダ、LLVMの分岐90%下限。対象欠落・空の集計も拒否）
 
 ### QLT-010 — ゲートの弱体化はアーキテクチャ変更
 
@@ -214,7 +214,7 @@ CNF-006 が「本文に定義があるのにここに行が無い」を拒否す
 | QLT-006 | planned | |
 | QLT-007 | planned | |
 | QLT-008 | planned | レビュー事項 |
-| QLT-009 | planned | |
+| QLT-009 | active | LLVM計装・llvm-cov・eng/coverage.py、実プロファイルの反例 |
 | QLT-010 | 不能 | PR の手続き |
 | QLT-011 | planned | |
 | QLT-012 | planned | |
@@ -241,8 +241,8 @@ CNF-006 が「本文に定義があるのにここに行が無い」を拒否す
 | アーキテクチャ | 宣言グラフ・実ターゲット・ソース所有 | targets.cmake / architecture.json / CMake File API |
 | 規約検査 | NeNe Loupe 固有 | `eng/conformance.py` |
 | 検査自身のテスト | 規約検査と実ツールの正例・反例 | unittest / eng/prove-gates.py |
-| 単体テスト | 基盤のスモーク確認 | CTest。製品の単体テストは未導入 |
-| カバレッジ | 中核の検証密度 | 未導入。中核実装時に測定器と90%下限を導入 |
+| 単体テスト | 色・画素所有・失敗と復帰 | CTest / tests/unit。OS資源と表示は使わない |
+| カバレッジ | 中核の検証密度 | eng/coverage.py / coverage-policy.json。LLVMの実分岐を90%以上要求 |
 | 依存 | 道具の版と実行時依存0 | tool-versions.json / architecture.json。SDK全体の再現性は未完了 |
 
 ---

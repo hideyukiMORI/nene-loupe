@@ -2,32 +2,36 @@
 
 A tiny frameless screen loupe and colour picker for Windows. C++ / Win32, no UI library.
 
-**Status: verification foundation; no product implementation yet.** The repository has a
-CMake/MSVC smoke test, clang-tidy/clang-format checks, standard-library-only conformance tests,
-and reproducible negative proofs. See [current work](docs/todo/current.md) for measured status.
+**Status: first working slice.** A 160×64 DIP window shows a sharp 8× loupe of the
+7×7 pixels directly behind the lens and the centre colour in HEX. Drag anywhere to move it;
+press Esc or Alt+F4 to close. It stays above other windows. See
+[current work](docs/todo/current.md) for the implementation and measured limits.
 
-On Windows, install the versions in `eng/tool-versions.json` (Visual Studio Build Tools with
+On Windows 10 version 2004 or later (x64, DWM enabled), install the versions in `eng/tool-versions.json` (Visual Studio Build Tools with
 C++ tools, LLVM and CMake, plus Python), then run:
 
 ```powershell
 pwsh -NoProfile -File ./eng/bootstrap.ps1
 pwsh -NoProfile -File ./eng/check.ps1
+./build/NeNeLoupe.exe
 ```
 
-Bootstrap enables this repository's Git hooks. The full gate checks the foundation;
-it does not demonstrate a working loupe. CI and branch protection are only considered enforced
-after remote verification is recorded in [gate proofs](docs/quality/gate-proofs.md).
+Bootstrap enables this repository's Git hooks. The full gate builds the application,
+runs OS-independent unit tests and enforces 90% core/application branch coverage with LLVM.
+Interactive Windows checks are recorded separately in [gate proofs](docs/quality/gate-proofs.md).
+The status title exposes the current HEX; capture failures clear stale pixels and show a message.
 
-## What it will do
+## Remaining features
 
-- A small, borderless, draggable window
-- Left: a loupe magnifying the pixels around the mouse cursor
-- Right: the colour code of the pixel at the loupe's centre; click to copy to clipboard
+- Click the colour to copy to the clipboard
 - Switch the display format (RGB decimal / HEX / CMYK / …)
 - A gear icon opens a small settings modal: app colouring, copyright, version
 
-That is all. The window size is deliberately not fixed yet; it will be adjusted after the
-first working build.
+The initial window size may still be adjusted. This build has no clipboard, format switching,
+settings or persistence. Move the lens over the target to sample it; moving the pointer alone does not change the
+sampling position. The window is excluded from desktop capture to reveal its backdrop, so it
+will also be absent from ordinary screenshots and screen sharing. HDR and ICC colour
+management are outside the specification.
 
 ## Why C++ and plain Win32
 

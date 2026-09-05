@@ -89,7 +89,12 @@ application が作った値を描き、操作を意図として渡す（ARC-011�
 
 | 種類 | 置き場 |
 | --- | --- |
-| production | `src/core` / `src/application` / `src/adapters/win32` / `src/ui/win32` / `src/app`。現在は未作成 |
-| テスト | `tests/build`（実在するC++基盤テスト）/ `tests/conformance`（検査器自身の正例・反例）。製品テストは最初の実装時に追加 |
+| production | `src/core` / `src/application` / `src/adapters/win32` / `src/ui/win32` / `src/app` |
+| テスト | `tests/build`（C++基盤）/ `tests/unit`（OS非依存の中核）/ `tests/conformance`（検査器自身の正例・反例） |
 | 検査設定 | `.clang-format` / `.clang-tidy` / `eng/*.json`。参照の一覧は `eng/config-bindings.json`（CNF-007） |
 | 生成物 | `build/`（CMake・オブジェクト・検証exe）/ `out/`（実測fixture・出力）。製品のコード生成は未採用 |
+
+Issue #3で検証専用の`unit_tests`を追加した（ADR 0004）。依存先はcore/applicationだけ。
+中核の全cppと同じ単体テストを、測定専用LLVMビルドでも使う。
+OSライブラリの宣言は`neneloupe_system_link`を通し、`platformLibraries`の許可表と照合する。
+手動起動する`eng/verify-window.py`は実Windows・ポインタ・表示を扱う環境検証で、単体テストではない。

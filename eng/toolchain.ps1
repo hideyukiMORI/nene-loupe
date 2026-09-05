@@ -29,6 +29,9 @@ $checks = @(
     @{ Name = 'ninja'; Expected = $versions.ninja },
     @{ Name = 'clang-tidy'; Expected = $versions.llvm },
     @{ Name = 'clang-format'; Expected = $versions.llvm },
+    @{ Name = 'clang-cl'; Expected = $versions.llvm },
+    @{ Name = 'llvm-profdata'; Expected = $versions.llvm },
+    @{ Name = 'llvm-cov'; Expected = $versions.llvm },
     @{ Name = 'python'; Expected = $versions.python }
 )
 foreach ($check in $checks) {

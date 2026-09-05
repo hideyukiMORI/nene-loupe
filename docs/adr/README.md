@@ -19,3 +19,5 @@ ADR は「なぜそう決めたか」「何を却下したか」を書く。
 | [0001](0001-strictness-is-mechanically-enforced.md) | 厳格さは機械で強制する | 受理 |
 | [0002](0002-plain-win32-no-ui-library.md) | UI ライブラリを使わず、素の Win32 で作る | 受理 |
 | [0003](0003-cpp-foundation-and-measured-limits.md) | C++の検査基盤と実測できた限界を固定する | 受理 |
+| [0004](0004-first-loupe-slice.md) | 最初の縦切りを単一のサンプル状態で通す | 採取位置のみ0005で置換 |
+| [0005](0005-sample-through-lens.md) | ルーペ自身を除外し、その直下を採取する | 受理 |
