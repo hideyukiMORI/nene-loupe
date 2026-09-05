@@ -1,0 +1,249 @@
+import datetime
+import importlib.util
+import json
+from pathlib import Path
+import sys
+import tempfile
+import unittest
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "eng"))
+import conformance as cnf
+
+spec = importlib.util.spec_from_file_location("git_conventions", ROOT / "eng/git-conventions.py")
+git_conventions = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(git_conventions)
+RULES = json.loads((ROOT / "eng/conformance-rules.json").read_text(encoding="utf-8"))
+TODAY = datetime.date(2026, 9, 6)
+
+
+class SourceChecks(unittest.TestCase):
+    def ids(self, source, path="src/core/Color.hpp", waivers=None):
+        return {f.rule for f in cnf.source_checks(path, source, RULES, waivers or {})}
+
+    def test_cnf001_positive(self):
+        self.assertFalse(self.ids('class Color {}; // class ColorHelper {};\n'))
+
+    def test_cnf001_negative(self):
+        self.assertIn("CNF-001", self.ids("class ColorHelper {};"))
+
+    def test_cnf001_module(self):
+        self.assertIn("CNF-001", self.ids("", "src/core/utils/Color.hpp"))
+
+    def test_cnf001_alias(self):
+        self.assertIn("CNF-001", self.ids("using ColorHelper = int;"))
+
+    def test_cnf002_positive(self):
+        self.assertNotIn("CNF-002", self.ids("class Color {};"))
+
+    def test_cnf002_negative(self):
+        self.assertIn("CNF-002", self.ids("class Color {}; class Theme {};"))
+
+    def test_cnf002_filename(self):
+        self.assertIn("CNF-002", self.ids("class Theme {};"))
+
+    def test_cnf002_nested_positive(self):
+        self.assertNotIn("CNF-002", self.ids("namespace neneloupe { class Color { class Value {}; }; }"))
+
+    def test_cnf002_namespace_negative(self):
+        self.assertIn("CNF-002", self.ids("namespace neneloupe { class Color {}; class Theme {}; }"))
+
+    def test_cnf003_quoted_pragma_positive(self):
+        self.assertNotIn("CNF-003", self.ids('auto text = "#pragma warning(disable: 4062)";'))
+
+    def test_cnf003_positive(self):
+        waivers = {"WVR-0001": {"scope": "src/core/Color.hpp#Color", "rule": "CPP-003"}}
+        self.assertNotIn("CNF-003", self.ids("// Waiver: WVR-0001\n// NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)\nclass Color {};", waivers=waivers))
+
+    def test_cnf003_negative(self):
+        self.assertIn("CNF-003", self.ids("// NOLINTNEXTLINE(check)\nclass Color {};"))
+
+    def test_cnf003_broad(self):
+        for source in ["#pragma warning(disable: 4062)", "// NOLINT", "// NOLINTBEGIN(check)"]:
+            with self.subTest(source=source):
+                self.assertIn("CNF-003", self.ids(source))
+
+    def test_cnf003_wrong_scope(self):
+        waivers = {"WVR-0001": {"scope": "src/core/Other.hpp#Other", "rule": "CPP-003"}}
+        self.assertIn("CNF-003", self.ids("// Waiver: WVR-0001\n// NOLINTNEXTLINE(check)", waivers=waivers))
+
+    def test_arc007_negative(self):
+        for path in ["src/core/Color.cpp", "tests/build/Color.cpp"]:
+            with self.subTest(path=path):
+                self.assertIn("ARC-007", self.ids("auto t = std::chrono::system_clock::now();", path))
+
+    def test_arc007_adapter_positive(self):
+        self.assertNotIn("ARC-007", self.ids("auto t = std::chrono::system_clock::now();", "src/adapters/win32/Clock.cpp"))
+
+    def test_arc007_literals_positive(self):
+        self.assertNotIn("ARC-007", self.ids('auto s = R"tag(system_clock::now())tag"; // getenv()'))
+
+    def test_arc003_negative(self):
+        self.assertIn("ARC-003", self.ids('#include <windows.h>'))
+
+
+class RepositoryChecks(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+
+    def write(self, path, text):
+        file = self.root / path
+        file.parent.mkdir(parents=True, exist_ok=True)
+        file.write_text(text, encoding="utf-8")
+
+    def paths(self):
+        return [p.relative_to(self.root) for p in self.root.rglob("*") if p.is_file()]
+
+    def seed_waiver(self, expires="2026-09-07"):
+        self.write("src/core/Color.hpp", "class Color {};")
+        self.write("docs/waivers/README.md", "[WVR-0001](WVR-0001-color.md)")
+        self.write("docs/waivers/WVR-0001-color.md", f"- Status: active\n- Rule: CPP-003\n- Issue: #1\n- Owner: hide\n- Created: 2026-09-01\n- Expires: {expires}\n- Scope: src/core/Color.hpp#Color\n")
+
+    def test_cnf004_positive(self):
+        self.seed_waiver()
+        errors, valid = cnf.waiver_checks(self.root, self.paths(), TODAY)
+        self.assertEqual([], errors)
+        self.assertIn("WVR-0001", valid)
+
+    def test_cnf004_expired(self):
+        self.seed_waiver("2026-09-05")
+        errors, valid = cnf.waiver_checks(self.root, self.paths(), TODAY)
+        self.assertIn("CNF-004", {f.rule for f in errors})
+        self.assertNotIn("WVR-0001", valid)
+
+    def test_cnf004_expiry_day_valid(self):
+        self.seed_waiver("2026-09-06")
+        self.assertFalse(cnf.waiver_checks(self.root, self.paths(), TODAY)[0])
+
+    def test_cnf004_missing_field(self):
+        self.seed_waiver()
+        self.write("docs/waivers/WVR-0001-color.md", "- Status: active")
+        self.assertTrue(cnf.waiver_checks(self.root, self.paths(), TODAY)[0])
+
+    def test_cnf004_stale_index(self):
+        self.write("docs/waivers/README.md", "WVR-0001")
+        self.assertTrue(cnf.waiver_checks(self.root, self.paths(), TODAY)[0])
+
+    def test_cnf004_bad_scope_is_not_valid(self):
+        self.seed_waiver()
+        path = self.root / "docs/waivers/WVR-0001-color.md"
+        path.write_text(path.read_text(encoding="utf-8").replace("src/core/Color.hpp#Color", "../outside.hpp#Color"), encoding="utf-8")
+        errors, valid = cnf.waiver_checks(self.root, self.paths(), TODAY)
+        self.assertTrue(errors)
+        self.assertNotIn("WVR-0001", valid)
+
+    def seed_config(self):
+        self.write("eng/config-bindings.json", '{".clang-tidy": ["CMakeLists.txt"]}')
+        self.write(".clang-tidy", "WarningsAsErrors: '*'\n")
+        self.write("CMakeLists.txt", '# read .clang-tidy\n')
+
+    def config_ids(self):
+        return {f.rule for f in cnf.configuration_checks(self.root, self.paths(), RULES)}
+
+    def test_cnf005_positive(self):
+        self.seed_config()
+        self.assertFalse(self.config_ids())
+
+    def test_cnf005_filename(self):
+        self.seed_config()
+        self.write("baseline.json", "{}")
+        self.assertIn("CNF-005", self.config_ids())
+
+    def test_cnf005_option(self):
+        self.seed_config()
+        self.write("eng/options.cmake", 'add_compile_options(/WX-)')
+        self.assertIn("CNF-005", self.config_ids())
+
+    def test_cnf007_positive(self):
+        self.seed_config()
+        self.assertNotIn("CNF-007", self.config_ids())
+
+    def test_cnf007_missing_binding(self):
+        self.seed_config()
+        self.write("CMakeLists.txt", "project(test)")
+        self.assertIn("CNF-007", self.config_ids())
+
+    def test_cnf007_extra_config(self):
+        self.seed_config()
+        self.write("src/.clang-tidy", "Checks: '*'")
+        self.assertIn("CNF-007", self.config_ids())
+
+    def test_cnf008_positive(self):
+        self.seed_config()
+        self.write("src/Color.cpp", "// TODO #1: implement color")
+        self.assertNotIn("CNF-008", self.config_ids())
+
+    def test_cnf008_negative(self):
+        self.seed_config()
+        self.write("src/Color.cpp", "// FIXME: implement color")
+        self.assertIn("CNF-008", self.config_ids())
+
+    def seed_docs(self):
+        self.write("docs/QUALITY_GATES.md", "### CNF-006 — documents\n- 機械強制: **active**\n\n## 3. 強制マトリクス\n| CNF-006 | active | checker |\n\n## 4. Gates\n")
+        self.write("docs/quality/gate-proofs.md", "| CNF-006 | test | passed |")
+
+    def doc_errors(self):
+        return cnf.document_checks(self.root, self.paths(), {"normativeFiles": ["docs/QUALITY_GATES.md"]})
+
+    def test_cnf006_positive(self):
+        self.seed_docs()
+        self.assertFalse(self.doc_errors())
+
+    def test_cnf006_undefined(self):
+        self.seed_docs()
+        self.write("README.md", "CPP-999")
+        self.assertTrue(any("undefined" in f.detail for f in self.doc_errors()))
+
+    def test_cnf006_placeholder(self):
+        self.seed_docs()
+        self.write("README.md", "{{TOOL}}")
+        self.assertTrue(any("placeholder" in f.detail for f in self.doc_errors()))
+
+    def test_cnf006_missing_proof(self):
+        self.seed_docs()
+        self.write("docs/quality/gate-proofs.md", "")
+        self.assertTrue(any("proof" in f.detail for f in self.doc_errors()))
+
+    def test_cnf006_duplicate(self):
+        self.seed_docs()
+        path = self.root / "docs/QUALITY_GATES.md"
+        path.write_text(path.read_text(encoding="utf-8") + "\n### CNF-006 — duplicate\n- 機械強制: **active**\n", encoding="utf-8")
+        self.assertTrue(any("duplicate" in f.detail for f in self.doc_errors()))
+
+    def test_cnf006_status_mismatch(self):
+        self.seed_docs()
+        path = self.root / "docs/QUALITY_GATES.md"
+        path.write_text(path.read_text(encoding="utf-8").replace("**active**", "**planned**"), encoding="utf-8")
+        self.assertTrue(any("mismatch" in f.detail for f in self.doc_errors()))
+
+    def test_arc002_graph_cycle(self):
+        self.write("eng/architecture.json", json.dumps({"modules": {"core": {"path": "src/core", "dependencies": ["core"]}}, "runtimeDependencies": []}))
+        self.assertIn("ARC-002", {f.rule for f in cnf.architecture_checks(self.root, self.paths(), None)})
+
+    def test_arc002_relative_include(self):
+        graph = json.loads((ROOT / "eng/architecture.json").read_text(encoding="utf-8"))
+        self.write("eng/architecture.json", json.dumps(graph))
+        self.write("src/core/Color.hpp", '#include "../ui/win32/Window.hpp"')
+        self.write("src/ui/win32/Window.hpp", "class Window {};")
+        self.assertIn("ARC-002", {f.rule for f in cnf.architecture_checks(self.root, self.paths(), None)})
+
+
+class GitChecks(unittest.TestCase):
+    def test_valid(self):
+        self.assertEqual([], git_conventions.validate("build: 検査を固定する (#1)"))
+
+    def test_missing_issue(self):
+        self.assertTrue(git_conventions.validate("build: 検査を固定する"))
+
+    def test_english_description(self):
+        self.assertTrue(git_conventions.validate("build: enforce checks (#1)"))
+
+    def test_breaking_footer(self):
+        self.assertTrue(git_conventions.validate("build!: 契約を変える (#1)"))
+        self.assertFalse(git_conventions.validate("build!: 契約を変える (#1)\n\nBREAKING CHANGE: 契約を更新"))
+
+
+if __name__ == "__main__":
+    unittest.main()

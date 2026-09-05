@@ -1,76 +1,68 @@
 # ゲート発火の証明 — NeNe Loupe
 
-> Status: 記録 / 最終実測 2026-09-06
-> 根拠となる規則: QLT-007（カスタムゲートには negative proof が要る）
+> 記録: 2026-09-06 / Issue #1。以下は実行した結果のみ。
+> 関連: QLT-007 / QLT-013 / ADR 0003
 
-**検査は「落ちること」を見るまで信用しない。** 各ゲートについて、最小の違反を仕込んだ状態で
-意図した規則 ID によって失敗すること、そして元に戻すと `pwsh -NoProfile -File ./eng/check.ps1` が緑に戻ることを実測する。
-ゲートを変えたら、この記録も同じ変更で更新する。
+## 1. 環境と範囲
 
-環境: {{OS / 言語の版 / ビルド道具の版}}
-CI: {{ランナー / 版}}
+Windows x64。MSVC 19.44.35228、LLVM 19.1.5、CMake 3.31.6-msvc6、Ninja 1.12.1、Python 3.12.10。
+これらは実測時の版であり、今後使う版の正本は `eng/tool-versions.json`。
+製品コードは0。緑は検査基盤を証明し、ルーペ・DPI・複数モニタの動作を証明しない。
 
----
+## 2. activeの規則
 
-## 1. 実測結果
-
-| # | 規則 | 仕込んだ違反 | 実行したタスク | 結果 |
-| --- | --- | --- | --- | --- |
-| P1 | {{ARC-007}} | {{中核で現在時刻を読む}} | {{最も狭い該当タスク}} | **失敗** |
-| P2 | {{ARC-002}} | {{禁じた向きの依存を足す}} | | **失敗** |
-| P3 | CPP-002 | {{網羅しない分岐に default を書く}} | | **失敗** |
-| P4 | QLT-002 | {{警告を 1 つ出す}} | | **失敗** |
-| P5 | CNF-001 | {{型を `TimeHelper` と命名する}} | | **失敗** |
-| P6 | CNF-003 | {{waiver 無しの抑制を書く}} | | **失敗** |
-| P7 | CNF-004 | {{期限切れの waiver を置く}} | | **失敗** |
-| P8 | QLT-004 | {{整形を崩す}} | | **失敗** |
-| P9 | CNF-005 | {{`baseline` を名に含む設定ファイルを置く}} | | **失敗** |
-| P10 | CNF-006 | {{マトリクスに無い規則 ID を本文に書く}} | | **失敗** |
-| P11 | CNF-007 | {{どこからも読み込まれない設定ファイルを置く}} | | **失敗** |
-
-**復帰の確認**: 全件について、仕込みを戻したあと `pwsh -NoProfile -File ./eng/check.ps1` が終了コード 0 で成功した。
-
-**除外側の確認**: 例外区画について「禁止が効いていること」と「唯一の窓口が通ること」の両方を見る。
-
-| 区画 | 適用しない禁止 | 呼んでいる禁止 API | 結果 |
+| 規則 | 最小の違反 | 検証経路 | 実測 |
 | --- | --- | --- | --- |
-| `adapters/win32` | 決定性 | {{now() 等}} | `pwsh -NoProfile -File ./eng/check.ps1` 成功 |
+| QLT-002 | 未使用変数・lint違反・整形違反 | eng/prove-gates.py / 実CMakeビルド・clang-format | C4101 / clang-tidy診断 / 整形診断で非0。各復帰は0 |
+| QLT-004 | 一行に詰めたmain | eng/prove-gates.py / clang-format --dry-run --Werror | clang-format-violationsで非0。元の整形は0 |
+| CNF-006 | 未定義ID・重複定義・状態不一致・証明行欠落・未置換値 | tests/conformance の document_checks 正例・反例 | 正例は指摘0、反例はCNF-006 |
+| CNF-008 | Issue番号のないタスクコメント | tests/conformance の configuration_checks 正例・反例 | 番号付きは指摘0、番号なしはCNF-008 |
 
----
+## 3. plannedの部分的な証明
 
-## 2. 出力の抜粋（実行結果からの引用）
+| 規則 | 実測 |
+| --- | --- |
+| ARC-002 | CMakeの禁止依存でARC-002。元に戻すと構成・ビルドとも成功。字句検査でも逆方向includeと循環を拒否 |
+| ARC-003 | coreのwindows.hを拒否。推移的includeまでは未保証 |
+| ARC-007 | coreと製品テストのsystem_clockを拒否。adapters/win32では許可。文字列・コメントは検出しない |
+| CPP-002 | 同じビルド経路の分岐漏れをC4062で拒否。元のソースは成功 |
+| CPP-003 | メソッドを持つ公開メンバーをclang-tidyで拒否。aggregateだけの場合は漏れる |
+| CPP-012 | 5引数をreadability-function-sizeで拒否。元のソースは成功 |
+| CNF-001 | 禁止型名・別名・モジュール名を拒否。普通の型名は通る |
+| CNF-002 | 複数型とファイル名不一致を拒否。主要宣言の完全な分類は未完了 |
+| CNF-003 | waiverなし・Scope違い・ファイル単位の抑制を拒否。有効な行単位waiverは通る |
+| CNF-004 | 期限切れ・必須項目欠落・不整合索引を拒否。期限当日と将来期限は通る |
+| CNF-005 | 禁止設定ファイル名・/WX-を拒否。正常な設定は通る |
+| CNF-007 | 設定参照の欠落・余分な設定を拒否。正常な参照は通る |
+| GIT-003 | 日本語・Issue番号・破壊的変更フッタを検査。CIの実行証拠は未取得 |
 
-```text
-P1  {{実際の失敗出力。規則 ID が含まれていること}}
+## 4. 再現
+
+```powershell
+pwsh -NoProfile -File ./eng/measure-language.ps1
+python -m unittest discover -s tests/conformance -v
+pwsh -NoProfile -File ./eng/check.ps1
 ```
 
----
+Phase 0の19結果は [phase0-results.json](phase0-results.json)。
+実ツールの6反例と復帰結果はフルゲートから実行し、`out/proofs/results.json`に出力する。
+反例は`out/proofs/`以下の使い捨てプロジェクトへ入れ、本体のソースは変更しない。
+検査器の正例・反例はフルゲートから常に呼ぶ。
+ローカルの単一ゲートは2026-09-06に終了コード0を確認した。
+検査器は44テスト。C++のCTestは1件。製品のテスト件数には数えない。
 
-## 3. 事故から生まれた検査
+## 5. GitHubと実機
 
-<!-- 設定だけあって効いていなかった、検査を足した直後に迂回された、などの事故を Issue 番号つきで残す。
-     前例: NeNeClock Issue #26（設定ファイルが読み込まれていなかった → CNF-011）/ #42（文言検査の迂回 → CNF-013） -->
+2026-09-06にruleset `main-quality-gate`（ID 22345027）を適用し、APIで読み戻した。
+PR必須、GitHub Actionsの`check`必須（integration 15368）、strict up-to-date、
+force push・削除禁止、未解決レビューの解消を要求する。bypass actorは空。
+リポジトリ設定はsquashのみを許可し、件名はPRタイトルを使う。
 
-（まだ無い）
-
----
-
-## 4. リポジトリ設定（ruleset）
-
-| 設定 | 値 | 確認日 |
-| --- | --- | --- |
-| PR 必須 | {{未設定／設定済み}} | |
-| 必須 check | `{{CI_JOB_NAME}}` | |
-| strict up-to-date | | |
-| force push / ブランチ削除の禁止 | | |
-| squash のみ | | |
-
-🔴 **設定していないものを「必須になっている」と書かない。** 設定したら `gh api` で読み戻して記録する。
-
----
-
-## 5. 環境依存の確認（QLT-013）
-
-<!-- 表示・実機・実 OS 資源を伴う確認は、単体テストとは別にここに環境と手順を書く -->
-
-（まだ無い）
+最初の [CI実行](https://github.com/hideyukiMORI/nene-loupe/actions/runs/33981391008) は
+PATH上の別CMake（3.31.6）を拾い、QLT-011で失敗した。版の比較を緩めず、
+Visual Studio同梱のCMake/Ninjaをtoolchain.ps1で明示的に選択するよう修正した。
+修正後の [CI実行](https://github.com/hideyukiMORI/nene-loupe/actions/runs/33981539645) は
+コミット `55e6116` で成功した。ローカルと同じ単一コマンドで44テスト、CTest、6反例と復帰を実行した。
+Ready後のhead更新を自動でDraftへ戻す処理や、Git規約の全条件の反例証明は未実装なので、
+GITとQLT-012の規則全体はplannedを維持する。
+表示・DPI・複数モニタ・クリップボードの実機検証は未実施。

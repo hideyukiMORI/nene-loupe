@@ -15,7 +15,7 @@
 ### QLT-001 — ゲートは一つ
 
 ローカルの検証と CI は**同じ 1 つのコマンド**（`pwsh -NoProfile -File ./eng/check.ps1`）を呼ぶ。CI のワークフローに品質判断のロジックを書かない。
-第 2 の完了定義を文書化しない。道具の版は 1 か所（{{VERSION_FILE}}）にだけ書く。
+第 2 の完了定義を文書化しない。道具の版は 1 か所（eng/tool-versions.json）にだけ書く。
 
 - 機械強制: **planned**（CI が `pwsh -NoProfile -File ./eng/check.ps1` を呼ぶだけであること）
 
@@ -23,7 +23,7 @@
 
 コンパイラの警告・整形差分・静的解析の指摘はすべて失敗にする。重大度の引き下げは禁止。
 
-- 機械強制: **planned**
+- 機械強制: **active**（MSVC /WX、clang-tidy WarningsAsErrors、clang-format --Werror。実ツールの反例と復帰で検証）
 
 ### QLT-003 — baseline を作らない
 
@@ -36,7 +36,7 @@ lint・静的解析・アーキテクチャ・依存・テストのいずれに�
 
 整形は設定から決定的に決まる。CI がソースを書き換えて成功させることはしない。整形の正本は 1 つ（設定ファイルは置かないか 1 つだけ）。
 
-- 機械強制: **planned**
+- 機械強制: **active**（eng/check.ps1 の clang-format --dry-run --Werror）
 
 ### QLT-005 — ローカルと CI は同一
 
@@ -67,7 +67,7 @@ CI で必要なゲートは、すべてローカルで実行できる。検査�
 
 ### QLT-009 — カバレッジは下げられない
 
-中核の分岐カバレッジ下限を {{COVERAGE_MIN}}% とする。閾値は上げてよいが下げてはならない。下げるには ADR が要る。
+中核の分岐カバレッジ下限を 90% とする。閾値は上げてよいが下げてはならない。下げるには ADR が要る。
 **置いていない層は「置いていない」と書く。**
 
 - 機械強制: **planned**
@@ -102,23 +102,66 @@ head が動いたら Draft に戻して再度 Ready にする。古い成功 SHA
 
 ---
 
-## 2. 規約検査の規則（CNF-0xx）— `{{CONFORMANCE}}`
+## 2. 規約検査の規則（CNF-0xx）— `eng/conformance.py`
 
 汎用の lint が見ないもの、つまり**このリポジトリ固有の規約**を検査する。依存ゼロで書き、ゲートから常に呼ぶ。
 各規則には正例・反例の単体テストを付け、それもゲートに結線する（QLT-007）。
 
-<!-- 最初に入れる 5 つ。実装したら状態を active にし、gate-proofs に行を足す。 -->
+### CNF-001 — 禁止された総称名
 
-| ID | 内容 | 規則 | 状態 |
-| --- | --- | --- | --- |
-| `CNF-001` | 禁止された総称名（型名の語尾・パッケージ名） | CPP-010 | planned |
-| `CNF-002` | 1 ファイル 1 主要宣言 | CPP-011 | planned |
-| `CNF-003` | 抑制には waiver ID が要る（台帳を持つ言語のみ） | CPP-015 | planned |
-| `CNF-004` | waiver 台帳の整合（命名・必須項目・索引・**期限切れで落とす**） | CPP-015 | planned |
-| `CNF-005` | baseline とゲート無力化の禁止（`baseline` / `suppressions` / `ignoreFailures` 等） | QLT-003 | planned |
-| `CNF-006` | 文書整合（規則 ID の重複・未定義参照・マトリクスに行の無い規則） | ADR 0001 | planned |
-| `CNF-007` | 宣言した検査設定が実際にビルドから読み込まれていること | QLT-007 | planned |
-| `CNF-008` | `TODO` / `FIXME` には Issue 番号 | — | planned |
+C++の型・別名とモジュール名を字句検査する。マクロで生成した型名や全ての宣言構文の解析は未完了。
+
+- 対応する規則: CPP-010
+- 機械強制: **planned**（`eng/conformance.py`）
+
+### CNF-002 — 1ファイル1主要宣言
+
+型定義とファイル名を字句検査する。テンプレート等を含む主要宣言の完全な分類は未完了。
+
+- 対応する規則: CPP-011
+- 機械強制: **planned**（`eng/conformance.py`）
+
+### CNF-003 — 抑制とwaiverの結び付け
+
+ファイル単位のpragmaとNOLINTを拒否。行単位には有効なwaiverと検査名を要求する。宣言への厳密な結び付けは未完了。
+
+- 対応する規則: CPP-015
+- 機械強制: **planned**（`eng/conformance.py`）
+
+### CNF-004 — waiver台帳の整合
+
+命名・必須メタデータ・索引・Scope・期限を検査。期限はUTC日付で、Expires当日まで有効。解除条件本文の妥当性はレビュー。
+
+- 対応する規則: CPP-015
+- 機械強制: **planned**（`eng/conformance.py`）
+
+### CNF-005 — baselineとゲート無力化の禁止
+
+禁止された設定ファイル名と既知の無力化オプションを検査。任意のスクリプトによる迂回を網羅したとは扱わない。
+
+- 対応する規則: QLT-003
+- 機械強制: **planned**（`eng/conformance.py`）
+
+### CNF-006 — 文書整合
+
+規則IDの重複定義・未定義参照・マトリクス行と本文状態・activeの証明行・相対リンク・未置換の雛形値を検査する。Issue #1で未実測の成功文言が雛形に残っていたため、実証を別途要求する。文言の真偽そのものは機械では判定しない。
+
+- 対応する規則: QLT-007
+- 機械強制: **active**（`eng/conformance.py`）
+
+### CNF-007 — 検査設定の読込
+
+eng/config-bindings.jsonの設定と参照先を照合する。文字列参照だけでは実行を証明しないため、整形・lint・CMakeは実ツールの反例も実行する。任意の新設定の自動発見は未完了。
+
+- 対応する規則: QLT-007
+- 機械強制: **planned**（`eng/conformance.py`）
+
+### CNF-008 — TODOとFIXMEにIssue番号
+
+製品ソースとeng内のコードにあるタスクマーカーは同じ行のIssue番号を必須とする。検査器の正例・反例fixtureは対象外。
+
+- 対応する規則: QLT-008
+- 機械強制: **active**（`eng/conformance.py`）
 
 🔴 **検出語は検査器のソースに直書きしない**（検査器が自分自身を違反として報告する。前例: xi-tools 初版で 7 件の自己検出）。
 🔴 **テストソースは検査対象から外す**（テストは意図的な違反を書く場所）。
@@ -164,9 +207,9 @@ CNF-006 が「本文に定義があるのにここに行が無い」を拒否す
 | GIT-003 | planned | `.githooks/commit-msg`＋CI（全コミットと PR タイトル） |
 | GIT-004 | planned | PR テンプレート＋ruleset（squash-only） |
 | QLT-001 | planned | |
-| QLT-002 | planned | |
+| QLT-002 | active | MSVC・clang-tidy・clang-formatと実ツール反例 |
 | QLT-003 | planned | CNF-005 |
-| QLT-004 | planned | |
+| QLT-004 | active | clang-format --dry-run --Werror |
 | QLT-005 | planned | |
 | QLT-006 | planned | |
 | QLT-007 | planned | |
@@ -176,7 +219,14 @@ CNF-006 が「本文に定義があるのにここに行が無い」を拒否す
 | QLT-011 | planned | |
 | QLT-012 | planned | |
 | QLT-013 | planned | |
-| CNF-001 〜 CNF-008 | planned | `{{CONFORMANCE}}` |
+| CNF-001 | planned | eng/conformance.py / tests/conformance |
+| CNF-002 | planned | eng/conformance.py / tests/conformance |
+| CNF-003 | planned | eng/conformance.py / tests/conformance |
+| CNF-004 | planned | eng/conformance.py / tests/conformance |
+| CNF-005 | planned | eng/conformance.py / tests/conformance |
+| CNF-006 | active | eng/conformance.py / tests/conformance |
+| CNF-007 | planned | eng/conformance.py / tests/conformance |
+| CNF-008 | active | eng/conformance.py / tests/conformance |
 
 ---
 
@@ -184,16 +234,16 @@ CNF-006 が「本文に定義があるのにここに行が無い」を拒否す
 
 | 層 | 目的 | 実体 |
 | --- | --- | --- |
-| コンパイル | 型安全・網羅性・警告ゼロ | {{…}} |
-| 整形 | 文字列としての正本 | {{…}} |
-| API 禁止 | シンボル単位の禁止 | {{…}} |
-| 静的解析 | 構造と複雑度 | {{…}} |
-| アーキテクチャ | レイヤ・パッケージ境界 | {{…}} |
-| 規約検査 | NeNe Loupe 固有 | `{{CONFORMANCE}}` |
-| 検査自身のテスト | 規約検査の正例・反例 | {{…}} |
-| 単体テスト | 振る舞い | {{…}} |
-| カバレッジ | 中核の検証密度 | {{…}} |
-| 依存 | 再現性 | {{…}} |
+| コンパイル | 型安全・網羅性・警告ゼロ | MSVC・eng/targets.cmake |
+| 整形 | 文字列としての正本 | clang-format / .clang-format |
+| API 禁止 | 既知の入力API名・中核のプラットフォームヘッダ | conformanceの字句検査。完全なシンボル解決は未導入 |
+| 静的解析 | 構造と複雑度 | clang-tidy / .clang-tidy |
+| アーキテクチャ | 宣言グラフ・実ターゲット・ソース所有 | targets.cmake / architecture.json / CMake File API |
+| 規約検査 | NeNe Loupe 固有 | `eng/conformance.py` |
+| 検査自身のテスト | 規約検査と実ツールの正例・反例 | unittest / eng/prove-gates.py |
+| 単体テスト | 基盤のスモーク確認 | CTest。製品の単体テストは未導入 |
+| カバレッジ | 中核の検証密度 | 未導入。中核実装時に測定器と90%下限を導入 |
+| 依存 | 道具の版と実行時依存0 | tool-versions.json / architecture.json。SDK全体の再現性は未完了 |
 
 ---
 
