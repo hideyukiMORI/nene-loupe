@@ -18,7 +18,8 @@ the normative documents live in [docs/](docs/).
 3. `docs/CODING_RULES.md`
 4. `docs/QUALITY_GATES.md`
 5. `docs/DEVELOPMENT_WORKFLOW.md`
-6. `docs/GLOSSARY.md`
+6. `docs/COMMIT_CONVENTIONS.md`
+7. `docs/GLOSSARY.md`
 
 Then the active issue, the relevant accepted ADRs, and any active waivers.
 

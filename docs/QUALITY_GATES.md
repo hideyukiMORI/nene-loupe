@@ -159,6 +159,10 @@ CNF-006 が「本文に定義があるのにここに行が無い」を拒否す
 | CPP-013 | planned | |
 | CPP-014 | planned | |
 | CPP-015 | planned | CNF-003 ＋ CNF-004 |
+| GIT-001 | planned | PR テンプレート＋CI（`Closes #N`） |
+| GIT-002 | planned | ruleset＋CI（head ブランチ名） |
+| GIT-003 | planned | `.githooks/commit-msg`＋CI（全コミットと PR タイトル） |
+| GIT-004 | planned | PR テンプレート＋ruleset（squash-only） |
 | QLT-001 | planned | |
 | QLT-002 | planned | |
 | QLT-003 | planned | CNF-005 |

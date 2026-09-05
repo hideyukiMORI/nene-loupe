@@ -13,8 +13,9 @@ Claude Code / AI エージェントがこのリポジトリで作業するため
 3. [docs/CODING_RULES.md](docs/CODING_RULES.md) — C++ (C++23, MSVC) 規約（CPP-NNN）
 4. [docs/QUALITY_GATES.md](docs/QUALITY_GATES.md) — **いま何が機械で守られているか**（QLT-NNN / CNF-NNN）
 5. [docs/DEVELOPMENT_WORKFLOW.md](docs/DEVELOPMENT_WORKFLOW.md) — 手順
-6. [docs/GLOSSARY.md](docs/GLOSSARY.md) — 用語
-7. 該当する ADR（`docs/adr/`）と有効な waiver（`docs/waivers/`）
+6. [docs/COMMIT_CONVENTIONS.md](docs/COMMIT_CONVENTIONS.md) — Issue・ブランチ・コミット・PR（GIT-NNN）
+7. [docs/GLOSSARY.md](docs/GLOSSARY.md) — 用語
+8. 該当する ADR（`docs/adr/`）と有効な waiver（`docs/waivers/`）
 
 ---
 
@@ -77,7 +78,7 @@ pwsh -NoProfile -File ./eng/check.ps1          # 唯一の完了定義（ロー�
 Issue → 正典経路の特定 → ブランチ → （設計を変えるなら先に ADR）→ 最小の実装 →
 テスト → 狭い検査 → `pwsh -NoProfile -File ./eng/check.ps1` → 規則 ID ごとの自己レビュー → PR（draft）→ Ready → squash merge。
 
-コミットは Conventional Commits（`type` と `scope` は英語、説明は日本語、末尾に `(#N)`）。
+コミットは Conventional Commits（`type` と `scope` は英語、説明は日本語、末尾に `(#N)`）。形の正本は GIT-003。
 
 ---
 

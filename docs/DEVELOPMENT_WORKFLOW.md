@@ -41,20 +41,8 @@ production コード・ビルド・依存・方針・利用者向けドキュメ
 
 ## 3. ブランチとコミット
 
-ブランチ名:
-
-```text
-<type>/<issue番号>-<short-kebab-summary>
-```
-
-コミット（Conventional Commits）:
-
-```text
-<type>(<scope>): <日本語の説明> (#<issue番号>)
-```
-
-`type` は `feat` / `fix` / `docs` / `refactor` / `test` / `build` / `ci` / `chore`。
-`type` と `scope` は英語、説明は日本語。1 つの PR にアーキテクチャ移行・無関係な整理・依存更新・機能追加を混ぜない。
+Issue・ブランチ・コミット・PR の形は [COMMIT_CONVENTIONS.md](COMMIT_CONVENTIONS.md)（GIT-001〜004）だけが定める。ここには複製しない。
+1 つの PR にアーキテクチャ移行・無関係な整理・依存更新・機能追加を混ぜない。
 
 ---
 
