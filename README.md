@@ -2,9 +2,10 @@
 
 A tiny frameless screen loupe and colour picker for Windows. C++ / Win32, no UI library.
 
-**Status: first working slice.** A 160×64 DIP window shows a sharp 8× loupe of the
-7×7 pixels directly behind the lens and the centre colour in HEX. Drag anywhere to move it;
-press Esc or Alt+F4 to close. It stays above other windows. See
+**Status: design implementation under review (Issue #6).** A 240×64 DIP window shows a sharp
+8× loupe of the 7×7 pixels directly behind the lens and the centre colour. Click the value
+to copy it, click the format label to cycle formats, and open the gear for settings.
+Drag the lens or background to move; press Esc or Alt+F4 to close. See
 [current work](docs/todo/current.md) for the implementation and measured limits.
 
 On Windows 10 version 2004 or later (x64, DWM enabled), install the versions in `eng/tool-versions.json` (Visual Studio Build Tools with
@@ -21,14 +22,16 @@ runs OS-independent unit tests and enforces 90% core/application branch coverage
 Interactive Windows checks are recorded separately in [gate proofs](docs/quality/gate-proofs.md).
 The status title exposes the current HEX; capture failures clear stale pixels and show a message.
 
-## Remaining features
+## Controls and settings
 
-- Click the colour to copy to the clipboard
-- Switch the display format (RGB decimal / HEX / CMYK / …)
-- A gear icon opens a small settings modal: app colouring, copyright, version
+- Click the value to copy RGB decimal, HEX, CMYK, HSL or HSV text.
+- Cycle formats with the label, or choose one from the right-click menu.
+- The gear opens theme (dark / light / system), always-on-top, copyright and version.
+- Settings apply immediately and persist in `%LOCALAPPDATA%\NeNeLoupe\settings.v1.txt`.
 
-The initial window size may still be adjusted. This build has no clipboard, format switching,
-settings or persistence. Move the lens over the target to sample it; moving the pointer alone does not change the
+Automated Windows checks cover copying, modal settings, persistence and four monitors;
+manual interaction review and long-duration checks remain. Move the lens over the target to sample it;
+moving the pointer alone does not change the
 sampling position. The window is excluded from desktop capture to reveal its backdrop, so it
 will also be absent from ordinary screenshots and screen sharing. HDR and ICC colour
 management are outside the specification.

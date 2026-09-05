@@ -16,12 +16,19 @@
 | waiver | 1 つの規則に対する期限付きの狭い例外 | `docs/waivers/WVR-NNNN-*.md` |
 | 機械強制の状態 | active / planned / 不能 / 不採用 | `docs/QUALITY_GATES.md` の強制マトリクス |
 | negative proof | ゲートが意図した規則で落ちることの実測 | `docs/quality/gate-proofs.md` |
-| RGB色 | 8bitの赤・緑・青。HEX整形の正本 | `RgbColor`（core） |
+| RGB色 | 8bitの赤・緑・青の値。整形は持たない | `RgbColor`（core） |
+| 表示文字列 | 色を表示形式に従って綴った文字列。表示・窓のタイトル・クリップボードで同じものを使う | `ColorText`（core） |
 | 画面サンプル | 7×7画素の所有コピー。中央の画素が色番号の元になる | `ScreenSample`（core） |
 | 採取座標 | レンズ中心の物理スクリーン座標。負の座標を含む | `ScreenPosition`（core） |
 | 現在サンプルの所有者 | 一度のポート取得で最新結果へ置き換える | `LoupeController`（application） |
 | 表示フレーム | 最新サンプルから生成する画素とHEX、または失敗文言 | `LoupeFrame`（application） |
-| 色形式 | RGB10進・RGB16進・CMYK・HSL・HSVの閉じた集合 | core（具体型は最初の実装時に命名） |
+| 色形式 | RGB10進・RGB16進・CMYK・HSL・HSVの閉じた集合。巡回の順もここが正本 | `ColorFormat`（core） |
+| テーマ | 利用者が選ぶ配色。ダーク・ライト・システムに従うの閉じた集合 | `Theme`（core） |
+| 見えの配色 | 実際に描くほうの閉じた集合。ダーク・ライトの2つだけ。システム追従はここへ解決される | `ThemeAppearance`（core） |
+| 配色表 | 見えの配色ごとの色の対応。`windows.h`を含まない | `ThemePalette`（core） |
+| 重なり順 | 常に最前面か、通常の重なり順かの閉じた集合 | `WindowLayer`（core） |
+| 設定 | テーマ・色形式・重なり順の組。保存される値の正本 | `LoupeSettings`（core） |
+| 設定フレーム | 設定モーダルが描く値と、読込・保存の状態 | `SettingsFrame`（application） |
 
 ## 使ってはいけない語
 

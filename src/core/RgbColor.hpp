@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <string>
 
 namespace neneloupe
 {
@@ -12,7 +11,6 @@ class RgbColor final
     std::uint8_t red() const noexcept;
     std::uint8_t green() const noexcept;
     std::uint8_t blue() const noexcept;
-    std::string hex() const;
     bool operator==(const RgbColor &) const = default;
 
   private:
