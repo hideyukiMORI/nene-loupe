@@ -1,0 +1,19 @@
+# ビルド出力（CMake / MSVC）。アンカーして誤爆を防ぐ
+/build/
+/out/
+/.vs/
+/x64/
+/Debug/
+/Release/
+*.user
+*.suo
+*.pdb
+*.ilk
+*.obj
+*.exe
+*.dll
+*.lib
+*.exp
+# 一時物
+*.log
+*.tmp
