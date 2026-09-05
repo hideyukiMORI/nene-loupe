@@ -5,7 +5,8 @@
     "adapters_win32": {"path": "src/adapters/win32", "dependencies": ["application", "core"]},
     "ui_win32": {"path": "src/ui/win32", "dependencies": ["application", "core"]},
     "app": {"path": "src/app", "dependencies": ["core", "application", "adapters_win32", "ui_win32"]},
-    "verification": {"path": "tests/build", "dependencies": []}
+    "verification": {"path": "tests/build", "dependencies": []},
+    "unit_tests": {"path": "tests/unit", "dependencies": ["core", "application"]}
   },
   "runtimeDependencies": [],
   "platformLibraries": {"adapters_win32": ["user32", "gdi32", "advapi32"], "ui_win32": ["user32", "gdi32"], "app": ["user32"]}

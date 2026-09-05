@@ -229,6 +229,25 @@ class RepositoryChecks(unittest.TestCase):
         self.write("src/ui/win32/Window.hpp", "class Window {};")
         self.assertIn("ARC-002", {f.rule for f in cnf.architecture_checks(self.root, self.paths(), None)})
 
+    def seed_build_graph(self, include_unit):
+        graph = json.loads((ROOT / "eng/architecture.json").read_text(encoding="utf-8"))
+        self.write("eng/architecture.json", json.dumps(graph))
+        self.write("tests/unit/Sample.cpp", "int main() { return 0; }")
+        reply = "build/.cmake/api/v1/reply/"
+        self.write(reply + "index-1.json", json.dumps({"reply": {"codemodel-v2": {"jsonFile": "model.json"}}}))
+        targets = [{"id": "unit", "name": "unit", "jsonFile": "unit.json"}] if include_unit else []
+        self.write(reply + "model.json", json.dumps({"configurations": [{"targets": targets}]}))
+        self.write(reply + "unit.json", json.dumps({"name": "unit", "sources": [{"path": "tests/unit/Sample.cpp"}]}))
+
+    def test_arc002_unit_translation_present(self):
+        self.seed_build_graph(True)
+        self.assertFalse(cnf.architecture_checks(self.root, self.paths(), self.root / "build"))
+
+    def test_arc002_unit_translation_missing(self):
+        self.seed_build_graph(False)
+        findings = cnf.architecture_checks(self.root, self.paths(), self.root / "build")
+        self.assertTrue(any(f.rule == "ARC-002" and "absent from the build" in f.detail for f in findings))
+
 
 class GitChecks(unittest.TestCase):
     def test_valid(self):

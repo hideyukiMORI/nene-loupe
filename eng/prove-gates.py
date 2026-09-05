@@ -26,14 +26,16 @@ def main() -> None:
         root = Path(temporary).resolve()
         if not root.is_relative_to(output_root):
             raise RuntimeError("Proof workspace escaped the intended output directory")
-        for path in ["CMakeLists.txt", "eng/targets.cmake", "eng/architecture.json", ".clang-tidy", ".clang-format", "tests/build/ToolchainSmoke.cpp"]:
+        files = ["CMakeLists.txt", "eng/targets.cmake", "eng/architecture.json", ".clang-tidy", ".clang-format", "tests/build/ToolchainSmoke.cpp"]
+        files += [p.relative_to(ROOT).as_posix() for folder in ["src", "tests/unit"] for p in (ROOT / folder).rglob("*") if p.is_file()]
+        for path in files:
             destination = root / path
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(ROOT / path, destination)
         source = root / "tests/build/ToolchainSmoke.cpp"
         original = source.read_text(encoding="utf-8")
         configure = ["cmake", "-S", ".", "-B", "build", "-G", "Ninja", "-DCMAKE_BUILD_TYPE=Debug"]
-        build = ["cmake", "--build", "build", "--clean-first"]
+        build = ["cmake", "--build", "build", "--target", "toolchain_smoke", "--clean-first"]
         run(configure, root, True)
         run(build, root, True)
         probes = [
@@ -63,6 +65,13 @@ def main() -> None:
         run(build, root, True)
         evidence.append({"rule": "ARC-002", "negative": result, "restorationExit": 0})
         print("QLT-004 / ARC-002: real tools rejected violations; restoration passed")
+        cmake_file.write_text(cmake_original + "\nneneloupe_system_link(neneloupe_core user32)\n", encoding="utf-8")
+        result = run(configure, root, False, "ARC-002")
+        cmake_file.write_text(cmake_original, encoding="utf-8")
+        run(configure, root, True)
+        run(build, root, True)
+        evidence.append({"rule": "ARC-002", "negative": result, "restorationExit": 0})
+        print("ARC-002: core platform library rejected; restoration passed")
     (output_root / "results.json").write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"Gate proofs passed: {len(evidence)} real-tool negative/restoration pairs")
 

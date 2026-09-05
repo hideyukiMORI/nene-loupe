@@ -29,10 +29,12 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'ARC-002: actual build graph failed.' }
     & ctest --test-dir build --output-on-failure --no-tests=error
     if ($LASTEXITCODE -ne 0) { throw 'C++ verification failed.' }
+    & python eng/coverage.py
+    if ($LASTEXITCODE -ne 0) { throw 'QLT-009: branch coverage or its negative proof failed.' }
     & python eng/prove-gates.py
     if ($LASTEXITCODE -ne 0) { throw 'QLT-007: gate proofs failed.' }
     & git diff --check
     if ($LASTEXITCODE -ne 0) { throw 'Whitespace verification failed.' }
-    Write-Host 'NeNe Loupe full gate passed (verification foundation; no product implementation).'
+    Write-Host 'NeNe Loupe full gate passed (UI hardware checks are recorded separately).'
 }
 finally { Pop-Location }
