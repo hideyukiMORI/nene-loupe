@@ -28,5 +28,5 @@ Phase 0 / 1 の実測で埋める。**埋めるまで対応する規則は plann
 
 ## 次の 1 手
 
-Phase 0: `_work/reports/ayane-strict-repo-policy/INIT_PROCEDURE.md` に従い、MSVC（`/std:c++latest` `/W4 /WX /permissive-`）と
+Phase 0: `/home/xi/docker/_work/reports/ayane-strict-repo-policy/INIT_PROCEDURE.md` に従い、MSVC（`/std:c++latest` `/W4 /WX /permissive-`）と
 clang-tidy で M-1〜M-8 を実測し、ADR 0001 の空欄を埋める。

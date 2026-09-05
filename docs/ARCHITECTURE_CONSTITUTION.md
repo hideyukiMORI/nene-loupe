@@ -40,7 +40,7 @@
 
 先行事例（NENE-PIXEL＝Kotlin / nene-recall＝Go / xi-tools＝Rust / NeNeCommander＝C# / NeNeClock＝Java）が
 到達した点との比較。**本リポジトリの列は Phase 0 の実測で埋める。** 出典は
-`_work/reports/ayane-strict-repo-policy/LINEAGE.md` 第 2 節。
+`/home/xi/docker/_work/reports/ayane-strict-repo-policy/LINEAGE.md` 第 2 節。
 
 | 規則 | Kotlin | Go | Rust | C# | Java | **C++ (C++23, MSVC)（本リポジトリの実測）** |
 | --- | --- | --- | --- | --- | --- | --- |

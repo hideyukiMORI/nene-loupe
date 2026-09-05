@@ -53,4 +53,4 @@
 ## 関連
 
 - SPECIFICATION.md 第 3 節（非要件）
-- `_work/reports/ayane-strict-repo-policy/POLICY.md`
+- `/home/xi/docker/_work/reports/ayane-strict-repo-policy/POLICY.md`

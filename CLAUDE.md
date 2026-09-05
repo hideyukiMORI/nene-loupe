@@ -105,3 +105,16 @@ Waivers: none | WVR-NNNN
 
 <!-- 前例（xi-tools・nene-recall）は「動くもの／動かないもの／測れるもの」をここに実測つきで書いている。
      README の主張と実態が乖離しないよう、ここは実測でだけ更新する。 -->
+
+---
+
+## 7. 上位のポリシーと雛形の所在
+
+このリポジトリの規約は **AYANE 厳格規約ポリシー**の適用例である。ポリシー本文・初期化手順・雛形は
+施主のワークスペース（private）にある。
+
+- WSL: `/home/xi/docker/_work/reports/ayane-strict-repo-policy/`（`POLICY.md` / `INIT_PROCEDURE.md` / `LINEAGE.md` / `templates/`）
+- Windows: `\\wsl.localhost\Ubuntu\home\xi\docker\_work\reports\ayane-strict-repo-policy\`
+
+雛形で足りなかったものを見つけたら、このリポを直すと同時に雛形へ還流する（board id:155）。
+先行事例は NeNeClock（`/home/xi/docker/NeNeClock`・Java）と NeNeCommander（`C:\Users\info\WORKS\NeNeCommander`・C#）。

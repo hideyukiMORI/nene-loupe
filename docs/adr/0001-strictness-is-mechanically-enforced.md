@@ -7,7 +7,7 @@
 
 ## 文脈
 
-本リポジトリの規約は、AYANE 厳格規約ポリシー（`_work/reports/ayane-strict-repo-policy/POLICY.md`）と、
+本リポジトリの規約は、AYANE 厳格規約ポリシー（`/home/xi/docker/_work/reports/ayane-strict-repo-policy/POLICY.md`）と、
 先行する 5 リポジトリ（NENE-PIXEL＝Kotlin / nene-recall＝Go / xi-tools＝Rust / NeNeCommander＝C# / NeNeClock＝Java）で
 確立された考え方を C++ (C++23, MSVC) へ持ち込んだものである。共通する中核は 1 つに要約できる。
 
@@ -93,4 +93,4 @@
 ## 関連
 
 - 先行: NENE-PIXEL `docs/ADR`、nene-recall ADR 0010、xi-tools ADR 0001、NeNeCommander ADR-0001、NeNeClock ADR 0001
-- ポリシー: `_work/reports/ayane-strict-repo-policy/`
+- ポリシー: `/home/xi/docker/_work/reports/ayane-strict-repo-policy/`
