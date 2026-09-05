@@ -8,6 +8,7 @@
 [PR #4](https://github.com/hideyukiMORI/nene-loupe/pull/4)は統合済み。
 作業ブランチは `feat/6-designed-loupe-controls`、分岐元mainは `ad65487`。
 実装と検証を保存する区切りで、レビューと統合は次回。
+実装保存は `8303053`、[Draft PR #7](https://github.com/hideyukiMORI/nene-loupe/pull/7)を作成済み。
 
 ## 実装・検証
 
