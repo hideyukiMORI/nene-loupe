@@ -46,7 +46,7 @@ pwsh -NoProfile -File ./eng/check.ps1
 ```
 
 Phase 0の19結果は [phase0-results.json](phase0-results.json)。
-実ツールの6反例と復帰結果はフルゲートから実行し、`out/proofs/results.json`に出力する。
+実ツールの7反例と復帰結果はフルゲートから実行し、`out/proofs/results.json`に出力する。
 反例は`out/proofs/`以下の使い捨てプロジェクトへ入れ、本体のソースは変更しない。
 検査器の正例・反例はフルゲートから常に呼ぶ。
 ローカルの単一ゲートは2026-09-06に終了コード0を確認した。
@@ -71,6 +71,11 @@ Issue #1では表示・DPI・複数モニタ・クリップボードの実機検
 
 ## 6. 最初の製品実装（Issue #3 / ADR 0004）
 
+ローカルの `pwsh -NoProfile -File ./eng/check.ps1` は2026-09-06に終了コード0。
+検査器54テスト、CTest2件、分岐カバレッジの反例と復帰、実ツール7組の反例と復帰を実行した。
+追加したOSライブラリ経路も、coreへのuser32宣言でARC-002となり、撤去後に構成・ビルドが成功した。
+CIの実行状態とレビューは [PR #4](https://github.com/hideyukiMORI/nene-loupe/pull/4) で確認する。
+
 同じMSVCビルドで製品と`loupe_tests`をコンパイルし、CTestの2件が成功した。
 `python eng/coverage.py`は固定LLVMの計装exeを同じcore/application全cppと単体テストから作り、
 全テストで9/10分岐（90%）、失敗系を省いた実行で10%を測定し、後者をQLT-009で拒否した。
@@ -91,7 +96,7 @@ Windows x64、初期モニタ120 DPI（125%）で次を実測した。
 - ネイティブドラッグで(100,100)から(180,150)へ移動。EscとAlt+F4は終了コード0。
 - 3秒間更新後のGDI資源の安定値は8→8。長時間のリーク検証ではない。
 - 更新途中の表示が見えたため、描画をメモリDCからの一括転送へ修正した。
-  修正後のルーペ画像は`out/window-verification/loupe.png`と`grid.png`で目視確認する。
+  修正後のルーペ画像は`out/window-verification/loupe.png`と`grid.png`で目視確認した。
 
 接続モニタは4台、仮想画面は(-3840,-1440)から11520×3600。
 複数モニタをまたぐ検証はポインタ操作の競合で中断しており、成功とは扱わない。

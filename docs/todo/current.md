@@ -12,7 +12,7 @@
 | 初期化・仕様・ADR 0001/0002 | 完了 |
 | Phase 0 / M-1〜M-8 | 19ケースを実測済み。phase0-results.jsonに記録 |
 | Phase 1・2 / 検査基盤 | PR #2統合済み。ローカル・CIの単一ゲート成功、main保護適用済み |
-| Phase 3 / 最初の縦切り | 5層の実装とOS非依存テストを追加。MSVCビルド・CTest成功。分岐90%と反例を実測 |
+| Phase 3 / 最初の縦切り | 5層の実装とOS非依存テストを追加。ローカルのフルゲート成功。検査器54件・CTest2件・分岐90%・実ツール7反例と復帰 |
 
 ## 動くものと限界
 
@@ -28,5 +28,6 @@
 
 ## 次の作業
 
-Issue #3の自己レビューとローカルのフルゲート、Draft PRからReadyへの移行とCI確認。
+[PR #4](https://github.com/hideyukiMORI/nene-loupe/pull/4)のCI確認とレビュー。
+ポインタ操作が競合しない時間に複数モニタの実機検証を再開する。
 上位ポリシーはWindowsでは `\\wsl.localhost\Ubuntu-22.04\home\xi\docker\_work\reports\ayane-strict-repo-policy\`。
