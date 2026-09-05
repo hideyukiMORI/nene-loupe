@@ -12,7 +12,7 @@ productionコードはこのIssueの対象外。
 | 初期化・仕様・ADR 0001/0002 | 完了 |
 | Phase 0 / M-1〜M-8 | MSVC・clang-tidyで19ケース実測済み。ADR 0001/0003とphase0-results.jsonに記録 |
 | Phase 1 / 検査基盤 | CMake・警告エラー・clang-tidy・clang-format・規約検査・フック・CI定義を追加。ローカルのフルゲート成功 |
-| Phase 2 / negative proof | 検査器44ケース、実ツール6反例と復帰を実測。main保護は設定・読み戻し済み。CIは道具の選択差を修正して再確認中 |
+| Phase 2 / negative proof | 検査器44ケース、実ツール6反例と復帰を実測。main保護は設定・読み戻し済み。CIも同じゲートで成功 |
 | Phase 3 / 最初の縦切り | 未着手。別Issueで枠なし窓とカーソル中心のHEX表示を作る |
 
 ## 動くものと限界
@@ -24,5 +24,5 @@ CMakeで基盤確認用のexeがビルドできる。ルーペ本体はまだ存
 
 ## 次の作業
 
-Draft PRからCIの実行とリポジトリ保護設定を確認する。
+[PR #2](https://github.com/hideyukiMORI/nene-loupe/pull/2)のレビューと統合。次の製品実装は別Issueで開始する。
 上位ポリシーはWindowsでは `\\wsl.localhost\Ubuntu-22.04\home\xi\docker\_work\reports\ayane-strict-repo-policy\`。

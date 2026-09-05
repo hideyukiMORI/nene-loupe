@@ -86,13 +86,13 @@ def source_checks(path: str, text: str, rules: dict, waivers: dict) -> list[Find
     for number, line in enumerate(raw_lines, 1):
         code_line = code_lines[number - 1] if number <= len(code_lines) else ""
         comment = line[line.index("//"):] if "//" in line else ""
-        if re.search(r"#\s*pragma\s+(warning|clang\s+diagnostic|GCC\s+diagnostic)|\b__pragma\s*\(", code_line) or re.search(r"\bNOLINT(?:BEGIN|END)?\b", comment):
+        if re.search(rules["suppressionPragmaPattern"], code_line) or re.search(rules["broadSuppressionPattern"], comment):
             findings.append(Finding("CNF-003", path, f"line {number}: broad suppression is forbidden"))
-        if "NOLINTNEXTLINE" in comment:
+        if rules["lineSuppressionToken"] in comment:
             previous = text.splitlines()[number - 2] if number > 1 else ""
             match = re.fullmatch(r"\s*// Waiver: (WVR-\d{4})\s*", previous)
             waiver = waivers.get(match[1]) if match else None
-            if not waiver or not re.search(r"NOLINTNEXTLINE\([a-z0-9,-]+\)", line) or waiver["scope"].split("#")[0] != path:
+            if not waiver or not re.search(rules["lineSuppressionPattern"], line) or waiver["scope"].split("#")[0] != path:
                 findings.append(Finding("CNF-003", path, f"line {number}: missing valid, scoped waiver"))
     return findings
 
@@ -224,7 +224,7 @@ def configuration_checks(root: Path, paths: list[Path], rules: dict) -> list[Fin
                     findings.append(Finding("CNF-005", name, "gate disabling option"))
         if path.suffix in {".cpp", ".hpp", ".h", ".ps1", ".py", ".cmake"} and not name.startswith("tests/conformance/"):
             for number, line in enumerate((root / path).read_text(encoding="utf-8").splitlines(), 1):
-                if re.search(r"\b(?:TO" + r"DO|FIX" + r"ME)\b", line) and not re.search(r"#[1-9]\d*", line):
+                if re.search(rules["taskMarkerPattern"], line) and not re.search(r"#[1-9]\d*", line):
                     findings.append(Finding("CNF-008", name, f"line {number}: task marker needs an Issue number"))
     return findings
 

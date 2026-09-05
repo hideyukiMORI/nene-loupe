@@ -61,5 +61,8 @@ force push・削除禁止、未解決レビューの解消を要求する。bypa
 最初の [CI実行](https://github.com/hideyukiMORI/nene-loupe/actions/runs/33981391008) は
 PATH上の別CMake（3.31.6）を拾い、QLT-011で失敗した。版の比較を緩めず、
 Visual Studio同梱のCMake/Ninjaをtoolchain.ps1で明示的に選択するよう修正した。
-修正後のCI成功を確認するまではGITとQLT-012をplannedのままにする。
+修正後の [CI実行](https://github.com/hideyukiMORI/nene-loupe/actions/runs/33981539645) は
+コミット `55e6116` で成功した。ローカルと同じ単一コマンドで44テスト、CTest、6反例と復帰を実行した。
+Ready後のhead更新を自動でDraftへ戻す処理や、Git規約の全条件の反例証明は未実装なので、
+GITとQLT-012の規則全体はplannedを維持する。
 表示・DPI・複数モニタ・クリップボードの実機検証は未実施。
