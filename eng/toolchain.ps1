@@ -8,7 +8,12 @@ $installation = & $vswhere -latest -products '*' -requires Microsoft.VisualStudi
 if ($LASTEXITCODE -ne 0 -or -not $installation) { throw 'QLT-011: MSVC was not found.' }
 Import-Module (Join-Path $installation 'Common7/Tools/Microsoft.VisualStudio.DevShell.dll')
 Enter-VsDevShell -VsInstallPath $installation -SkipAutomaticLocation -DevCmdArguments "-arch=amd64 -host_arch=amd64 -vcvars_ver=$($versions.msvcToolset)" | Out-Null
-$env:PATH = (Join-Path $installation 'VC/Tools/Llvm/x64/bin') + [IO.Path]::PathSeparator + $env:PATH
+$toolDirectories = @(
+    (Join-Path $installation 'VC/Tools/Llvm/x64/bin'),
+    (Join-Path $installation 'Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin'),
+    (Join-Path $installation 'Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja')
+)
+$env:PATH = ($toolDirectories -join [IO.Path]::PathSeparator) + [IO.Path]::PathSeparator + $env:PATH
 $env:PYTHONDONTWRITEBYTECODE = '1'
 $env:PYTHONUTF8 = '1'
 $env:VSLANG = '1033'

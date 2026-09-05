@@ -53,7 +53,13 @@ Phase 0の19結果は [phase0-results.json](phase0-results.json)。
 
 ## 5. GitHubと実機
 
-2026-09-06の読み戻し時点ではrulesetなし、mainは未保護、squash以外も許可。
-CIワークフローは今回追加したが、リモートでの実行結果は未確認。
-これらの適用・確認まではGITとQLT-012をplannedのままにする。
+2026-09-06にruleset `main-quality-gate`（ID 22345027）を適用し、APIで読み戻した。
+PR必須、GitHub Actionsの`check`必須（integration 15368）、strict up-to-date、
+force push・削除禁止、未解決レビューの解消を要求する。bypass actorは空。
+リポジトリ設定はsquashのみを許可し、件名はPRタイトルを使う。
+
+最初の [CI実行](https://github.com/hideyukiMORI/nene-loupe/actions/runs/33981391008) は
+PATH上の別CMake（3.31.6）を拾い、QLT-011で失敗した。版の比較を緩めず、
+Visual Studio同梱のCMake/Ninjaをtoolchain.ps1で明示的に選択するよう修正した。
+修正後のCI成功を確認するまではGITとQLT-012をplannedのままにする。
 表示・DPI・複数モニタ・クリップボードの実機検証は未実施。
