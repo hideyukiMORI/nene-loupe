@@ -3,14 +3,12 @@
 
 namespace neneloupe
 {
-std::expected<ScreenSample, SamplingFailure> Win32ScreenSamplerAdapter::sample()
+std::expected<ScreenSample, SamplingFailure>
+Win32ScreenSamplerAdapter::sample(ScreenPosition position)
 {
-    POINT cursor{};
-    if (!GetCursorPos(&cursor))
-        return std::unexpected(SamplingFailure::cursor_unavailable);
     auto surface = CaptureSurface::create();
     if (!surface)
         return std::unexpected(surface.error());
-    return (*surface)->capture(cursor);
+    return (*surface)->capture(POINT{position.x(), position.y()});
 }
 } // namespace neneloupe

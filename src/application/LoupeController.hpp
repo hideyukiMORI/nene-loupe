@@ -11,7 +11,7 @@ class LoupeController final
     explicit LoupeController(ScreenSamplerPort &sampler);
     LoupeController(const LoupeController &) = delete;
     LoupeController &operator=(const LoupeController &) = delete;
-    void refresh();
+    void refresh(const std::expected<ScreenPosition, SamplingFailure> &position);
     LoupeFrame frame() const;
 
   private:

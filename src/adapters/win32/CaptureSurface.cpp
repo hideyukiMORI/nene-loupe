@@ -46,12 +46,12 @@ CaptureSurface::~CaptureSurface()
         ReleaseDC(nullptr, screen_);
 }
 
-std::expected<ScreenSample, SamplingFailure> CaptureSurface::capture(POINT cursor)
+std::expected<ScreenSample, SamplingFailure> CaptureSurface::capture(POINT center)
 {
     constexpr int side = ScreenSample::side();
     auto *words = static_cast<std::uint32_t *>(pixels_);
     std::fill_n(words, side * side, 0U);
-    if (!copy_pixels(cursor) || !GdiFlush())
+    if (!copy_pixels(center) || !GdiFlush())
         return std::unexpected(SamplingFailure::capture_unavailable);
     std::vector<RgbColor> colors;
     colors.reserve(side * side);
@@ -68,11 +68,11 @@ std::expected<ScreenSample, SamplingFailure> CaptureSurface::capture(POINT curso
     return std::move(*sample);
 }
 
-bool CaptureSurface::copy_pixels(POINT cursor)
+bool CaptureSurface::copy_pixels(POINT center)
 {
     constexpr int side = ScreenSample::side();
-    const RECT requested{cursor.x - side / 2, cursor.y - side / 2, cursor.x + side / 2 + 1,
-                         cursor.y + side / 2 + 1};
+    const RECT requested{center.x - side / 2, center.y - side / 2, center.x + side / 2 + 1,
+                         center.y + side / 2 + 1};
     const int left = GetSystemMetrics(SM_XVIRTUALSCREEN);
     const int top = GetSystemMetrics(SM_YVIRTUALSCREEN);
     const RECT desktop{left, top, left + GetSystemMetrics(SM_CXVIRTUALSCREEN),

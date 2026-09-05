@@ -37,8 +37,10 @@ class SequenceSampler final : public neneloupe::ScreenSamplerPort
     {
     }
 
-    std::expected<neneloupe::ScreenSample, neneloupe::SamplingFailure> sample() override
+    std::expected<neneloupe::ScreenSample, neneloupe::SamplingFailure>
+    sample(neneloupe::ScreenPosition position) override
     {
+        positions_.push_back(position);
         return sequence_.at(position_++);
     }
 
@@ -47,7 +49,13 @@ class SequenceSampler final : public neneloupe::ScreenSamplerPort
         return position_;
     }
 
+    const std::vector<neneloupe::ScreenPosition> &positions() const
+    {
+        return positions_;
+    }
+
   private:
+    std::vector<neneloupe::ScreenPosition> positions_;
     std::vector<std::expected<neneloupe::ScreenSample, neneloupe::SamplingFailure>> sequence_;
     std::size_t position_ = 0;
 };
@@ -101,23 +109,49 @@ void verify_updates()
     using namespace neneloupe;
     SequenceSampler sampler({sample_with(RgbColor::from_channels(255, 128, 0)),
                              std::unexpected(SamplingFailure::capture_unavailable),
-                             std::unexpected(SamplingFailure::cursor_unavailable),
+                             std::unexpected(SamplingFailure::position_unavailable),
                              sample_with(RgbColor::from_channels(0, 1, 15))});
     LoupeController controller(sampler);
+    require(sampler.calls() == 0, "construction does not sample an unknown position");
+    const auto point = ScreenPosition::from_physical_pixels(-1200, -300);
+    require(point.x() == -1200 && point.y() == -300, "negative physical coordinates");
+    controller.refresh(point);
     const auto original = controller.frame();
     require(original.caption() == L"#FF8000", "initial sample formatted by application");
     require(original.sample().has_value(), "initial pixels available");
-    controller.refresh();
+    controller.refresh(point);
     require(!controller.frame().sample(), "capture failure removes stale pixels");
     require(controller.frame().caption() == L"画面取得不可", "capture failure caption");
-    controller.refresh();
-    require(controller.frame().caption() == L"カーソル取得不可", "cursor failure caption");
-    controller.refresh();
+    controller.refresh(point);
+    require(controller.frame().caption() == L"位置取得不可", "position failure caption");
+    controller.refresh(point);
     require(controller.frame().caption() == L"#00010F", "recovery uses fresh data");
     require(original.caption() == L"#FF8000", "previous immutable frame is unchanged");
     require(sampler.calls() == 4, "one port call per update");
+    require(sampler.positions() == std::vector(4, point),
+            "explicit lens position reaches the port");
+    controller.refresh(std::unexpected(SamplingFailure::position_unavailable));
+    require(!controller.frame().sample(), "invalid position clears the old pixels");
+    require(controller.frame().caption() == L"位置取得不可", "invalid position is explicit");
+    require(sampler.calls() == 4, "invalid position never calls the capture port");
 }
 } // namespace
+
+void verify_position_changes()
+{
+    using namespace neneloupe;
+    const auto first = ScreenPosition::from_physical_pixels(120, 80);
+    const auto second = ScreenPosition::from_physical_pixels(-900, -50);
+    SequenceSampler sampler({sample_with(RgbColor::from_channels(255, 255, 255)),
+                             sample_with(RgbColor::from_channels(255, 128, 0))});
+    LoupeController controller(sampler);
+    controller.refresh(first);
+    controller.refresh(std::unexpected(SamplingFailure::position_unavailable));
+    controller.refresh(second);
+    require(sampler.positions() == std::vector{first, second},
+            "moving the lens changes its target");
+    require(controller.frame().caption() == L"#FF8000", "position recovery samples the new target");
+}
 
 int main(int argc, char **argv)
 {
@@ -129,6 +163,7 @@ int main(int argc, char **argv)
     }
     verify_sample_rejection();
     verify_updates();
+    verify_position_changes();
     std::puts("Loupe unit tests passed: color channels, sample ownership, rejection, failure and "
               "recovery.");
     return 0;

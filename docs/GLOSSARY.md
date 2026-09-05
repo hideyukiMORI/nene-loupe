@@ -18,6 +18,7 @@
 | negative proof | ゲートが意図した規則で落ちることの実測 | `docs/quality/gate-proofs.md` |
 | RGB色 | 8bitの赤・緑・青。HEX整形の正本 | `RgbColor`（core） |
 | 画面サンプル | 7×7画素の所有コピー。中央の画素が色番号の元になる | `ScreenSample`（core） |
+| 採取座標 | レンズ中心の物理スクリーン座標。負の座標を含む | `ScreenPosition`（core） |
 | 現在サンプルの所有者 | 一度のポート取得で最新結果へ置き換える | `LoupeController`（application） |
 | 表示フレーム | 最新サンプルから生成する画素とHEX、または失敗文言 | `LoupeFrame`（application） |
 | 色形式 | RGB10進・RGB16進・CMYK・HSL・HSVの閉じた集合 | core（具体型は最初の実装時に命名） |

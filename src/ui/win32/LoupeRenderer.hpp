@@ -8,6 +8,7 @@ class LoupeRenderer final
 {
   public:
     static void render(HDC dc, const LoupeFrame &frame, UINT dpi);
+    static POINT lens_center(UINT dpi);
 
   private:
     static void render_content(HDC dc, const LoupeFrame &frame, UINT dpi);

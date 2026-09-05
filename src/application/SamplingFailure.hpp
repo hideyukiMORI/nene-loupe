@@ -4,7 +4,7 @@ namespace neneloupe
 {
 enum class SamplingFailure
 {
-    cursor_unavailable,
+    position_unavailable,
     capture_unavailable
 };
 }

@@ -18,8 +18,8 @@ LoupeFrame LoupeFrame::from_sample(const std::expected<ScreenSample, SamplingFai
     }
     switch (sample.error())
     {
-    case SamplingFailure::cursor_unavailable:
-        return LoupeFrame(std::nullopt, L"カーソル取得不可");
+    case SamplingFailure::position_unavailable:
+        return LoupeFrame(std::nullopt, L"位置取得不可");
     case SamplingFailure::capture_unavailable:
         return LoupeFrame(std::nullopt, L"画面取得不可");
     }

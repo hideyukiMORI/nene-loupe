@@ -23,6 +23,7 @@ class LoupeWindow final
     LRESULT dispatch(UINT message, WPARAM word, LPARAM data);
     void render();
     void refresh();
+    std::expected<ScreenPosition, SamplingFailure> sampling_position() const;
     void change_dpi(WPARAM word, LPARAM data);
     HINSTANCE instance_;
     LoupeController &controller_;

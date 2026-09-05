@@ -13,12 +13,12 @@ class CaptureSurface final
     ~CaptureSurface();
     CaptureSurface(const CaptureSurface &) = delete;
     CaptureSurface &operator=(const CaptureSurface &) = delete;
-    std::expected<ScreenSample, SamplingFailure> capture(POINT cursor);
+    std::expected<ScreenSample, SamplingFailure> capture(POINT center);
 
   private:
     CaptureSurface() = default;
     bool initialize();
-    bool copy_pixels(POINT cursor);
+    bool copy_pixels(POINT center);
     HDC screen_ = nullptr;
     HDC memory_ = nullptr;
     HBITMAP bitmap_ = nullptr;

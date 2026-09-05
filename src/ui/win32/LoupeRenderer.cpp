@@ -54,10 +54,18 @@ void LoupeRenderer::render_sample(HDC dc, const ScreenSample &sample, UINT dpi)
         SetDCBrushColor(dc, RGB(color.red(), color.green(), color.blue()));
         FillRect(dc, &cell, static_cast<HBRUSH>(GetStockObject(DC_BRUSH)));
     }
-    RECT marker{scale(27, dpi), scale(27, dpi), scale(37, dpi), scale(37, dpi)};
+    const auto center = lens_center(dpi);
+    RECT marker{center.x - scale(5, dpi), center.y - scale(5, dpi), center.x + scale(5, dpi),
+                center.y + scale(5, dpi)};
     FrameRect(dc, &marker, static_cast<HBRUSH>(GetStockObject(BLACK_BRUSH)));
     InflateRect(&marker, -scale(1, dpi), -scale(1, dpi));
     FrameRect(dc, &marker, static_cast<HBRUSH>(GetStockObject(WHITE_BRUSH)));
+}
+
+POINT LoupeRenderer::lens_center(UINT dpi)
+{
+    const auto center = scale(4 + ScreenSample::side() * 8 / 2, dpi);
+    return POINT{center, center};
 }
 
 void LoupeRenderer::render_caption(HDC dc, const LoupeFrame &frame, UINT dpi)

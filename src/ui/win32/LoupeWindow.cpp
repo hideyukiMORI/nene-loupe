@@ -37,6 +37,8 @@ std::expected<void, WindowFailure> LoupeWindow::initialize()
     if (!CreateWindowExW(WS_EX_TOPMOST | WS_EX_APPWINDOW, class_name, L"NeNe Loupe", WS_POPUP, 100,
                          100, 160, 64, nullptr, nullptr, instance_, this))
         return std::unexpected(WindowFailure::creation_failed);
+    if (!SetWindowDisplayAffinity(window_, WDA_EXCLUDEFROMCAPTURE))
+        return std::unexpected(WindowFailure::capture_exclusion_failed);
     dpi_ = GetDpiForWindow(window_);
     SetWindowPos(window_, nullptr, 0, 0, MulDiv(160, static_cast<int>(dpi_), 96),
                  MulDiv(64, static_cast<int>(dpi_), 96), SWP_NOMOVE | SWP_NOZORDER);
@@ -123,11 +125,20 @@ void LoupeWindow::render()
 
 void LoupeWindow::refresh()
 {
-    controller_.refresh();
+    controller_.refresh(sampling_position());
     const auto frame = controller_.frame();
     const auto title = std::wstring(L"NeNe Loupe — ") + frame.caption();
     SetWindowTextW(window_, title.c_str());
     InvalidateRect(window_, nullptr, FALSE);
+}
+
+std::expected<ScreenPosition, SamplingFailure> LoupeWindow::sampling_position() const
+{
+    auto center = LoupeRenderer::lens_center(dpi_);
+    if (!ClientToScreen(window_, &center))
+        return std::unexpected(SamplingFailure::position_unavailable);
+    return ScreenPosition::from_physical_pixels(static_cast<int>(center.x),
+                                                static_cast<int>(center.y));
 }
 
 void LoupeWindow::change_dpi(WPARAM word, LPARAM data)

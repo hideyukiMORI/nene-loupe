@@ -3,11 +3,11 @@
 A tiny frameless screen loupe and colour picker for Windows. C++ / Win32, no UI library.
 
 **Status: first working slice.** A 160×64 DIP window shows a sharp 8× loupe of the
-7×7 pixels around the pointer and the centre colour in HEX. Drag anywhere to move it;
+7×7 pixels directly behind the lens and the centre colour in HEX. Drag anywhere to move it;
 press Esc or Alt+F4 to close. It stays above other windows. See
 [current work](docs/todo/current.md) for the implementation and measured limits.
 
-On Windows, install the versions in `eng/tool-versions.json` (Visual Studio Build Tools with
+On Windows 10 version 2004 or later (x64, DWM enabled), install the versions in `eng/tool-versions.json` (Visual Studio Build Tools with
 C++ tools, LLVM and CMake, plus Python), then run:
 
 ```powershell
@@ -28,8 +28,10 @@ The status title exposes the current HEX; capture failures clear stale pixels an
 - A gear icon opens a small settings modal: app colouring, copyright, version
 
 The initial window size may still be adjusted. This build has no clipboard, format switching,
-settings or persistence. It samples the visible desktop, including its own window when the
-pointer is over it. HDR and ICC colour management are outside the specification.
+settings or persistence. Move the lens over the target to sample it; moving the pointer alone does not change the
+sampling position. The window is excluded from desktop capture to reveal its backdrop, so it
+will also be absent from ordinary screenshots and screen sharing. HDR and ICC colour
+management are outside the specification.
 
 ## Why C++ and plain Win32
 

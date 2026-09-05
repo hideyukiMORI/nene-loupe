@@ -19,7 +19,7 @@ neneloupe_target(toolchain_smoke verification EXECUTABLE tests/build/ToolchainSm
 add_test(NAME toolchain_smoke COMMAND toolchain_smoke)
 
 neneloupe_target(neneloupe_core core STATIC
-    src/core/RgbColor.cpp src/core/ScreenSample.cpp)
+    src/core/RgbColor.cpp src/core/ScreenSample.cpp src/core/ScreenPosition.cpp)
 neneloupe_target(neneloupe_application application STATIC
     src/application/LoupeFrame.cpp src/application/LoupeController.cpp)
 neneloupe_link(neneloupe_application neneloupe_core)
