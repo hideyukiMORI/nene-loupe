@@ -8,10 +8,6 @@
 読み方（**active / planned / 不能 / 不採用**）と強制の層は
 [ARCHITECTURE_CONSTITUTION.md](ARCHITECTURE_CONSTITUTION.md) 第 0 節と同じ。
 
-<!-- 各規則の「機械強制」は Phase 0 の実測で埋める。写した時点では全部 planned。
-     言語固有の穴（Go のゼロ値・Rust の Default derive・Java の record・C# の struct）は
-     規則として足す。前例: GO-003 / RS-003 / JAV-007 / CS-003 -->
-
 ---
 
 ## 1. 型と状態（CPP-0xx）
@@ -28,7 +24,7 @@
 モードや状態機械を boolean の組み合わせ・マジック整数・裸の文字列で表さない。
 分岐に `default` / `else` / `_` を書かない。**書いた瞬間に検査は死ぬ。**
 
-- 機械強制: **planned** → {{M1 の結果}}
+- 機械強制: **planned** → `/we4061 /we4062` とLLVMのcovered-switch-default診断。if/elseの意味分類と範囲外enumの防止は未完了
 
 ### CPP-003 — 公開状態は不変
 
@@ -40,7 +36,7 @@
 
 `null` 相当が意味してよいのは「省略可能な値が無い」だけ。無効・未読込・失敗・未知・削除済みを表さない。公開 API は `null` を返さない。
 
-- 機械強制: **planned** → {{M3 の結果}}
+- 機械強制: **planned** → C4700で未初期化を拒否。nullptrの意味や全経路の非null性は保証しない
 
 ### CPP-005 — 期待される失敗は例外で表さない
 
@@ -58,7 +54,7 @@
 
 不変条件を持つ型はコンストラクタを非公開にし、生成経路を**唯一のファクトリ**に集約する。ファクトリは想定内の不正入力に例外を投げず、結果型を返す。
 
-- 機械強制: **planned** → {{M4 の結果}}
+- 機械強制: **planned** → privateへの直接アクセスはC2248。唯一のファクトリを選ぶ設計自体はレビュー
 
 ---
 
@@ -96,16 +92,13 @@
 
 ### CPP-012 — 複雑度に上限を置く
 
-<!-- 数値は言語の道具に合わせてよい（施主決定 2026-09-06）。lint 名を必ず併記する。
-     複雑度 10・引数 4 は全言語共通。 -->
-
 | 指標 | 上限 | 道具 |
 | --- | --- | --- |
-| 認知的／循環的複雑度（関数） | 10 | {{TOOL}} |
-| 関数の長さ | {{40 or 60}} 行 | {{TOOL}} |
-| ネストの深さ | {{3 or 4}} | {{TOOL}} |
-| 引数の数 | 4 | {{TOOL}} |
-| bool の制御引数（公開 API） | 禁止 | {{TOOL}} |
+| 認知的複雑度（関数） | 10 | clang-tidy `readability-function-cognitive-complexity` |
+| 関数の長さ | 60 行 | clang-tidy `readability-function-size.LineThreshold` |
+| ネストの深さ | 3 | clang-tidy `readability-function-size.NestingThreshold` |
+| 引数の数 | 4 | clang-tidy `readability-function-size.ParameterThreshold` |
+| bool の制御引数（公開 API） | 禁止 | planned（意味と公開境界の検査は未実装） |
 
 閾値を満たすためだけに意味のある処理を割るのは目的に反する。超える必要があるときは**測定可能な理由**を添えて ADR にする。
 
@@ -117,8 +110,7 @@
 
 ### CPP-013 — 並行性の形は一つ
 
-<!-- デスクトップ: UI スレッドだけ（Clock JAV-013）。Kotlin: 構造化された並行のみ（PIXEL KOT-014）。
-     C#: async end-to-end（Commander CS-016）。Go: context を持ち回る（GO-013）。CLI: 該当なしでもよい -->
+UIとapplicationの状態遷移は単一のUIスレッドで行う。背景スレッドは追加しない（ADR 0003）。
 
 - 機械強制: **planned**
 
@@ -130,23 +122,20 @@
 
 ### CPP-015 — 抑制は例外であって道具ではない
 
-<!-- 言語で封じられる（Rust forbid）なら「台帳を持たない」と書き、封じられないなら waiver 台帳（CNF）で補う。
-     どちらにせよ理由と規則 ID を必須にする。 -->
-
 抑制には**直前行の `// Waiver: WVR-NNNN`** と有効な waiver 台帳の項目が両方そろっているときにだけ書ける。
 ファイル単位・ディレクトリ単位の抑制、静的解析の除外設定、lint の baseline は禁止。
 
 - 機械強制: **planned** → CNF-003 / CNF-004
-- 機械強制: **不能／該当なし**（抑制機能そのものの禁止。{{M7 の結果}}）
+- 機械強制: **不能／該当なし**（抑制機能そのものの禁止。MSVCのpragmaで明示的なエラー指定も抑制できる。ADR 0003）
 
 ---
 
-## 4. 無し（素の Win32） 規約
+## 4. 素の Win32 の規約
 
-<!-- UI 枠組みを持つ場合のみ。前例: Clock SWG-001〜006・Commander CS-021〜023・PIXEL KOT-017〜019。
-     UI を持たない CLI は本節を「該当なし」として残す（節番号は消さない）。候補は POLICY.md 第 2 節末尾。 -->
-
-該当なし／{{UI_RULES}}
+UIは実装予定。ウィンドウ手続きは操作を意図として渡し、描画はapplicationの表示値を反映する（ARC-011）。
+タイマーは再サンプリングのきっかけで、値を累積しない。メッセージ番号は開いたOSの集合なので、
+`DefWindowProcW`へ渡す既定分岐を許す。閉じた業務enumの既定分岐とは区別する（CPP-002）。
+HWND・HDC・HBITMAP等の所有権はRAIIで閉じる。実機証明は最初の縦切りIssueで行う。
 
 ---
 
@@ -155,7 +144,7 @@
 新しい依存を足すときは、次の 3 つを揃える。**1 つでも欠けたら足していない。**
 
 1. ADR を 1 本立てる
-2. 許可リスト（{{ALLOWLIST_FILE}}）に 1 行足す
+2. 許可リスト（`eng/architecture.json` の `runtimeDependencies`）に 1 行足す
 3. 下の表に 1 行足す
 
 | 依存 | 用途 | 根拠 |
@@ -173,7 +162,8 @@
 | 検査 | 不採用の理由 |
 | --- | --- |
 | 全 lint の一括有効化（`enable-all` / `restriction` 群） | 相互に矛盾する規則が同時に入り、規則ではなく道具の機嫌に従うことになる（前例: nene-recall・xi-tools） |
-| {{REJECTED}} | … |
+| 公開メンバーlintだけで不変性を保証する | aggregateの穴を実測（ADR 0003）。可変参照の流出も対象外 |
+| 正規表現だけで全API呼び出しを証明する | マクロ・別名・推移的includeを完全には解決しない |
 
 ---
 

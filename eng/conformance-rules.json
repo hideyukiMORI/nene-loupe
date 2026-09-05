@@ -1,0 +1,11 @@
+{
+  "typeSuffixes": ["Manager", "Helper", "Util", "Utils", "Common"],
+  "moduleNames": ["utils", "helpers", "managers", "misc", "common"],
+  "forbiddenFileWords": ["baseline", "suppressions"],
+  "disabledGatePatterns": ["(?i)/W[0-3](?![0-9])", "(?i)/WX-", "(?i)/wd[0-9]+", "(?i)\\bignoreFailures\\s*[:=]\\s*true", "(?i)continue-on-error\\s*:\\s*true", "(?i)--exit-zero\\b", "(?i)--line-filter", "(?i)--exclude-header-filter", "(?i)WarningsAsErrors:\\s*['\"]{2}"],
+  "nondeterministicNames": ["system_clock", "steady_clock", "high_resolution_clock", "random_device", "rand", "srand", "getenv", "getenv_s", "_wgetenv", "time", "clock", "setlocale", "locale", "GetLocalTime", "GetSystemTime", "GetTickCount", "QueryPerformanceCounter", "GetEnvironmentVariableA", "GetEnvironmentVariableW", "GetCursorPos"],
+  "platformHeaders": ["windows.h", "Windows.h", "winuser.h", "wingdi.h", "fileapi.h", "processthreadsapi.h", "winsock2.h", "filesystem", "fstream"],
+  "cppExtensions": [".cpp", ".cc", ".cxx", ".h", ".hpp", ".hxx"],
+  "configurationExtensions": [".ps1", ".cmake", ".yml", ".yaml"],
+  "normativeFiles": ["docs/ARCHITECTURE_CONSTITUTION.md", "docs/CODING_RULES.md", "docs/COMMIT_CONVENTIONS.md", "docs/QUALITY_GATES.md"]
+}

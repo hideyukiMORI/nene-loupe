@@ -2,9 +2,21 @@
 
 A tiny frameless screen loupe and colour picker for Windows. C++ / Win32, no UI library.
 
-**Status: nothing is built yet.** This repository was initialised on 2026-09-06 under the
-AYANE strict-repository policy; the rule set and gates go in before the first line of
-production code. See [docs/todo/current.md](docs/todo/current.md) for what actually exists.
+**Status: verification foundation; no product implementation yet.** The repository has a
+CMake/MSVC smoke test, clang-tidy/clang-format checks, standard-library-only conformance tests,
+and reproducible negative proofs. See [current work](docs/todo/current.md) for measured status.
+
+On Windows, install the versions in `eng/tool-versions.json` (Visual Studio Build Tools with
+C++ tools, LLVM and CMake, plus Python), then run:
+
+```powershell
+pwsh -NoProfile -File ./eng/bootstrap.ps1
+pwsh -NoProfile -File ./eng/check.ps1
+```
+
+Bootstrap enables this repository's Git hooks. The full gate checks the foundation;
+it does not demonstrate a working loupe. CI and branch protection are only considered enforced
+after remote verification is recorded in [gate proofs](docs/quality/gate-proofs.md).
 
 ## What it will do
 

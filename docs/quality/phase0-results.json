@@ -1,0 +1,116 @@
+[
+  {
+    "id": "M1-w4",
+    "tool": "MSVC",
+    "exitCode": 0,
+    "output": "M1-w4.cpp"
+  },
+  {
+    "id": "M1-exhaustive",
+    "tool": "MSVC",
+    "exitCode": 2,
+    "output": "M1-exhaustive.cpp\r\n<repo>/out/phase0/M1-exhaustive.cpp(2): error C4062: 列挙型 'Mode' の switch 中の列挙子 'Mode::hex' はハンドルされません\r\n<repo>/out/phase0/M1-exhaustive.cpp(1): note: 'Mode' の宣言を確認してください"
+  },
+  {
+    "id": "M1-default",
+    "tool": "MSVC",
+    "exitCode": 2,
+    "output": "M1-default.cpp\r\n<repo>/out/phase0/M1-default.cpp(2): error C4061: 列挙型 'Mode' の switch 中の列挙子 'Mode::hex' は case ラベルによって明示的にハンドルされません。\r\n<repo>/out/phase0/M1-default.cpp(1): note: 'Mode' の宣言を確認してください"
+  },
+  {
+    "id": "M1-valid",
+    "tool": "MSVC",
+    "exitCode": 0,
+    "output": "M1-valid.cpp"
+  },
+  {
+    "id": "M2-public",
+    "tool": "MSVC",
+    "exitCode": 0,
+    "output": "M2-public.cpp"
+  },
+  {
+    "id": "M2-public-method",
+    "tool": "MSVC",
+    "exitCode": 0,
+    "output": "M2-public-method.cpp"
+  },
+  {
+    "id": "M2-private",
+    "tool": "MSVC",
+    "exitCode": 2,
+    "output": "M2-private.cpp\r\n<repo>/out/phase0/M2-private.cpp(2): error C2248: 'Sample::value': private メンバー (クラス 'Sample' で宣言されている) にアクセスできません。\r\n<repo>/out/phase0/M2-private.cpp(1): note: 'Sample::value' の宣言を確認してください\r\n<repo>/out/phase0/M2-private.cpp(1): note: 'Sample' の宣言を確認してください"
+  },
+  {
+    "id": "M3-null",
+    "tool": "MSVC",
+    "exitCode": 0,
+    "output": "M3-null.cpp"
+  },
+  {
+    "id": "M3-uninitialized",
+    "tool": "MSVC",
+    "exitCode": 2,
+    "output": "M3-uninitialized.cpp\r\n<repo>/out/phase0/M3-uninitialized.cpp(1) : error C2220: 次の警告はエラーとして処理されます\r\n<repo>/out/phase0/M3-uninitialized.cpp(1) : warning C4700: 初期化されていないローカル変数 'value' が使用されます"
+  },
+  {
+    "id": "M3-invalid-enum",
+    "tool": "MSVC",
+    "exitCode": 0,
+    "output": "M3-invalid-enum.cpp"
+  },
+  {
+    "id": "M4-private",
+    "tool": "MSVC",
+    "exitCode": 2,
+    "output": "M4-private.cpp\r\n<repo>/out/phase0/M4-private.cpp(2): error C2248: 'Value::Value': private メンバー (クラス 'Value' で宣言されている) にアクセスできません。\r\n<repo>/out/phase0/M4-private.cpp(1): note: 'Value::Value' の宣言を確認してください\r\n<repo>/out/phase0/M4-private.cpp(1): note: 'Value' の宣言を確認してください"
+  },
+  {
+    "id": "M4-copy",
+    "tool": "MSVC",
+    "exitCode": 0,
+    "output": "M4-copy.cpp"
+  },
+  {
+    "id": "M5-time",
+    "tool": "MSVC",
+    "exitCode": 0,
+    "output": "M5-time.cpp"
+  },
+  {
+    "id": "M6-win32",
+    "tool": "MSVC",
+    "exitCode": 0,
+    "output": "M6-win32.cpp"
+  },
+  {
+    "id": "M7-suppression",
+    "tool": "MSVC",
+    "exitCode": 0,
+    "output": "M7-suppression.cpp"
+  },
+  {
+    "id": "M8-push-zero",
+    "tool": "MSVC",
+    "exitCode": 2,
+    "output": "M8-push-zero.cpp\r\n<repo>/out/phase0/M8-push-zero.cpp(3): error C4062: 列挙型 'Mode' の switch 中の列挙子 'Mode::hex' はハンドルされません\r\n<repo>/out/phase0/M8-push-zero.cpp(2): note: 'Mode' の宣言を確認してください"
+  },
+  {
+    "id": "M8-file-suppression",
+    "tool": "MSVC",
+    "exitCode": 0,
+    "output": "M8-file-suppression.cpp"
+  },
+  {
+    "id": "M2-tidy-aggregate-hole",
+    "tool": "clang-tidy",
+    "exitCode": 0,
+    "output": ""
+  },
+  {
+    "id": "M2-tidy",
+    "tool": "clang-tidy",
+    "exitCode": 1,
+    "output": "1 warning generated.\r\n<repo>/out/phase0/M2-public-method.cpp:1:21: error: member variable 'value' has public visibility [misc-non-private-member-variables-in-classes,-warnings-as-errors]\r\n    1 | struct Sample { int value; int read() const { return value; } };\r\n      |                     ^\r\n1 warning treated as error"
+  }
+]

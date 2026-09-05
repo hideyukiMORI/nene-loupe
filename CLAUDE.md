@@ -33,15 +33,6 @@ Claude Code / AI エージェントがこのリポジトリで作業するため
 
 ## 2. このプロジェクトで間違えやすい所
 
-<!-- 縦切り 1 本を通したら、実際に踏んだものをここに足す。前例（NeNeClock）の形:
-### 現在時刻を読む場所は 1 つしかない
-`now()` 系は **adapters/win32 以外では書けない**（ゲートが落とす）。時刻が要ればポートを注入する。**テストソースにも同じ禁止がかかる。**
-### 網羅性検査を殺す `default` / `else` / `_` を書かない
-選択肢が増えたらコンパイルが落ちるのが正しい状態。
-### 期待される失敗は例外にしない
-閉じた結果型で返す。広い catch はゲートが拒否する。
--->
-
 ### 現在時刻を読む場所は 1 つしかない
 
 現在時刻・乱数・既定ロケール・環境変数を読んでよいのは **adapters/win32** だけである（ARC-007）。
@@ -103,9 +94,6 @@ Waivers: none | WVR-NNNN
 
 現在のタスクは [docs/todo/current.md](docs/todo/current.md)。GitHub Issue が正で、そこは要約。
 
-<!-- 前例（xi-tools・nene-recall）は「動くもの／動かないもの／測れるもの」をここに実測つきで書いている。
-     README の主張と実態が乖離しないよう、ここは実測でだけ更新する。 -->
-
 ---
 
 ## 7. 上位のポリシーと雛形の所在
@@ -114,7 +102,7 @@ Waivers: none | WVR-NNNN
 施主のワークスペース（private）にある。
 
 - WSL: `/home/xi/docker/_work/reports/ayane-strict-repo-policy/`（`POLICY.md` / `INIT_PROCEDURE.md` / `LINEAGE.md` / `templates/`）
-- Windows: `\\wsl.localhost\Ubuntu\home\xi\docker\_work\reports\ayane-strict-repo-policy\`
+- Windows: `\\wsl.localhost\Ubuntu-22.04\home\xi\docker\_work\reports\ayane-strict-repo-policy\`
 
 雛形で足りなかったものを見つけたら、このリポを直すと同時に雛形へ還流する（board id:155）。
 先行事例は NeNeClock（`/home/xi/docker/NeNeClock`・Java）と NeNeCommander（`C:\Users\info\WORKS\NeNeCommander`・C#）。

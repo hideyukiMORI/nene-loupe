@@ -1,0 +1,19 @@
+[
+  {"id":"M1-w4", "source":"enum class Mode { rgb, hex };\nint select(Mode mode) { switch (mode) { case Mode::rgb: return 1; } return 0; }", "flags":[], "compiles":true},
+  {"id":"M1-exhaustive", "source":"enum class Mode { rgb, hex };\nint select(Mode mode) { switch (mode) { case Mode::rgb: return 1; } return 0; }", "flags":["/we4061","/we4062"], "compiles":false},
+  {"id":"M1-default", "source":"enum class Mode { rgb, hex };\nint select(Mode mode) { switch (mode) { case Mode::rgb: return 1; default: return 0; } }", "flags":["/we4061","/we4062"], "compiles":false},
+  {"id":"M1-valid", "source":"enum class Mode { rgb, hex };\nint select(Mode mode) { switch (mode) { case Mode::rgb: return 1; case Mode::hex: return 2; } return 0; }", "flags":["/we4061","/we4062"], "compiles":true},
+  {"id":"M2-public", "source":"struct Sample { int value; };\nint mutate() { Sample sample{1}; sample.value = 2; return sample.value; }", "flags":[], "compiles":true},
+  {"id":"M2-public-method", "source":"struct Sample { int value; int read() const { return value; } };\nint mutate() { Sample sample{1}; sample.value = 2; return sample.read(); }", "flags":[], "compiles":true},
+  {"id":"M2-private", "source":"class Sample { int value = 1; };\nint mutate() { Sample sample; sample.value = 2; return 0; }", "flags":[], "compiles":false},
+  {"id":"M3-null", "source":"int* read() { return nullptr; }", "flags":[], "compiles":true},
+  {"id":"M3-uninitialized", "source":"int read() { int value; return value; }", "flags":[], "compiles":false},
+  {"id":"M3-invalid-enum", "source":"enum class Mode { rgb, hex };\nMode read() { return static_cast<Mode>(99); }", "flags":[], "compiles":true},
+  {"id":"M4-private", "source":"class Value { Value() = default; };\nValue read() { return Value{}; }", "flags":[], "compiles":false},
+  {"id":"M4-copy", "source":"class Value { int value; explicit Value(int input) : value(input) {} public: static Value make() { return Value(1); } int get() const { return value; } };\nint read() { auto first = Value::make(); auto second = first; return second.get(); }", "flags":[], "compiles":true},
+  {"id":"M5-time", "source":"#include <chrono>\nauto read() { return std::chrono::system_clock::now(); }", "flags":[], "compiles":true},
+  {"id":"M6-win32", "source":"#include <windows.h>\nPOINT read() { POINT value{}; GetCursorPos(&value); return value; }", "flags":[], "compiles":true},
+  {"id":"M7-suppression", "source":"#pragma warning(disable: 4062)\nenum class Mode { rgb, hex };\nint select(Mode mode) { switch (mode) { case Mode::rgb: return 1; } return 0; }", "flags":["/we4062"], "compiles":true},
+  {"id":"M8-push-zero", "source":"#pragma warning(push, 0)\nenum class Mode { rgb, hex };\nint select(Mode mode) { switch (mode) { case Mode::rgb: return 1; } return 0; }\n#pragma warning(pop)", "flags":["/we4062"], "compiles":false},
+  {"id":"M8-file-suppression", "source":"#pragma warning(disable: 4061 4062 4101 4700)\nenum class Mode { rgb, hex };\nint select(Mode mode) { switch (mode) { case Mode::rgb: return 1; } return 0; }", "flags":["/we4061","/we4062"], "compiles":true}
+]

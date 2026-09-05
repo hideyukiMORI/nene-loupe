@@ -12,11 +12,12 @@
 | 合成ルート | 依存を結ぶ唯一の場所。端末と終了コードを持つ | `app（wWinMain）` |
 | 反映（render） | 決まった値を UI 部品へ写す操作。UI 状態を変えてよい唯一の場所 | `render*`（UI） |
 | 隔離区画 | 可変性を許した唯一の場所 | ARC-005 の表 |
-| 規約検査（conformance） | NeNe Loupe 固有の自作ゲート | `{{CONFORMANCE}}`（CNF-NNN） |
+| 規約検査（conformance） | NeNe Loupe 固有の自作ゲート | `eng/conformance.py`（CNF-NNN） |
 | waiver | 1 つの規則に対する期限付きの狭い例外 | `docs/waivers/WVR-NNNN-*.md` |
 | 機械強制の状態 | active / planned / 不能 / 不採用 | `docs/QUALITY_GATES.md` の強制マトリクス |
 | negative proof | ゲートが意図した規則で落ちることの実測 | `docs/quality/gate-proofs.md` |
-| {{TERM}} | {{MEANING}} | {{TYPE}} |
+| 画面サンプル | カーソル周辺の画素と中心位置。一回の取得結果 | `ScreenSamplerPort`からapplicationへ |
+| 色形式 | RGB10進・RGB16進・CMYK・HSL・HSVの閉じた集合 | core（具体型は最初の実装時に命名） |
 
 ## 使ってはいけない語
 
