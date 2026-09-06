@@ -6,7 +6,8 @@
 
 [Issue #9](https://github.com/hideyukiMORI/nene-loupe/issues/9): タスクバー、Alt+Tab、
 エクスプローラー、実行ファイルを参照するショートカットへ独自アプリアイコンを表示する。
-ブランチは`feat/9-application-icon`。Issue #5と#6はmain `ac91af4`まで統合済み。
+ブランチは`feat/9-application-icon`、[PR #10](https://github.com/hideyukiMORI/nene-loupe/pull/10)。
+Issue #5と#6はmain `ac91af4`まで統合済み。
 
 ## 実装・検証した内容
 
@@ -24,8 +25,8 @@
 
 ## 完了まで
 
-最終全体ゲート、Draft PR、Ready後のCIとレビューを確認する。利用者が確認中の旧
-`build/NeNeLoupe.exe`は終了していない。新しいexeへの入れ替え時だけ終了する。
+Issue #9とPR #10を進行状態の正本とし、未完了の工程だけを進める。実装・隔離検証時点では
+利用者が確認中の旧`build/NeNeLoupe.exe`を終了していない。新しいexeへの入れ替えは統合後に行う。
 
 スタートアップへの自動登録、ショートカットやインストーラーの生成、通知領域常駐、
 AppUserModelID追加は範囲外。設定スキーマ変更なし。Waivers: none。
