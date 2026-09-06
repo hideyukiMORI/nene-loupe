@@ -1,28 +1,25 @@
 # いまのタスク — NeNe Loupe
 
-> GitHub IssueとPRが進行状態の正本。この文書は2026-09-06のIssue #17実装時点の要約。
+> GitHub IssueとPRが進行状態の正本。この文書は2026-09-06のv0.2.0公開完了後の要約。
 
 ## 現在のIssue
 
-[Issue #17](https://github.com/hideyukiMORI/nene-loupe/issues/17): CMakeのPROJECT_VERSIONを唯一の
-版入力としてWin32 metadataを揃え、Release x64のportable ZIPとchecksumを生成してv0.2.0を公開する。
-ブランチは`feat/17-release-v0-2-0`。Issue #5、#6、#9、#11、#13、#15はmainへ統合済み。
+[Issue #19](https://github.com/hideyukiMORI/nene-loupe/issues/19)と対応PRが、v0.2.0正式公開までの実績を
+日報と引き継ぎへ記録する今回の更新の追跡先。完了状態はGitHubを参照し、未完了工程がある場合だけ進める。
+製品コードと公開済みのtag・成果物は変更しない。
+[Issue #17](https://github.com/hideyukiMORI/nene-loupe/issues/17)と
+[PR #18](https://github.com/hideyukiMORI/nene-loupe/pull/18)は完了し、mainへ統合済み。
 
-## 実装時点の確認
+## 公開済みの状態
 
-- `src/app`のmanifestとVERSIONINFOはCMake configureでbuild下へ生成し、設定画面と同じ版入力を使う。
-- `eng/package-release.ps1`は固定toolchainと既存CMake targetをReleaseでclean buildする。
-- portable ZIP直下は`NeNeLoupe.exe`、利用者向け`README.txt`、正本`LICENSE`の3件だけで、
-  `SHA256SUMS`はZIPを対象にする。
-- Release narrow buildは71/71、build graph conformance 0、CTest 2/2。x64、静的runtime、
-  manifest 0.2.0.0、FileVersion 0.2.0.0、ProductVersion 0.2.0を実測した。
-- ZIPから展開したexeの短いPMv2起動smokeは終了0。120 DPIで300×80 px、大・小HICONは非0だった。
+- 公開時のmainと`v0.2.0` tagの対象は`91ca33273cc6c8203349f250c03fa576f87bf20e`。
+- [GitHub Release v0.2.0](https://github.com/hideyukiMORI/nene-loupe/releases/tag/v0.2.0)を公開済み。
+- 最終全体ゲートはConformance違反0、Python 57/57、clean build 71/71、CTest 2/2、分岐92.50%、
+  実ツール検証8件で終了0。[CI](https://github.com/hideyukiMORI/nene-loupe/actions/runs/34034847773)も成功。
+- portable ZIPのSHA-256は`7C9B023ACD98916C9C9E3A03902BAD304C289103A3EE3A90FEDDFED80598B961`。
+  GitHubからの再ダウンロード後も`SHA256SUMS`と一致した。設定スキーマ変更なし。Waivers: none。
 
 ## 次に行うこと
 
-Issue #17と対応PRを進行状態の正本として未完了の工程だけ進める。最終HEADの全体ゲートとCI成功後に
-squash統合し、cleanなmainからRelease成果物を作り直して実測する。公開するZIP、`SHA256SUMS`、
-release notesをレビュー後、`v0.2.0` tagとGitHub Releaseを作る。
-
-インストーラ、自動更新、コード署名基盤、スタートアップ登録、ショートカットは今回追加しない。
-利用者が起動中のアプリ、設定、位置は変更しない。
+[Issue #19](https://github.com/hideyukiMORI/nene-loupe/issues/19)と対応PRの完了状態を確認し、未完了工程が
+ある場合だけ進める。公開状態はGitHub Releaseを正本とする。新しい製品作業は焦点Issueを作成してから始める。
