@@ -1,14 +1,26 @@
 #include "Win32ScreenSamplerAdapter.hpp"
-#include "CaptureSurface.hpp"
+
+#include <utility>
 
 namespace neneloupe
 {
 std::expected<ScreenSample, SamplingFailure>
 Win32ScreenSamplerAdapter::sample(ScreenPosition position)
 {
-    auto surface = CaptureSurface::create();
-    if (!surface)
-        return std::unexpected(surface.error());
-    return (*surface)->capture(POINT{position.x(), position.y()});
+    if (!surface_)
+    {
+        auto created = CaptureSurface::create();
+        if (!created)
+        {
+            return std::unexpected(created.error());
+        }
+        surface_ = std::move(*created);
+    }
+    auto result = surface_->capture(POINT{position.x(), position.y()});
+    if (!result)
+    {
+        surface_.reset();
+    }
+    return result;
 }
 } // namespace neneloupe

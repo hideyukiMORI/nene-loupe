@@ -26,16 +26,4 @@ std::uint8_t RgbColor::blue() const noexcept
 {
     return blue_;
 }
-
-std::string RgbColor::hex() const
-{
-    constexpr char digits[] = "0123456789ABCDEF";
-    return {'#',
-            digits[red_ >> 4],
-            digits[red_ & 15],
-            digits[green_ >> 4],
-            digits[green_ & 15],
-            digits[blue_ >> 4],
-            digits[blue_ & 15]};
-}
 } // namespace neneloupe

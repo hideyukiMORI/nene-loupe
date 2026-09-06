@@ -1,6 +1,6 @@
 # ゲート発火の証明 — NeNe Loupe
 
-> 記録: 2026-09-06 / Issue #1・#3・#5。以下は実行した結果のみ。
+> 記録: 2026-09-06 / Issue #1・#3・#5・#6。以下は実行した結果のみ。
 > 関連: QLT-007 / QLT-011 / QLT-013 / ADR 0003
 
 ## 1. 環境と範囲
@@ -153,6 +153,178 @@ fixtureの`rules.ninja`だけを、日本語の実prefixをUTF-8のbyte列とし
 `pwsh -NoProfile -File ./eng/check.ps1`も終了コード0で、検査器54件、CTest 2件、
 11/12分岐（91.67%）、実ツール7反例と復帰、ヘッダ差分依存のproofを実行した。
 
-英語resourceを持つMSVCでの実出力はこの端末では採取できない。prefixを言語別に決め打ちせず、
-実際の`cl`出力、CMakeの検出値、Ninjaの値を照合する同じproofを英語CIでも実行する。
-CIの結果を取得するまでは英語環境の成功を未確認として扱う。Waivers: none。
+英語resourceを持つMSVCでの実出力はこの端末では採取できないため、prefixを言語別に決め打ちせず、
+実際の`cl`出力、CMakeの検出値、Ninjaの値を照合する同じproofを英語CIでも実行した。
+[PR #8のCI](https://github.com/hideyukiMORI/nene-loupe/actions/runs/34015538775)は、
+英語MSVCの実prefix `Note: including file: `、code page 65001、実ツール8反例と復帰を確認して
+全体ゲート終了0となった。HEAD `df30ff2`をsquash統合し、main `2c51bf9`でIssue #5を閉じた。Waivers: none。
+
+## 9. デザインと操作（Issue #6 / ADR 0006）
+
+2026-09-06 05:35 JST、Claude Codeが最終ソースに対して全体ゲートを実行し、サナが生ログの終了0を確認した。
+CTest 2/2、分岐111/120＝92.50%、不足実行18.33%をQLT-009で拒否、実ツール7反例と復帰が成功。
+適合違反0、MSVC・clang-tidy・clang-formatのゲートも成功した。
+
+同日05:39、サナが `python -B eng/verify-window.py` を実行し終了0を確認した。
+検証はbuildからコピーした専用exeと隔離したLOCALAPPDATAを使用し、テスト窓だけをPIDで特定する。
+実ポインタ・キーボードを操作しない。コピー検証は元のクリップボードをメモリ上で退避し、
+所有者がテスト窓のままの場合に復元する。対応外形式がある場合は変更前に中止する。
+
+- 第7節と同じ4モニタ、120/144/168 DPIで240×64 DIP、4色、1物理画素移動、ヒット領域を確認。
+- 背景のダブルクリックメッセージで窓位置・寸法が変わらないことを確認。Aero Snapの手動操作は未確認。
+- 実クリップボード値は `#FF8000`、`0, 50, 100, 0`、`30, 100%, 50%`、
+  `30, 100%, 100%`、`255, 128, 0`、巡回後 `#FF8000`。
+- 設定窓の取り込み除外17、親窓無効化、最前面OFF/ON/OFFを親・設定窓で確認。
+- dark/light/system/darkを選択し、Esc後の親窓再有効化を確認。
+- 保存4行がschema=1/theme=dark/format=hex/layer=normalと一致し、再起動で最前面OFFを復元。
+- 未対応版・テーマ・形式・不足行・余分な行の5ケースは既定値で起動し、無操作では原本を上書きしない。
+- 短時間のGDI資源11→11、Esc終了0。証拠は `out/window-verification/lens-results.json`。
+
+補助診断は色変換20,485比較で不一致0、Win32保存adapter10/10、実HWNDのUnicodeコピーと占有失敗を確認した。
+GDI rendererのダーク／ライト・コピー成否・設定失敗の画像を確認した。これらは全体ゲートの代替ではない。
+手動の操作感、右クリックメニュー、フォーカスの詳細、OSテーマ変更追従、画面端、長時間性能は未確認。
+HDR/ICCは仕様対象外。Waivers: none。
+
+### 9.1 レビュー後のUI修正と画面端回帰
+
+同日の再開後、Issue #6 / ADR 0006の実装を静的レビューし、次を修正した。
+
+- 操作領域からドラッグへ移る`WM_NCLBUTTONDOWN`に、開始点のスクリーン座標を渡す。
+- 設定窓のタイトル帯だけを`HTCAPTION`、操作領域を`HTCLIENT`として扱う。
+- 設定窓をownerのモニタとDPIで生成し、初期配置と`WM_DPICHANGED`の双方を同じwork areaへの
+  配置経路へ通す。
+- `WM_SETTINGCHANGE`でルーペと開いている設定窓の両方を再描画する。
+- 形式メニューの現在値を通常のチェックではなく、単一選択のラジオ印で示す。
+
+設定窓の旧配置は、モニタ移動後にDPIで拡大した最終寸法を再クランプしなかった。
+旧exe（SHA-256 `4454C6D6C8A39C679B5D0645CEFE27C49C7315304DA4DA1E9BB54AA8099AB02B`）へ
+次を実行すると終了1となった。
+
+```powershell
+python -B eng/verify-window.py --suite geometry --executable out/window-verification/runtime-diagnostics/NeNeLoupe-runtime.exe
+```
+
+144 DPIモニタのwork area `[-3840, 0, 0, 2160]`でownerを右下
+`[-360, 2064, 0, 2160]`へ置くと、設定窓は`[-400, 1670, 80, 2258]`となり右・下へはみ出した。
+修正版exe（SHA-256 `38B2393257EFD509379C26B590811892FC6AAEAAD1BD6BDBF4EF4AD17E81698A`）では
+同じgeometry suiteが終了0となった。
+
+`eng/verify-window.py`は既定の`full`と、クリップボードを扱わない`geometry`を明示選択できる。
+両suiteは、従来の4モニタ検証に加え、次を共通で実測する。
+
+- 4モニタの物理的な左右端に採取中心を置き、既知の中心色が一致すること。
+- 採取中心を仮想デスクトップ外へ出すと、古い色を残さず「画面取得不可」になること。
+- 各モニタのwork area左上・右下、計8配置で、設定窓の最終DPI寸法と配置、取り込み除外17、
+  ×のヒット領域による閉じる操作、ownerの再有効化を確認すること。
+- 右クリックの形式メニューが現れ、ownerモニタのwork area内に収まり、安全に閉じられること。
+
+`geometry`はクリップボードの退避・コピー、設定変更と保存、再起動復元、不正設定拒否を実行せず、
+JSONの`suite`と`skippedChecks`へ明記する。既定の`full`はgeometryを含む上位集合である。
+最終ビルドに対する次の既定コマンドは終了0となり、5形式の実クリップボード、設定保存、再起動復元、
+不正設定5種まで成功した。結果は`out/window-verification/lens-results.json`、geometryだけの結果は
+`out/window-verification/geometry-results.json`にある。
+
+```powershell
+python -B eng/verify-window.py
+```
+
+最初の再実行では、クリップボードに`GlobalSize`で安全に退避できない
+`EnterpriseDataProtectionId`形式があり、`ClipboardSnapshot`が変更前に終了1で停止した。
+これは製品のコピー失敗ではない。後の再実行時には全形式を安全に退避でき、値検証後の復元を含めて
+既定`full`が終了0となった。安全停止の条件は緩めていない。
+
+### 9.2 5分間の資源測定
+
+上記旧exeの専用コピーと隔離した`LOCALAPPDATA`だけを使い、300秒間、30秒ごとに資源を測定した。
+CPU時間は合計6.0625秒で、単一論理コア換算の平均は約2.0%、20論理CPU全体では約0.10%。
+GDI objectは11→11で変化しなかった。150〜180秒の間にUSER objectは14→16、handleは
+136→159、working setは+2,416,640 byte、private bytesは+258,048 byteへ一段増え、
+その後120秒はUSER objectとhandleが横ばいだった。
+結果は`out/window-verification/runtime-diagnostics/endurance-results.json`。
+
+この測定では150秒時点に`WM_SETTINGCHANGE`を`PostMessageW`で送ろうとしたが、同期送信専用の
+システムメッセージなので戻り値は偽だった。したがって上記の資源増加をOS設定変更通知の結果とは扱わない。
+後の15分測定の初回も同じAPI選択をassertして終了1となり、`finally`が製品を正常終了した。
+製品の異常終了ではない。再測定は`SendMessageTimeoutW`と対象PID・HWND・終了コードの監視を使う。
+
+この測定が示すのは旧exeの5分間と、資源が一段増えた後120秒の範囲だけであり、
+長時間リークが無いことの保証ではない。
+この旧測定では実ポインタ・実キーボード、利用者のOSテーマ設定は変更していない。
+今回の修正後に次の全体ゲートを実行し、終了0となった。ログは`out/check-issue6.log`。
+
+```powershell
+pwsh -NoProfile -File ./eng/check.ps1
+```
+
+Conformance違反0、Python gate tests 54/54、clean build 68/68、CTest 2/2、分岐111/120＝92.50%、
+実ツールによる反例・復帰7組が成功した。設定スキーマ変更なし。Waivers: none。
+
+### 9.3 残操作、ポップアップ自己採取、15分間の資源測定
+
+専用fixtureと対象PID・foreground・実座標を毎回確認し、約4秒の実入力を行った。右クリックメニューで
+HEXからRGBを選択すると表示は`255, 128, 0`へ変わり、同じfixtureへの外クリックでメニューが閉じた。
+形式チップからのドラッグで窓は`[120,120,420,200]`から`[208,173,508,253]`へ移動した。
+設定窓はforegroundを取得し、×で閉じるとownerへforegroundが戻った。レンズを上端へ動かした結果は
+`[1880,0,2180,80]`、`IsZoomed=false`で、固定`WS_POPUP`はAero Snapによる最大化を受けず通常移動した。
+終了時に元のpointer位置`[3014,1014]`とforeground HWNDを復元した。キーボード入力とOS設定変更はない。
+結果は`out/window-verification/input-ux/results.json`。
+
+開いている設定窓を120 DPIと168 DPIのモニタ間で4回移動した。最終寸法は120 DPIで400×490物理画素、
+168 DPIで560×686物理画素となり、各移動は1つの安定状態へ収束してwork area内に収まった。
+実OSのモニタ構成やwork areaは変更せず、画面外へ置いた設定窓へ`WM_DISPLAYCHANGE`と
+`WM_SETTINGCHANGE/SPI_SETWORKAREA`を同期送信する回帰を追加した。修正前exe
+（SHA-256 `2C49342ECE16DD94E0E2AE54CA035E04D8515E26B003C205F64914C2B42445F6`）では
+`[100,2120,500,2610]`のまま残り終了1、修正後は`[100,1610,500,2100]`へ再配置され終了0となった。
+負例は`out/window-verification/regression-red.json`、DPIと通知の診断は
+`out/window-verification/notification-probe/results.json`。
+
+同じ修正前exeを右端へ置くと、ネイティブ形式メニュー`[7484,1052,7680,1248]`がレンズ
+`[7417,1024,7529,1136]`へ重なり、既知背景`#FF8000`が表示中だけ`#FE7F00`となった。
+これはメニューの影を自己採取した再現である。`WH_CALLWNDPROC`で表示前にメニューへ
+`WDA_EXCLUDEFROMCAPTURE`（17）を設定する単一路へ修正した。最終exe
+（SHA-256 `8B9717FE743296FCB9C192CED9A6CB9D80D541508A6B9E4A5CA5FE989F57C85E`）では、
+同じ重なりでWDA 17、メニュー表示中も`#FF8000`を維持し、背面fixtureを`#00FF00`へ変えると
+メニューを開いたまま新色へ追従し、キャンセル後も`#00FF00`だった。採取の凍結は使っていない。
+最終的にhookの寿命を`TrackPopupMenu`の間だけへ狭めたexe（SHA-256
+`7227823C13331DD1F60A6F2A53153AA397B24C1954C613C3F8C8C46E5859D85B`）で、30回の開閉と
+1回のwarmupを再実行した。GDI・USER・handle・private bytesの最終差分0、working setは
++77,824 byte。全30回のWDAは17、製品終了0。結果は`out/window-verification/menu-resource/results.json`。
+WDA設定失敗時にメニューを表示しない経路の単独証拠は`out/popup-affinity-probe/destroy-results.json`。
+
+修正前exeと隔離した`LOCALAPPDATA`を固定し、30秒warmup後に900.11秒測定した。
+対象SHA-256は`2C49342ECE16DD94E0E2AE54CA035E04D8515E26B003C205F64914C2B42445F6`。
+`SendMessageTimeoutW`による`WM_SETTINGCHANGE`を10回、設定窓の開閉を25回行い、対象PID・HWNDと
+終了コードを監視した。GDIは11→11、USERは14→14、handleは137→136、private bytesは
++172,032 byte、working setは+704,512 byte。CPU時間は22.484375秒で、単一論理コア換算の平均
+2.498%、20論理CPU全体で0.1249%。各設定窓burst直後のUSER 16は次のsampleで14へ戻り、
+private bytesも2,109,440〜2,347,008 byteの範囲で単調増加しなかった。製品とprobeは終了0。
+測定中15:36:39.581〜15:36:47.372 JSTに別PIDのpopup単独probeを実行したため、純粋idle測定とは
+扱わない。結果は`out/window-verification/endurance-15m/results.json`。これは15分の観測であり、
+それを超える連続運転の保証ではない。
+
+hook寿命を狭める直前の同じ機能実装（SHA-256 `8B9717FE743296FCB9C192CED9A6CB9D80D541508A6B9E4A5CA5FE989F57C85E`）に
+対する次の実Windows検証は終了0。既定`full`は4モニタ、画面端・仮想画面外、
+設定窓8配置、同期通知再配置、ポップアップのWDAと背面色追従、クリップボード保全と5形式、
+設定保存・再起動、不正設定5種を含む。証拠は`out/window-verification/lens-results.json`。
+その後のhook寿命変更は、上記の最終SHA
+`7227823C13331DD1F60A6F2A53153AA397B24C1954C613C3F8C8C46E5859D85B`でポップアップ30回のWDA・閉鎖・
+資源回帰を再実行して補完した。scope変更後に既定`full`を再実行したとは扱わない。
+
+```powershell
+python -B eng/verify-window.py --suite geometry --executable build/NeNeLoupe.exe
+python -B eng/verify-window.py --executable build/NeNeLoupe.exe
+python -B out/window-verification/menu-resource-probe.py
+pwsh -NoProfile -File ./eng/check.ps1
+```
+
+最終全体ゲートは2026-09-06 15:54:31〜15:55:16 JSTに終了0。ログは
+`out/check-issue6-final.log`。Conformance違反0、Python gate tests 54/54、clean build 70/70、
+CTest 2/2、分岐111/120＝92.50%、8件の実ツール検証（既存7組とヘッダ依存実測）、
+diff checkが成功した。
+clean rebuild後のexe SHA-256は`7A0A9B2647D8D1E8485243BB54174B0E76BB85326F34EFD1C141C80A39881643`。
+最終popup回帰後にソース変更はなく、popup回帰済みexeとの差はclean rebuildによるバイナリ差である。
+設定スキーマ変更なし。Waivers: none。
+
+実OSテーマの大域切替と、実際のモニタ切断・work area変更は行っていない。system appearanceの実読込、
+単体テストのdark/light切替、実`WM_SETTINGCHANGE`による両窓再描画、synthetic通知の再配置を組み合わせて
+境界を確認した。これら大域変更を伴う2項目と15分を超える連続運転が、今回の検証上限である。

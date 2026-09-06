@@ -1,34 +1,39 @@
 # いまのタスク — NeNe Loupe
 
-> GitHub Issueが正。この文書は実測に基づく要約。
+> GitHub IssueとPRが進行状態の正本。この文書は2026-09-06のIssue #6実装・残検証完了時点の要約。
 
-## 現在のIssue
+## 今回対応したIssue
 
-[Issue #3](https://github.com/hideyukiMORI/nene-loupe/issues/3): 最初の縦切りでルーペ直下を拡大して中心のHEXを表示する。
-[PR #2](https://github.com/hideyukiMORI/nene-loupe/pull/2)はsquashで統合済み、Issue #1は完了した。
+[Issue #6](https://github.com/hideyukiMORI/nene-loupe/issues/6): デザインB、値クリックのコピー、色形式、
+保存可能な設定。[PR #7](https://github.com/hideyukiMORI/nene-loupe/pull/7)の現在のDraft/Ready、CI、レビュー、
+統合状態はGitHubで確認する。ここでは未統合の変更を統合済みとは扱わない。
+[Issue #5](https://github.com/hideyukiMORI/nene-loupe/issues/5)は
+[PR #8](https://github.com/hideyukiMORI/nene-loupe/pull/8)でmainへ統合済み。
 
-| 段階 | 状態 |
-| --- | --- |
-| 初期化・仕様・ADR 0001/0002 | 完了 |
-| Phase 0 / M-1〜M-8 | 19ケースを実測済み。phase0-results.jsonに記録 |
-| Phase 1・2 / 検査基盤 | PR #2統合済み。ローカル・CIの単一ゲート成功、main保護適用済み |
-| Phase 3 / 最初の縦切り | 5層の実装とOS非依存テストを追加。ローカルのフルゲート成功。検査器54件・CTest2件・分岐91.67%・実ツール7反例と復帰 |
+## 実装・検証済みの内容
 
-## 動くものと限界
+- 240×64 DIPのルーペ、5形式、値クリックのコピー、成功・失敗表示。
+- 320×392 DIPの設定モーダル、テーマ3択、常に最前面の即時切替と保存。設定スキーマ1。
+- ドラッグ開始座標、タイトルのドラッグ帯、形式メニューのラジオ印、テーマ通知時の両窓再描画。
+- 設定窓の初期・DPI変更・表示構成/work area通知後の配置を、対象work areaへ収める単一経路。
+- ネイティブ形式メニューを表示前に取り込み除外し、重なった場合も背面色を継続採取する単一路。
+- 4モニタ、120/144/168 DPI、画面端、仮想画面外、設定窓8隅、異DPI間4移動、
+  同期通知後の再配置、クリップボード保全と全5形式、設定保存・再起動、不正設定5種。
+- 対象PIDと実座標を限定した実入力で、メニュー選択・外クリック、ドラッグ、上端移動、
+  設定窓のforeground取得とownerへの復帰を確認。pointerと元のforegroundは復元した。
+- メニュー30回+warmupで全WDA 17、GDI・USER・handle・private bytesの最終差分0。
+- 30秒warmup後の15分測定で、OS設定通知10回と設定窓開閉25回を実行。GDI 11→11、
+  USER 14→14、handle 137→136。CPUは単一論理コア平均2.498%、20論理CPU全体0.1249%。
+- hook寿命を狭める直前の同機能実装で`python -B eng/verify-window.py`の既定`full`は終了0。
+  scope変更後は最終exeのメニュー30回回帰で補完した。最終`pwsh -NoProfile -File ./eng/check.ps1`も
+  終了0（Conformance 0、Python 54/54、clean build 70/70、CTest 2/2、分岐92.50%、
+  8件の実ツール検証（既存7組とヘッダ依存実測）、diff check 0）。設定スキーマ変更なし。Waivers: none。
 
-`build/NeNeLoupe.exe`は枠なし・最前面の160×64 DIP窓に背面の7×7画素の8倍拡大と中心HEXを表示する。
-どこからでもドラッグ移動し、Esc/Alt+F4で閉じる。取得失敗時は古い画素を消して失敗文言を表示する。
-最新の取得結果はLoupeControllerだけが所有する。コピー・形式切替・設定・保存は未実装。
+詳細とコマンドは[検証証拠](../quality/gate-proofs.md)第9節、作業履歴は
+[日報](../reports/2026-09-06.md)、再開情報は[引き継ぎ書](../handoffs/2026-09-06.md)に記録した。
 
-完了定義は `pwsh -NoProfile -File ./eng/check.ps1`。
-ADR 0005で採取中心をルーペ中央に固定し、自分の窓を取り込みから除外した。
-4台のモニタ（120/144/168 DPI）、負の座標、1物理画素の移動による採取位置変更、色一致、Esc終了を確認した。
-画面端と長時間の性能測定は未確認。
-実行した証拠と未確認範囲は[gate-proofs.md](../quality/gate-proofs.md)を参照する。
-意味的な不変性、完全なAPI禁止など、十分に塞げない規則はplannedを維持する。
+## 検証境界
 
-## 次の作業
-
-[PR #4](https://github.com/hideyukiMORI/nene-loupe/pull/4)のCI確認とレビュー。
-実機検証はポインタを操作しない方法へ変更し、完了した。次はコピー・色形式切替・設定の個別実装。
-上位ポリシーはWindowsでは `\\wsl.localhost\Ubuntu-22.04\home\xi\docker\_work\reports\ayane-strict-repo-policy\`。
+実OSテーマの大域切替と、実際のモニタ切断・work area変更は行っていない。system appearanceの実読込、
+単体テストのdark/light切替、実メッセージによる再描画、synthetic通知後の再配置までを確認した。
+資源測定の観測上限は15分であり、それを超える連続運転の保証ではない。HDR/ICCは仕様対象外。
