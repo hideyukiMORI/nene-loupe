@@ -141,3 +141,23 @@ Waivers: none | WVR-NNNN
 設定ファイルとドキュメントが食い違ったら、**ドキュメントが決定の記録**である。ただし両方がそろうまで merge は止める。
 
 **事故が起きたら、直すだけでなく再発を機械で塞ぐ規則を足し、Issue 番号と実測を規則本文に残す。**
+
+---
+
+## 9. リリース
+
+製品の版入力は`CMakeLists.txt`の`project(... VERSION ...)`だけとする。設定画面、Win32 manifest、
+VERSIONINFO、配布物名はCMake configureで同じ値から導出する。Release x64の正規生成経路は次である。
+
+```powershell
+pwsh -NoProfile -File ./eng/package-release.ps1
+```
+
+このコマンドは固定toolchainと既存CMake targetをRelease構成でclean buildし、CTestと実build graphを
+検査して、`out/release/`へportable ZIPと`SHA256SUMS`を作る。ZIP直下は`NeNeLoupe.exe`、
+利用者向け`README.txt`、正本`LICENSE`だけとする。このRelease検査はPR最終HEADで行う全体ゲートの
+代わりではない。
+
+公開はsquash統合後のcleanな`main`から同じコマンドで作り直し、x64、埋込版、manifest、ICON、
+静的runtime、ZIP内容、checksum、短い実Windows起動を確認してから行う。`v<PROJECT_VERSION>`のtagと
+同名GitHub ReleaseへZIPと`SHA256SUMS`を添付する。署名、インストーラ、自動更新は別の焦点Issueとする。

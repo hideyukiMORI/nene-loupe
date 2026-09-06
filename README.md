@@ -2,25 +2,17 @@
 
 A tiny frameless screen loupe and colour picker for Windows. C++ / Win32, no UI library.
 
-**Status: design implementation under review (Issue #6).** A 240×64 DIP window shows a sharp
-8× loupe of the 7×7 pixels directly behind the lens and the centre colour. Click the value
-to copy it, click the format label to cycle formats, and open the gear for settings.
-Drag the lens or background to move; press Esc or Alt+F4 to close. See
-[current work](docs/todo/current.md) for the implementation and measured limits.
+## Download and run
 
-On Windows 10 version 2004 or later (x64, DWM enabled), install the versions in `eng/tool-versions.json` (Visual Studio Build Tools with
-C++ tools, LLVM and CMake, plus Python), then run:
+NeNe Loupe requires Windows 10 version 2004 or later (x64) with DWM enabled.
+Download the ZIP and `SHA256SUMS` from the
+[latest release](https://github.com/hideyukiMORI/nene-loupe/releases/latest), verify the ZIP,
+extract it, and run `NeNeLoupe.exe`. No installer or additional Visual C++ runtime is required.
+The published executable is not code signed, so Windows may show an unknown-publisher warning.
+Use `Get-FileHash <downloaded-zip> -Algorithm SHA256` and compare the result with `SHA256SUMS`.
 
-```powershell
-pwsh -NoProfile -File ./eng/bootstrap.ps1
-pwsh -NoProfile -File ./eng/check.ps1
-./build/NeNeLoupe.exe
-```
-
-Bootstrap enables this repository's Git hooks. The full gate builds the application,
-runs OS-independent unit tests and enforces 90% core/application branch coverage with LLVM.
-Interactive Windows checks are recorded separately in [gate proofs](docs/quality/gate-proofs.md).
-The status title exposes the current HEX; capture failures clear stale pixels and show a message.
+A 240×64 DIP window shows a sharp 8× loupe of the 7×7 pixels directly behind the lens and
+the centre colour. Drag the lens or background to move; press Esc or Alt+F4 to close.
 
 ## Controls and settings
 
@@ -29,12 +21,29 @@ The status title exposes the current HEX; capture failures clear stale pixels an
 - The gear opens theme (dark / light / system), always-on-top, copyright and version.
 - Settings apply immediately and persist in `%LOCALAPPDATA%\NeNeLoupe\settings.v1.txt`.
 
-Automated Windows checks cover copying, modal settings, persistence and four monitors;
-manual interaction review and long-duration checks remain. Move the lens over the target to sample it;
-moving the pointer alone does not change the
-sampling position. The window is excluded from desktop capture to reveal its backdrop, so it
-will also be absent from ordinary screenshots and screen sharing. HDR and ICC colour
-management are outside the specification.
+The window is excluded from desktop capture to reveal its backdrop, so it will also be absent
+from ordinary screenshots and screen sharing. HDR and ICC colour management are outside the
+specification. See [current work](docs/todo/current.md) and
+[gate proofs](docs/quality/gate-proofs.md) for measured verification boundaries.
+
+## Development
+
+Install the versions in `eng/tool-versions.json` (Visual Studio Build Tools with C++ tools,
+LLVM and CMake, plus Python), then run:
+
+```powershell
+pwsh -NoProfile -File ./eng/bootstrap.ps1
+pwsh -NoProfile -File ./eng/check.ps1
+./build/NeNeLoupe.exe
+```
+
+After the full gate succeeds, `pwsh -NoProfile -File ./eng/package-release.ps1` creates the
+Release x64 portable ZIP and `SHA256SUMS` under `out/release/`.
+
+Bootstrap enables this repository's Git hooks. The full gate builds the application,
+runs OS-independent unit tests and enforces 90% core/application branch coverage with LLVM.
+Interactive Windows checks are recorded separately in [gate proofs](docs/quality/gate-proofs.md).
+The status title exposes the current HEX; capture failures clear stale pixels and show a message.
 
 ## Why C++ and plain Win32
 
