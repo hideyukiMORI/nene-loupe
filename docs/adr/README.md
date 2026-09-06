@@ -22,3 +22,4 @@ ADR は「なぜそう決めたか」「何を却下したか」を書く。
 | [0004](0004-first-loupe-slice.md) | 最初の縦切りを単一のサンプル状態で通す | 採取位置のみ0005で置換 |
 | [0005](0005-sample-through-lens.md) | ルーペ自身を除外し、その直下を採取する | 受理 |
 | [0006](0006-designed-loupe-controls.md) | デザインに沿った操作部と、版を持つ設定の保存 | 受理 |
+| [0007](0007-photograph-the-loupe-for-the-readme.md) | README のために、除外を外した起動で自分の窓を撮る | 受理 |

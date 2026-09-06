@@ -4,6 +4,10 @@
 
 ## 現在のIssue
 
+[Issue #21](https://github.com/hideyukiMORI/nene-loupe/issues/21)が、READMEのトップへ実機の
+スクリーンショットを置く今回の作業の追跡先。撮影経路の選定は[ADR 0007](../adr/0007-photograph-the-loupe-for-the-readme.md)、
+実測は`out/readme-capture/`にある。
+
 [Issue #19](https://github.com/hideyukiMORI/nene-loupe/issues/19)と対応PRが、v0.2.0正式公開までの実績を
 日報と引き継ぎへ記録する今回の更新の追跡先。完了状態はGitHubを参照し、未完了工程がある場合だけ進める。
 製品コードと公開済みのtag・成果物は変更しない。
@@ -23,3 +27,4 @@
 
 [Issue #19](https://github.com/hideyukiMORI/nene-loupe/issues/19)と対応PRの完了状態を確認し、未完了工程が
 ある場合だけ進める。公開状態はGitHub Releaseを正本とする。新しい製品作業は焦点Issueを作成してから始める。
+Issue #21の統合後は、READMEの画像がUIの変更に追随しないこと（機械の検査が無いこと）が残る穴である。

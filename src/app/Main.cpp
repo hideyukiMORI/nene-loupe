@@ -1,9 +1,11 @@
+#include "CaptureExclusion.hpp"
 #include "LoupeWindow.hpp"
 #include "Win32ClipboardAdapter.hpp"
 #include "Win32ScreenSamplerAdapter.hpp"
 #include "Win32SettingsStoreAdapter.hpp"
 #include "Win32SystemAppearanceAdapter.hpp"
 
+#include <string_view>
 #include <utility>
 
 namespace
@@ -28,14 +30,17 @@ const wchar_t *reason_of(neneloupe::WindowFailure failure)
 }
 } // namespace
 
-int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int)
+int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR command_line, int)
 {
+    // 起動引数の解釈は core の 1 か所だけ。ここは受け取って渡すだけにする。
+    const std::wstring_view arguments = command_line ? command_line : L"";
+    const auto exclusion = neneloupe::capture_exclusion_of(arguments);
     neneloupe::Win32ScreenSamplerAdapter sampler;
     neneloupe::Win32ClipboardAdapter clipboard;
     neneloupe::Win32SettingsStoreAdapter store;
     neneloupe::Win32SystemAppearanceAdapter appearance;
     neneloupe::LoupeController controller(sampler, clipboard, store, appearance);
-    auto window = neneloupe::LoupeWindow::create(instance, controller);
+    auto window = neneloupe::LoupeWindow::create(instance, controller, exclusion);
     if (!window)
     {
         MessageBoxW(nullptr, reason_of(window.error()), L"NeNe Loupe", MB_OK | MB_ICONERROR);

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "CaptureExclusion.hpp"
 #include "LoupeController.hpp"
 #include "SettingsHitArea.hpp"
 #include "WindowFailure.hpp"
@@ -15,7 +16,7 @@ class SettingsWindow final
 {
   public:
     static std::expected<std::unique_ptr<SettingsWindow>, WindowFailure>
-    create(HINSTANCE instance, HWND owner, LoupeController &controller);
+    create(HINSTANCE instance, HWND owner, LoupeController &controller, CaptureExclusion exclusion);
     ~SettingsWindow();
     SettingsWindow(const SettingsWindow &) = delete;
     SettingsWindow &operator=(const SettingsWindow &) = delete;
@@ -23,7 +24,8 @@ class SettingsWindow final
     HWND handle() const noexcept;
 
   private:
-    SettingsWindow(HINSTANCE instance, HWND owner, LoupeController &controller);
+    SettingsWindow(HINSTANCE instance, HWND owner, LoupeController &controller,
+                   CaptureExclusion exclusion);
     std::expected<void, WindowFailure> initialize();
     RECT centered_on_owner() const;
     RECT fit_to_work_area(RECT desired, HMONITOR monitor) const;
@@ -38,6 +40,7 @@ class SettingsWindow final
     HINSTANCE instance_;
     HWND owner_;
     LoupeController &controller_;
+    CaptureExclusion exclusion_;
     HWND window_ = nullptr;
     ATOM class_ = 0;
     UINT dpi_ = 96;

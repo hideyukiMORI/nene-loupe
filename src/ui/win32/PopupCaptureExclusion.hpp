@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CaptureExclusion.hpp"
+
 #include <Windows.h>
 #include <expected>
 #include <memory>
@@ -14,7 +16,8 @@ class PopupCaptureExclusion final
         installation_failed,
     };
 
-    static std::expected<std::unique_ptr<PopupCaptureExclusion>, Failure> create(HWND owner);
+    static std::expected<std::unique_ptr<PopupCaptureExclusion>, Failure>
+    create(HWND owner, CaptureExclusion exclusion);
     ~PopupCaptureExclusion();
     PopupCaptureExclusion(const PopupCaptureExclusion &) = delete;
     PopupCaptureExclusion &operator=(const PopupCaptureExclusion &) = delete;

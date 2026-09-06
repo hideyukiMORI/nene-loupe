@@ -1,5 +1,6 @@
 #include "SettingsWindow.hpp"
 
+#include "CaptureExclusionStyle.hpp"
 #include "SettingsLayout.hpp"
 #include "SettingsRenderer.hpp"
 #include "WindowLayerStyle.hpp"
@@ -14,15 +15,18 @@ namespace
 constexpr wchar_t class_name[] = L"NeNeLoupe.Settings";
 }
 
-SettingsWindow::SettingsWindow(HINSTANCE instance, HWND owner, LoupeController &controller)
-    : instance_(instance), owner_(owner), controller_(controller)
+SettingsWindow::SettingsWindow(HINSTANCE instance, HWND owner, LoupeController &controller,
+                               CaptureExclusion exclusion)
+    : instance_(instance), owner_(owner), controller_(controller), exclusion_(exclusion)
 {
 }
 
 std::expected<std::unique_ptr<SettingsWindow>, WindowFailure>
-SettingsWindow::create(HINSTANCE instance, HWND owner, LoupeController &controller)
+SettingsWindow::create(HINSTANCE instance, HWND owner, LoupeController &controller,
+                       CaptureExclusion exclusion)
 {
-    auto window = std::unique_ptr<SettingsWindow>(new SettingsWindow(instance, owner, controller));
+    auto window =
+        std::unique_ptr<SettingsWindow>(new SettingsWindow(instance, owner, controller, exclusion));
     auto initialized = window->initialize();
     if (!initialized)
     {
@@ -54,7 +58,7 @@ std::expected<void, WindowFailure> SettingsWindow::initialize()
         return std::unexpected(WindowFailure::creation_failed);
     }
     // ルーペ窓と同じ規則を 2 枚目にも通す。掛けないとレンズが自分自身を採る。
-    if (!SetWindowDisplayAffinity(window_, WDA_EXCLUDEFROMCAPTURE))
+    if (!SetWindowDisplayAffinity(window_, CaptureExclusionStyle::affinity(exclusion_)))
     {
         return std::unexpected(WindowFailure::capture_exclusion_failed);
     }

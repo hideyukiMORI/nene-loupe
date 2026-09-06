@@ -1,5 +1,6 @@
 #pragma once
 
+#include "CaptureExclusion.hpp"
 #include "LoupeController.hpp"
 #include "LoupeHitArea.hpp"
 #include "SettingsWindow.hpp"
@@ -16,7 +17,7 @@ class LoupeWindow final
 {
   public:
     static std::expected<std::unique_ptr<LoupeWindow>, WindowFailure>
-    create(HINSTANCE instance, LoupeController &controller);
+    create(HINSTANCE instance, LoupeController &controller, CaptureExclusion exclusion);
     ~LoupeWindow();
     LoupeWindow(const LoupeWindow &) = delete;
     LoupeWindow &operator=(const LoupeWindow &) = delete;
@@ -24,7 +25,7 @@ class LoupeWindow final
     HWND handle() const noexcept;
 
   private:
-    LoupeWindow(HINSTANCE instance, LoupeController &controller);
+    LoupeWindow(HINSTANCE instance, LoupeController &controller, CaptureExclusion exclusion);
     std::expected<void, WindowFailure> initialize();
     static LRESULT CALLBACK procedure(HWND window, UINT message, WPARAM word, LPARAM data) noexcept;
     LRESULT dispatch(UINT message, WPARAM word, LPARAM data);
@@ -42,6 +43,7 @@ class LoupeWindow final
     void change_dpi(WPARAM word, LPARAM data);
     HINSTANCE instance_;
     LoupeController &controller_;
+    CaptureExclusion exclusion_;
     std::unique_ptr<SettingsWindow> settings_;
     std::wstring title_;
     HWND window_ = nullptr;
