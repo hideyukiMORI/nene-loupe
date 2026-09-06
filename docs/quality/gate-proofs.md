@@ -1,6 +1,6 @@
 # ゲート発火の証明 — NeNe Loupe
 
-> 記録: 2026-09-06 / Issue #1・#3・#5・#6。以下は実行した結果のみ。
+> 記録: 2026-09-06 / Issue #1・#3・#5・#6・#9・#11・#13・#15・#17。以下は実行した結果のみ。
 > 関連: QLT-007 / QLT-011 / QLT-013 / ADR 0003
 
 ## 1. 環境と範囲
@@ -419,3 +419,23 @@ ICOは16/20/24/32/48/64/128/256pxの8件、32-bit RGBAで既存alpha契約を満
 
 最終全体ゲートとCIはIssue #15のPRを進行状態の正本として確認する。設定スキーマ変更なし。
 Waivers: none。
+
+### 14. v0.2.0 Release x64（Issue #17）
+
+`CMakeLists.txt`のPROJECT_VERSIONを唯一の版入力とし、CMake configureでmanifestとVERSIONINFO用headerを
+build下へ生成した。固定manifestの復活と版literalをCNF-007が拒否する正例1件・負例2件を追加し、
+`python -B eng/test-conformance.py`は57/57、`python -B eng/conformance.py`は違反0だった。
+
+`pwsh -NoProfile -File ./eng/package-release.ps1`によるRelease narrow buildは71/71、実build graphの
+conformance違反0、CTest 2/2。抽出manifestはassemblyIdentity 0.2.0.0とPerMonitorV2、VERSIONINFOは
+FileVersion 0.2.0.0、ProductVersion 0.2.0だった。PEはx64で、importsはUSER32、ADVAPI32、GDI32、
+KERNEL32だけであり、動的Visual C++ runtimeを要求しない。
+
+portable ZIP直下が`NeNeLoupe.exe`、`README.txt`、`LICENSE`の3件だけであることと、生成した
+`SHA256SUMS`がZIPに一致することを確認した。ZIPから展開したexeを隔離`LOCALAPPDATA`で起動した
+single-thread PMv2 smokeは終了0。120 DPIの実矩形は`[100,100,400,180]`で240×64 DIPと一致し、
+大・小クラスHICONは非0だった。結果は`out/release/smoke-results.json`。
+
+最終全体ゲートとCIはIssue #17のPR、merged mainから再生成する公開ZIPとchecksumはv0.2.0の
+GitHub Releaseを正本として確認する。今回の実測はWindows 10 version 2004以降の全環境を網羅せず、
+公開exeはコード署名していない。

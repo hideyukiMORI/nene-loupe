@@ -5,5 +5,7 @@
   "eng/architecture.json": ["eng/targets.cmake", "eng/conformance.py", "eng/coverage.py"],
   "eng/coverage-policy.json": ["eng/coverage.py"],
   "eng/conformance-rules.json": ["eng/conformance.py"],
-  "eng/config-bindings.json": ["eng/conformance.py"]
+  "eng/config-bindings.json": ["eng/conformance.py"],
+  "src/app/NeNeLoupe.manifest.in": ["CMakeLists.txt"],
+  "src/app/NeNeLoupeVersion.h.in": ["CMakeLists.txt"]
 }

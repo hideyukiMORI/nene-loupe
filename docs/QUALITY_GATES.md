@@ -154,7 +154,7 @@ C++の型・別名とモジュール名を字句検査する。マクロで生�
 
 ### CNF-007 — 検査設定の読込
 
-eng/config-bindings.jsonの設定と参照先を照合する。文字列参照だけでは実行を証明しないため、整形・lint・CMakeは実ツールの反例も実行する。任意の新設定の自動発見は未完了。
+eng/config-bindings.jsonの設定と参照先を照合する。文字列参照だけでは実行を証明しないため、整形・lint・CMakeは実ツールの反例も実行する。Issue #17で版templateのCMake結線を照合し、固定manifestと版literalを拒否する検査を加えた。任意の新設定の自動発見は未完了。
 
 - 対応する規則: QLT-007
 - 機械強制: **planned**（`eng/conformance.py`）

@@ -2,6 +2,14 @@ cmake_minimum_required(VERSION 3.31)
 # 版はここが唯一の出どころ。設定モーダルの表示はこれをビルド時に受け取る（FR-011）。
 project(NeNeLoupe VERSION 0.2.0 LANGUAGES CXX)
 
+set(NENELOUPE_GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
+file(MAKE_DIRECTORY "${NENELOUPE_GENERATED_DIR}")
+configure_file(src/app/NeNeLoupe.manifest.in
+               "${NENELOUPE_GENERATED_DIR}/NeNeLoupe.manifest" @ONLY)
+configure_file(src/app/NeNeLoupeVersion.h.in
+               "${NENELOUPE_GENERATED_DIR}/NeNeLoupeVersion.h" @ONLY)
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/NeNeLoupeVersion.txt" "${PROJECT_VERSION}\n")
+
 if(NOT MSVC OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     message(FATAL_ERROR "QLT-011: this gate requires the pinned MSVC compiler")
 endif()
@@ -56,8 +64,11 @@ neneloupe_link(neneloupe_window neneloupe_application)
 neneloupe_system_link(neneloupe_window user32)
 neneloupe_system_link(neneloupe_window gdi32)
 
-neneloupe_target(NeNeLoupe app EXECUTABLE src/app/Main.cpp src/app/NeNeLoupe.manifest
-    src/app/NeNeLoupe.rc)
+neneloupe_target(NeNeLoupe app EXECUTABLE src/app/Main.cpp src/app/NeNeLoupe.rc)
+set(NENELOUPE_MANIFEST "${NENELOUPE_GENERATED_DIR}/NeNeLoupe.manifest")
+set_source_files_properties("${NENELOUPE_MANIFEST}" PROPERTIES GENERATED TRUE)
+target_sources(NeNeLoupe PRIVATE "${NENELOUPE_MANIFEST}")
+target_include_directories(NeNeLoupe PRIVATE "${NENELOUPE_GENERATED_DIR}")
 neneloupe_link(NeNeLoupe neneloupe_core)
 neneloupe_link(NeNeLoupe neneloupe_application)
 neneloupe_link(NeNeLoupe neneloupe_capture)
