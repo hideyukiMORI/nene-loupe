@@ -1,38 +1,39 @@
 # いまのタスク — NeNe Loupe
 
-> GitHub Issueが正。この文書は2026-09-06の再開後レビュー時点の要約。
+> GitHub IssueとPRが進行状態の正本。この文書は2026-09-06のIssue #6実装・残検証完了時点の要約。
 
-## 現在のIssue
+## 今回対応したIssue
 
-[Issue #6](https://github.com/hideyukiMORI/nene-loupe/issues/6): デザインB、値クリックのコピー、色形式、保存可能な設定。
-[PR #4](https://github.com/hideyukiMORI/nene-loupe/pull/4)は統合済み。
-作業ブランチは `feat/6-designed-loupe-controls`、分岐元mainは `ad65487`。
-保存済み実装をレビューし、見つかったUI不具合と検証を後続コミットへ保存した。統合前である。
-実装履歴の起点は `8303053`、[Draft PR #7](https://github.com/hideyukiMORI/nene-loupe/pull/7)を作成済み。
+[Issue #6](https://github.com/hideyukiMORI/nene-loupe/issues/6): デザインB、値クリックのコピー、色形式、
+保存可能な設定。[PR #7](https://github.com/hideyukiMORI/nene-loupe/pull/7)の現在のDraft/Ready、CI、レビュー、
+統合状態はGitHubで確認する。ここでは未統合の変更を統合済みとは扱わない。
+[Issue #5](https://github.com/hideyukiMORI/nene-loupe/issues/5)は
+[PR #8](https://github.com/hideyukiMORI/nene-loupe/pull/8)でmainへ統合済み。
 
-## 実装・検証
+## 実装・検証済みの内容
 
 - 240×64 DIPのルーペ、5形式、値クリックのコピー、成功・失敗表示。
-- 320×392 DIPの設定モーダル、テーマ3択、常に最前面の即時切替と保存。
-- 設定スキーマ1、破損・未対応入力の通知と無操作時の保全。ADR 0006に記録。
-- 全体ゲート終了0、CTest 2/2、分岐111/120＝92.50%、実ツール7反例と復帰成功。
-- Windows検証終了0。4モニタ・120/144/168 DPI、色採取、ヒット領域、コピー全形式、
-  モーダル性、最前面OFF/ON/OFF、再起動後の復元、不正設定5ケースを確認。
-- レビューで、ドラッグ開始座標、設定窓のドラッグ帯、OSテーマ通知時の設定窓再描画、形式メニューの
-  ラジオ印、設定窓のDPI変更後の画面内配置を修正した。設定スキーマは変更していない。
-- 旧exeで設定窓の画面外配置を再現し、修正版では4モニタの左上・右下8配置がwork area内に収まった。
-  画面端の中心色、仮想画面外の失敗表示、右クリックメニューの表示と画面内配置も確認した。
-- 修正版の`python -B eng/verify-window.py`は既定`full`で終了0。再全体ゲートも終了0。
-  Conformance違反0、CTest 2/2、分岐111/120＝92.50%、実ツールによる反例・復帰7組が成功した。
-- 旧exeの5分測定はGDI 11→11、CPU時間6.0625秒。測定範囲と制約は
-  [検証証拠](../quality/gate-proofs.md)第9.2節に記録した。
+- 320×392 DIPの設定モーダル、テーマ3択、常に最前面の即時切替と保存。設定スキーマ1。
+- ドラッグ開始座標、タイトルのドラッグ帯、形式メニューのラジオ印、テーマ通知時の両窓再描画。
+- 設定窓の初期・DPI変更・表示構成/work area通知後の配置を、対象work areaへ収める単一経路。
+- ネイティブ形式メニューを表示前に取り込み除外し、重なった場合も背面色を継続採取する単一路。
+- 4モニタ、120/144/168 DPI、画面端、仮想画面外、設定窓8隅、異DPI間4移動、
+  同期通知後の再配置、クリップボード保全と全5形式、設定保存・再起動、不正設定5種。
+- 対象PIDと実座標を限定した実入力で、メニュー選択・外クリック、ドラッグ、上端移動、
+  設定窓のforeground取得とownerへの復帰を確認。pointerと元のforegroundは復元した。
+- メニュー30回+warmupで全WDA 17、GDI・USER・handle・private bytesの最終差分0。
+- 30秒warmup後の15分測定で、OS設定通知10回と設定窓開閉25回を実行。GDI 11→11、
+  USER 14→14、handle 137→136。CPUは単一論理コア平均2.498%、20論理CPU全体0.1249%。
+- hook寿命を狭める直前の同機能実装で`python -B eng/verify-window.py`の既定`full`は終了0。
+  scope変更後は最終exeのメニュー30回回帰で補完した。最終`pwsh -NoProfile -File ./eng/check.ps1`も
+  終了0（Conformance 0、Python 54/54、clean build 70/70、CTest 2/2、分岐92.50%、
+  8件の実ツール検証（既存7組とヘッダ依存実測）、diff check 0）。設定スキーマ変更なし。Waivers: none。
 
-## 次の作業
+詳細とコマンドは[検証証拠](../quality/gate-proofs.md)第9節、作業履歴は
+[日報](../reports/2026-09-06.md)、再開情報は[引き継ぎ書](../handoffs/2026-09-06.md)に記録した。
 
-1. 手動のドラッグ・Aero Snap・右クリックでの選択、フォーカス復帰、OSテーマ実切替後の見た目を確認する。
-2. DPI境界での設定窓のちらつき、メニュー外クリック、メニューが重なる場合の自己採取、表示構成変更時の
-   再配置は未確認。再現を確認してから欠陥として扱う。
-3. Draft PRの差分・CIを確認し、Ready判定を行う。未レビューの変更を統合済み扱いにしない。
-4. 長時間の連続運転は5分測定とは別に必要性を判断する。Issue #5はPR #8でmainへ統合・終了済み。
+## 検証境界
 
-記録: [日報](../reports/2026-09-06.md)、[検証証拠](../quality/gate-proofs.md)。Waivers: none。
+実OSテーマの大域切替と、実際のモニタ切断・work area変更は行っていない。system appearanceの実読込、
+単体テストのdark/light切替、実メッセージによる再描画、synthetic通知後の再配置までを確認した。
+資源測定の観測上限は15分であり、それを超える連続運転の保証ではない。HDR/ICCは仕様対象外。

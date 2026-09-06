@@ -3,6 +3,7 @@
 #include "ColorText.hpp"
 #include "LoupeLayout.hpp"
 #include "LoupeRenderer.hpp"
+#include "PopupCaptureExclusion.hpp"
 #include "WindowLayerStyle.hpp"
 
 #include <algorithm>
@@ -370,8 +371,17 @@ void LoupeWindow::show_format_menu(POINT client)
                        static_cast<UINT>(selected - menu_formats.begin() + 1), MF_BYCOMMAND);
     POINT screen = client;
     ClientToScreen(window_, &screen);
-    const auto chosen = TrackPopupMenu(menu, TPM_RETURNCMD | TPM_RIGHTBUTTON, screen.x, screen.y, 0,
-                                       window_, nullptr);
+    int chosen = 0;
+    {
+        auto capture_exclusion = PopupCaptureExclusion::create(window_);
+        if (!capture_exclusion)
+        {
+            DestroyMenu(menu);
+            return;
+        }
+        chosen = TrackPopupMenu(menu, TPM_RETURNCMD | TPM_RIGHTBUTTON, screen.x, screen.y, 0,
+                                window_, nullptr);
+    }
     DestroyMenu(menu);
     if (chosen >= 1 && chosen <= static_cast<int>(menu_formats.size()))
     {

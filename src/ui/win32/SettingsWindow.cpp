@@ -195,6 +195,16 @@ LRESULT SettingsWindow::dispatch(UINT message, WPARAM word, LPARAM data)
     case WM_DPICHANGED:
         change_dpi(word, data);
         return 0;
+    case WM_DISPLAYCHANGE:
+        refit_to_current_work_area();
+        return 0;
+    case WM_SETTINGCHANGE:
+        if (word == SPI_SETWORKAREA)
+        {
+            refit_to_current_work_area();
+            return 0;
+        }
+        return DefWindowProcW(window_, message, word, data);
     default:
         return DefWindowProcW(window_, message, word, data);
     }
@@ -256,5 +266,15 @@ void SettingsWindow::change_dpi(WPARAM word, LPARAM data)
     const auto &suggested = *reinterpret_cast<const RECT *>(data);
     place(suggested, MonitorFromRect(&suggested, MONITOR_DEFAULTTONEAREST));
     InvalidateRect(window_, nullptr, FALSE);
+}
+
+void SettingsWindow::refit_to_current_work_area()
+{
+    RECT current{};
+    if (!GetWindowRect(window_, &current))
+    {
+        return;
+    }
+    place(current, MonitorFromRect(&current, MONITOR_DEFAULTTONEAREST));
 }
 } // namespace neneloupe

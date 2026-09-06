@@ -47,6 +47,7 @@ neneloupe_system_link(neneloupe_capture advapi32)
 neneloupe_target(neneloupe_window ui_win32 STATIC
     src/ui/win32/LoupeRenderer.cpp src/ui/win32/LoupeWindow.cpp src/ui/win32/LoupeLayout.cpp
     src/ui/win32/PaletteBrush.cpp src/ui/win32/SettingsLayout.cpp
+    src/ui/win32/PopupCaptureExclusion.cpp
     src/ui/win32/SettingsRenderer.cpp src/ui/win32/SettingsWindow.cpp
     src/ui/win32/WindowLayerStyle.cpp)
 target_compile_definitions(neneloupe_window PRIVATE "NENELOUPE_VERSION=L\"${PROJECT_VERSION}\"")

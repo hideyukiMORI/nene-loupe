@@ -1,6 +1,6 @@
 # ゲート発火の証明 — NeNe Loupe
 
-> 記録: 2026-09-06 / Issue #1・#3・#5。以下は実行した結果のみ。
+> 記録: 2026-09-06 / Issue #1・#3・#5・#6。以下は実行した結果のみ。
 > 関連: QLT-007 / QLT-011 / QLT-013 / ADR 0003
 
 ## 1. 環境と範囲
@@ -237,14 +237,19 @@ python -B eng/verify-window.py
 
 上記旧exeの専用コピーと隔離した`LOCALAPPDATA`だけを使い、300秒間、30秒ごとに資源を測定した。
 CPU時間は合計6.0625秒で、単一論理コア換算の平均は約2.0%、20論理CPU全体では約0.10%。
-GDI objectは11→11で変化しなかった。150秒時点で`WM_SETTINGCHANGE`を1回送った後、
-USER objectは14→16、handleは136→159、working setは+2,416,640 byte、private bytesは
-+258,048 byteへ一段増え、その後120秒はUSER objectとhandleが横ばいだった。
+GDI objectは11→11で変化しなかった。150〜180秒の間にUSER objectは14→16、handleは
+136→159、working setは+2,416,640 byte、private bytesは+258,048 byteへ一段増え、
+その後120秒はUSER objectとhandleが横ばいだった。
 結果は`out/window-verification/runtime-diagnostics/endurance-results.json`。
 
-この測定が示すのは旧exeの5分間と通知後120秒の範囲だけであり、長時間リークが無いことの保証ではない。
-実ポインタ・実キーボード、利用者のOSテーマ設定は変更していない。Aero Snapを含む実ドラッグ、
-OSテーマを実際に切り替えた追従、実フォーカス復帰、長時間の連続運転は引き続き手動確認が必要である。
+この測定では150秒時点に`WM_SETTINGCHANGE`を`PostMessageW`で送ろうとしたが、同期送信専用の
+システムメッセージなので戻り値は偽だった。したがって上記の資源増加をOS設定変更通知の結果とは扱わない。
+後の15分測定の初回も同じAPI選択をassertして終了1となり、`finally`が製品を正常終了した。
+製品の異常終了ではない。再測定は`SendMessageTimeoutW`と対象PID・HWND・終了コードの監視を使う。
+
+この測定が示すのは旧exeの5分間と、資源が一段増えた後120秒の範囲だけであり、
+長時間リークが無いことの保証ではない。
+この旧測定では実ポインタ・実キーボード、利用者のOSテーマ設定は変更していない。
 今回の修正後に次の全体ゲートを実行し、終了0となった。ログは`out/check-issue6.log`。
 
 ```powershell
@@ -253,3 +258,73 @@ pwsh -NoProfile -File ./eng/check.ps1
 
 Conformance違反0、Python gate tests 54/54、clean build 68/68、CTest 2/2、分岐111/120＝92.50%、
 実ツールによる反例・復帰7組が成功した。設定スキーマ変更なし。Waivers: none。
+
+### 9.3 残操作、ポップアップ自己採取、15分間の資源測定
+
+専用fixtureと対象PID・foreground・実座標を毎回確認し、約4秒の実入力を行った。右クリックメニューで
+HEXからRGBを選択すると表示は`255, 128, 0`へ変わり、同じfixtureへの外クリックでメニューが閉じた。
+形式チップからのドラッグで窓は`[120,120,420,200]`から`[208,173,508,253]`へ移動した。
+設定窓はforegroundを取得し、×で閉じるとownerへforegroundが戻った。レンズを上端へ動かした結果は
+`[1880,0,2180,80]`、`IsZoomed=false`で、固定`WS_POPUP`はAero Snapによる最大化を受けず通常移動した。
+終了時に元のpointer位置`[3014,1014]`とforeground HWNDを復元した。キーボード入力とOS設定変更はない。
+結果は`out/window-verification/input-ux/results.json`。
+
+開いている設定窓を120 DPIと168 DPIのモニタ間で4回移動した。最終寸法は120 DPIで400×490物理画素、
+168 DPIで560×686物理画素となり、各移動は1つの安定状態へ収束してwork area内に収まった。
+実OSのモニタ構成やwork areaは変更せず、画面外へ置いた設定窓へ`WM_DISPLAYCHANGE`と
+`WM_SETTINGCHANGE/SPI_SETWORKAREA`を同期送信する回帰を追加した。修正前exe
+（SHA-256 `2C49342ECE16DD94E0E2AE54CA035E04D8515E26B003C205F64914C2B42445F6`）では
+`[100,2120,500,2610]`のまま残り終了1、修正後は`[100,1610,500,2100]`へ再配置され終了0となった。
+負例は`out/window-verification/regression-red.json`、DPIと通知の診断は
+`out/window-verification/notification-probe/results.json`。
+
+同じ修正前exeを右端へ置くと、ネイティブ形式メニュー`[7484,1052,7680,1248]`がレンズ
+`[7417,1024,7529,1136]`へ重なり、既知背景`#FF8000`が表示中だけ`#FE7F00`となった。
+これはメニューの影を自己採取した再現である。`WH_CALLWNDPROC`で表示前にメニューへ
+`WDA_EXCLUDEFROMCAPTURE`（17）を設定する単一路へ修正した。最終exe
+（SHA-256 `8B9717FE743296FCB9C192CED9A6CB9D80D541508A6B9E4A5CA5FE989F57C85E`）では、
+同じ重なりでWDA 17、メニュー表示中も`#FF8000`を維持し、背面fixtureを`#00FF00`へ変えると
+メニューを開いたまま新色へ追従し、キャンセル後も`#00FF00`だった。採取の凍結は使っていない。
+最終的にhookの寿命を`TrackPopupMenu`の間だけへ狭めたexe（SHA-256
+`7227823C13331DD1F60A6F2A53153AA397B24C1954C613C3F8C8C46E5859D85B`）で、30回の開閉と
+1回のwarmupを再実行した。GDI・USER・handle・private bytesの最終差分0、working setは
++77,824 byte。全30回のWDAは17、製品終了0。結果は`out/window-verification/menu-resource/results.json`。
+WDA設定失敗時にメニューを表示しない経路の単独証拠は`out/popup-affinity-probe/destroy-results.json`。
+
+修正前exeと隔離した`LOCALAPPDATA`を固定し、30秒warmup後に900.11秒測定した。
+対象SHA-256は`2C49342ECE16DD94E0E2AE54CA035E04D8515E26B003C205F64914C2B42445F6`。
+`SendMessageTimeoutW`による`WM_SETTINGCHANGE`を10回、設定窓の開閉を25回行い、対象PID・HWNDと
+終了コードを監視した。GDIは11→11、USERは14→14、handleは137→136、private bytesは
++172,032 byte、working setは+704,512 byte。CPU時間は22.484375秒で、単一論理コア換算の平均
+2.498%、20論理CPU全体で0.1249%。各設定窓burst直後のUSER 16は次のsampleで14へ戻り、
+private bytesも2,109,440〜2,347,008 byteの範囲で単調増加しなかった。製品とprobeは終了0。
+測定中15:36:39.581〜15:36:47.372 JSTに別PIDのpopup単独probeを実行したため、純粋idle測定とは
+扱わない。結果は`out/window-verification/endurance-15m/results.json`。これは15分の観測であり、
+それを超える連続運転の保証ではない。
+
+hook寿命を狭める直前の同じ機能実装（SHA-256 `8B9717FE743296FCB9C192CED9A6CB9D80D541508A6B9E4A5CA5FE989F57C85E`）に
+対する次の実Windows検証は終了0。既定`full`は4モニタ、画面端・仮想画面外、
+設定窓8配置、同期通知再配置、ポップアップのWDAと背面色追従、クリップボード保全と5形式、
+設定保存・再起動、不正設定5種を含む。証拠は`out/window-verification/lens-results.json`。
+その後のhook寿命変更は、上記の最終SHA
+`7227823C13331DD1F60A6F2A53153AA397B24C1954C613C3F8C8C46E5859D85B`でポップアップ30回のWDA・閉鎖・
+資源回帰を再実行して補完した。scope変更後に既定`full`を再実行したとは扱わない。
+
+```powershell
+python -B eng/verify-window.py --suite geometry --executable build/NeNeLoupe.exe
+python -B eng/verify-window.py --executable build/NeNeLoupe.exe
+python -B out/window-verification/menu-resource-probe.py
+pwsh -NoProfile -File ./eng/check.ps1
+```
+
+最終全体ゲートは2026-09-06 15:54:31〜15:55:16 JSTに終了0。ログは
+`out/check-issue6-final.log`。Conformance違反0、Python gate tests 54/54、clean build 70/70、
+CTest 2/2、分岐111/120＝92.50%、8件の実ツール検証（既存7組とヘッダ依存実測）、
+diff checkが成功した。
+clean rebuild後のexe SHA-256は`7A0A9B2647D8D1E8485243BB54174B0E76BB85326F34EFD1C141C80A39881643`。
+最終popup回帰後にソース変更はなく、popup回帰済みexeとの差はclean rebuildによるバイナリ差である。
+設定スキーマ変更なし。Waivers: none。
+
+実OSテーマの大域切替と、実際のモニタ切断・work area変更は行っていない。system appearanceの実読込、
+単体テストのdark/light切替、実`WM_SETTINGCHANGE`による両窓再描画、synthetic通知の再配置を組み合わせて
+境界を確認した。これら大域変更を伴う2項目と15分を超える連続運転が、今回の検証上限である。

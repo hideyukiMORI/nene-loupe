@@ -533,6 +533,48 @@ def verify_settings_at_edges(window, helper, process, monitors):
     return results
 
 
+def verify_settings_notification_refit(window, process, monitors):
+    click(window, 224, 16)
+    modal = await_modal(process.pid, window)
+    owner_monitor = user.MonitorFromWindow(window, 2)
+    monitor = next(item for item in monitors if item["handle"] == owner_monitor)
+    work_left, work_top, work_right, work_bottom = monitor["work"]
+    rectangle = bounds(modal)
+    width = rectangle[2] - rectangle[0]
+    height = rectangle[3] - rectangle[1]
+    results = []
+    for message, word, name in (
+        (0x007E, 0, "WM_DISPLAYCHANGE"),
+        (0x001A, 47, "WM_SETTINGCHANGE/SPI_SETWORKAREA"),
+    ):
+        forced = [work_left + 100, work_bottom + 20,
+                  work_left + 100 + width, work_bottom + 20 + height]
+        assert user.SetWindowPos(modal, None, forced[0], forced[1], width, height, 0x14)
+        pause(0.1)
+        assert bounds(modal) == forced
+        user.SendMessageW(modal, message, word, 0)
+        _, refitted = await_stable_geometry(modal)
+        horizontal = ((width > work_right - work_left and refitted[0] == work_left)
+                      or (width <= work_right - work_left
+                          and refitted[0] >= work_left and refitted[2] <= work_right))
+        vertical = ((height > work_bottom - work_top and refitted[1] == work_top)
+                    or (height <= work_bottom - work_top
+                        and refitted[1] >= work_top and refitted[3] <= work_bottom))
+        assert horizontal and vertical, (name, forced, refitted, monitor["work"])
+        results.append({"notification": name, "forcedBounds": forced,
+                        "refittedBounds": refitted, "work": monitor["work"],
+                        "syntheticNotification": True, "placementContractPassed": True})
+    click(modal, 296, 22)
+    for _ in range(100):
+        if find_modal(process.pid, window) is None and user.IsWindowEnabled(window):
+            break
+        pause(0.03)
+    assert find_modal(process.pid, window) is None
+    assert user.IsWindowEnabled(window)
+    return {"notifications": results, "ownerReenabled": True,
+            "osDisplayOrWorkAreaChanged": False}
+
+
 def find_popup_menu(process_id):
     found = []
 
@@ -550,9 +592,22 @@ def find_popup_menu(process_id):
     return found[0] if found else None
 
 
-def verify_context_menu(window, process, monitors):
+def verify_context_menu(window, helper, process, monitors):
+    monitor = max(monitors, key=lambda item: item["work"][2])
+    work_left, work_top, work_right, work_bottom = monitor["work"]
+    center_x = work_left + (work_right - work_left) // 2
+    center_y = work_top + (work_bottom - work_top) // 2
+    move_over_fixture(window, helper, center_x, center_y)
     dpi = user.GetDpiForWindow(window)
-    point = point_parameter(round(112 * dpi / 96), round(16 * dpi / 96))
+    rectangle = bounds(window)
+    height = rectangle[3] - rectangle[1]
+    owner_x = work_right - kernel.MulDiv(150, dpi, 96)
+    owner_y = work_top + (work_bottom - work_top - height) // 2
+    move_over_fixture(window, helper, owner_x, owner_y)
+    dpi, owner_bounds = await_stable_geometry(window)
+    paint_color(helper, 0x0080FF)
+    await_caption(window, "#FF8000")
+    point = point_parameter(kernel.MulDiv(149, dpi, 96), kernel.MulDiv(16, dpi, 96))
     assert user.PostMessageW(window, 0x0205, 0, point)
     menu = None
     for _ in range(100):
@@ -562,18 +617,33 @@ def verify_context_menu(window, process, monitors):
         pause(0.02)
     assert menu, "Format popup menu did not appear"
     menu_bounds = bounds(menu)
-    owner_monitor = user.MonitorFromWindow(window, 2)
-    work = next(monitor["work"] for monitor in monitors
-                if monitor["handle"] == owner_monitor)
-    assert menu_bounds[0] >= work[0] and menu_bounds[1] >= work[1]
-    assert menu_bounds[2] <= work[2] and menu_bounds[3] <= work[3]
+    assert menu_bounds[0] >= work_left and menu_bounds[1] >= work_top
+    assert menu_bounds[2] <= work_right and menu_bounds[3] <= work_bottom
+    lens = [owner_bounds[0], owner_bounds[1],
+            owner_bounds[0] + kernel.MulDiv(64, dpi, 96),
+            owner_bounds[1] + kernel.MulDiv(64, dpi, 96)]
+    overlap = [max(lens[0], menu_bounds[0]), max(lens[1], menu_bounds[1]),
+               min(lens[2], menu_bounds[2]), min(lens[3], menu_bounds[3])]
+    assert overlap[0] < overlap[2] and overlap[1] < overlap[3], (lens, menu_bounds)
+    affinity = w.DWORD()
+    assert user.GetWindowDisplayAffinity(menu, c.byref(affinity))
+    assert affinity.value == 0x11
+    assert caption(window).endswith("#FF8000")
+    paint_color(helper, 0x00FF00)
+    await_caption(window, "#00FF00")
+    assert find_popup_menu(process.pid) == menu, "Format popup menu closed during sampling"
     assert user.PostMessageW(window, 0x001F, 0, 0)
     for _ in range(100):
         if find_popup_menu(process.pid) is None:
             break
         pause(0.02)
     assert find_popup_menu(process.pid) is None, "Format popup menu did not close"
-    return {"appeared": True, "bounds": menu_bounds, "withinOwnerMonitorWorkArea": True,
+    await_caption(window, "#00FF00")
+    return {"appeared": True, "ownerBounds": owner_bounds, "lensBounds": lens,
+            "bounds": menu_bounds, "overlapWithLens": overlap,
+            "withinOwnerMonitorWorkArea": True, "captureExclusion": affinity.value,
+            "captionBefore": "#FF8000", "captionWhileOpenAfterBackdropChange": "#00FF00",
+            "captionAfterCancel": caption(window), "continuedSamplingWhileOpen": True,
             "cancelled": True,
             "automaticPointerOrKeyboardInput": False}
 
@@ -677,7 +747,9 @@ def main():
         monitors = monitor_details()
         result["edgeSampling"] = verify_edge_sampling(window, helper, monitors)
         result["settingsAtEdges"] = verify_settings_at_edges(window, helper, process, monitors)
-        result["contextMenu"] = verify_context_menu(window, process, monitors)
+        result["settingsNotificationRefit"] = verify_settings_notification_refit(
+            window, process, monitors)
+        result["contextMenu"] = verify_context_menu(window, helper, process, monitors)
         if arguments.suite == "geometry":
             result["skippedChecks"] = [
                 "clipboard copy and restoration",

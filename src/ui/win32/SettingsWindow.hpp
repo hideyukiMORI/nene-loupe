@@ -34,6 +34,7 @@ class SettingsWindow final
     void render();
     void activate(SettingsHitArea area);
     void change_dpi(WPARAM word, LPARAM data);
+    void refit_to_current_work_area();
     HINSTANCE instance_;
     HWND owner_;
     LoupeController &controller_;
