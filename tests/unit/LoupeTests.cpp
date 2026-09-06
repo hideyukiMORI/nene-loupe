@@ -1,3 +1,4 @@
+#include "CaptureExclusion.hpp"
 #include "ColorText.hpp"
 #include "LoupeController.hpp"
 #include "PaletteRole.hpp"
@@ -231,6 +232,27 @@ void verify_hue_rounding()
             "green hue");
     require(ColorText::of(RgbColor::from_channels(0, 0, 255), ColorFormat::hsl) == "240, 100%, 50%",
             "blue hue");
+}
+
+void verify_capture_exclusion_argument()
+{
+    using neneloupe::capture_exclusion_of;
+    using neneloupe::CaptureExclusion;
+    require(capture_exclusion_of(L"") == CaptureExclusion::enabled, "no argument excludes");
+    require(capture_exclusion_of(L"   ") == CaptureExclusion::enabled, "blank argument excludes");
+    require(capture_exclusion_of(L"--allow-screen-capture") == CaptureExclusion::disabled,
+            "diagnostic argument alone");
+    require(capture_exclusion_of(L"  --allow-screen-capture  ") == CaptureExclusion::disabled,
+            "diagnostic argument with padding");
+    require(capture_exclusion_of(L"--other --allow-screen-capture") == CaptureExclusion::disabled,
+            "diagnostic argument after another");
+    require(capture_exclusion_of(L"--allow-screen-capture	--other") ==
+                CaptureExclusion::disabled,
+            "tab separated arguments");
+    require(capture_exclusion_of(L"--allow-screen-captured") == CaptureExclusion::enabled,
+            "longer word is not the argument");
+    require(capture_exclusion_of(L"allow-screen-capture") == CaptureExclusion::enabled,
+            "shorter word is not the argument");
 }
 
 void verify_format_cycle()
@@ -507,6 +529,7 @@ int main(int argc, char **argv)
     }
     verify_hue_rounding();
     verify_format_cycle();
+    verify_capture_exclusion_argument();
     verify_palette();
     verify_settings_value();
     verify_sample_rejection();

@@ -1,5 +1,6 @@
 #include "LoupeWindow.hpp"
 
+#include "CaptureExclusionStyle.hpp"
 #include "ColorText.hpp"
 #include "LoupeIconResource.h"
 #include "LoupeLayout.hpp"
@@ -35,15 +36,16 @@ bool moved_past_drag(POINT anchor, POINT current)
 }
 } // namespace
 
-LoupeWindow::LoupeWindow(HINSTANCE instance, LoupeController &controller)
-    : instance_(instance), controller_(controller)
+LoupeWindow::LoupeWindow(HINSTANCE instance, LoupeController &controller,
+                         CaptureExclusion exclusion)
+    : instance_(instance), controller_(controller), exclusion_(exclusion)
 {
 }
 
 std::expected<std::unique_ptr<LoupeWindow>, WindowFailure>
-LoupeWindow::create(HINSTANCE instance, LoupeController &controller)
+LoupeWindow::create(HINSTANCE instance, LoupeController &controller, CaptureExclusion exclusion)
 {
-    auto window = std::unique_ptr<LoupeWindow>(new LoupeWindow(instance, controller));
+    auto window = std::unique_ptr<LoupeWindow>(new LoupeWindow(instance, controller, exclusion));
     auto initialized = window->initialize();
     if (!initialized)
     {
@@ -88,7 +90,7 @@ std::expected<void, WindowFailure> LoupeWindow::initialize()
     {
         return std::unexpected(WindowFailure::creation_failed);
     }
-    if (!SetWindowDisplayAffinity(window_, WDA_EXCLUDEFROMCAPTURE))
+    if (!SetWindowDisplayAffinity(window_, CaptureExclusionStyle::affinity(exclusion_)))
     {
         return std::unexpected(WindowFailure::capture_exclusion_failed);
     }
@@ -368,7 +370,7 @@ void LoupeWindow::open_settings()
         SetForegroundWindow(settings_->handle());
         return;
     }
-    auto opened = SettingsWindow::create(instance_, window_, controller_);
+    auto opened = SettingsWindow::create(instance_, window_, controller_, exclusion_);
     if (!opened)
     {
         return;
@@ -399,7 +401,7 @@ void LoupeWindow::show_format_menu(POINT client)
     ClientToScreen(window_, &screen);
     int chosen = 0;
     {
-        auto capture_exclusion = PopupCaptureExclusion::create(window_);
+        auto capture_exclusion = PopupCaptureExclusion::create(window_, exclusion_);
         if (!capture_exclusion)
         {
             DestroyMenu(menu);

@@ -1,5 +1,10 @@
 # NeNe Loupe
 
+<p align="center">
+  <img src="docs/images/loupe-dark.png" width="240"
+       alt="The NeNe Loupe window in its dark theme: a magnified grid of colour squares with the centre pixel outlined, a green colour bar, a HEX label with a caret, a gear, and the value #33E699.">
+</p>
+
 A tiny frameless screen loupe and colour picker for Windows. C++ / Win32, no UI library.
 
 ## Download and run
@@ -25,6 +30,33 @@ The window is excluded from desktop capture to reveal its backdrop, so it will a
 from ordinary screenshots and screen sharing. HDR and ICC colour management are outside the
 specification. See [current work](docs/todo/current.md) and
 [gate proofs](docs/quality/gate-proofs.md) for measured verification boundaries.
+
+That exclusion is also why no screenshot tool can photograph this application. The pictures in
+this README are taken by `python eng/capture-readme-images.py`, which starts it with the
+documented diagnostic argument `--allow-screen-capture`, keeps a controlled backdrop over the
+loupe so the lens still reads real screen pixels rather than its own window, and photographs the
+window with `PrintWindow`. Ordinary runs take no arguments; see
+[ADR 0007](docs/adr/0007-photograph-the-loupe-for-the-readme.md).
+
+## Gallery
+
+<p align="center">
+  <img src="docs/images/loupe-light.png" width="240"
+       alt="The same window in its light theme: the magnified colour grid, the green colour bar, the HEX label and the value #33E699 on a white panel.">
+  <img src="docs/images/loupe-settings.png" width="320"
+       alt="The settings window in Japanese: theme options for dark, light and follow the system with dark selected, an always-on-top switch turned on, and the version, copyright and a note that CMYK is a naive conversion.">
+</p>
+
+<p align="center">
+  <img src="docs/images/loupe-dark-150.png" width="240"
+       alt="The dark window again, photographed on a 150% display: the same layout, drawn with more pixels.">
+</p>
+
+Every picture is of the running application on Windows 11. The window is 240×64 DIP and the
+settings window 320×392 DIP. At 125% scaling (120 DPI) that is 300×80 and 400×490 pixels; the
+last picture is the same window at 150% (144 DPI), 360×96 pixels. This machine has no 100%
+display. The lens is magnifying a 7×7 patch of screen pixels the capture script painted behind
+it, and the value is the centre pixel of that patch.
 
 ## Development
 

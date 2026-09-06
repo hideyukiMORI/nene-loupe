@@ -30,7 +30,7 @@ add_test(NAME toolchain_smoke COMMAND toolchain_smoke)
 neneloupe_target(neneloupe_core core STATIC
     src/core/RgbColor.cpp src/core/ScreenSample.cpp src/core/ScreenPosition.cpp
     src/core/ColorFormat.cpp src/core/ColorText.cpp src/core/ThemePalette.cpp
-    src/core/LoupeSettings.cpp src/core/WindowLayer.cpp)
+    src/core/LoupeSettings.cpp src/core/WindowLayer.cpp src/core/CaptureExclusion.cpp)
 neneloupe_target(neneloupe_application application STATIC
     src/application/LoupeFrame.cpp src/application/LoupeController.cpp
     src/application/SettingsFrame.cpp)
@@ -53,6 +53,7 @@ neneloupe_system_link(neneloupe_capture gdi32)
 neneloupe_system_link(neneloupe_capture advapi32)
 
 neneloupe_target(neneloupe_window ui_win32 STATIC
+    src/ui/win32/CaptureExclusionStyle.cpp
     src/ui/win32/LoupeRenderer.cpp src/ui/win32/LoupeWindow.cpp src/ui/win32/LoupeLayout.cpp
     src/ui/win32/PaletteBrush.cpp src/ui/win32/SettingsLayout.cpp
     src/ui/win32/PopupCaptureExclusion.cpp

@@ -1,5 +1,7 @@
 #include "PopupCaptureExclusion.hpp"
 
+#include "CaptureExclusionStyle.hpp"
+
 #include <array>
 #include <exception>
 
@@ -11,21 +13,26 @@ constexpr wchar_t popup_menu_class[] = L"#32768";
 }
 
 std::expected<std::unique_ptr<PopupCaptureExclusion>, PopupCaptureExclusion::Failure>
-PopupCaptureExclusion::create(HWND owner)
+PopupCaptureExclusion::create(HWND owner, CaptureExclusion exclusion)
 {
+    auto guard = std::unique_ptr<PopupCaptureExclusion>(new PopupCaptureExclusion());
+    // 除外しないと決めた起動では、メニューにも掛けない（ADR 0007）。
+    if (!CaptureExclusionStyle::excludes(exclusion))
+    {
+        return guard;
+    }
     const DWORD thread = GetWindowThreadProcessId(owner, nullptr);
     if (thread == 0)
     {
         return std::unexpected(Failure::installation_failed);
     }
-    auto exclusion = std::unique_ptr<PopupCaptureExclusion>(new PopupCaptureExclusion());
     HHOOK hook = SetWindowsHookExW(WH_CALLWNDPROC, callback, nullptr, thread);
     if (!hook)
     {
         return std::unexpected(Failure::installation_failed);
     }
-    exclusion->hook_ = hook;
-    return exclusion;
+    guard->hook_ = hook;
+    return guard;
 }
 
 PopupCaptureExclusion::PopupCaptureExclusion() noexcept = default;
