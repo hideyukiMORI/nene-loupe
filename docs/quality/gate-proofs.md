@@ -403,3 +403,19 @@ Shell抽出は32×32と16×16。隔離`LOCALAPPDATA`で短時間起動した120 
 
 最終全体ゲートとCIはIssue #13のPRを進行状態の正本として確認する。設定スキーマ変更なし。
 Waivers: none。
+
+### 13. 一体シルエットアイコン（Issue #15）
+
+採用SVGは既存4色を保ち、ルーペ中心(116,116)、外半径78、内半径48、持ち手幅30を1つの
+evenodd pathで描く。外周は角半径22、stroke 3をclipして見える幅1.5とした。SVGのSHA-256は
+`2B9F0B6C72B6C518FFE0725566F33F59CFBE05BCA2DCD1AED3F0AB52D627A7A3`、2回生成して一致したICOは
+`02035547F9C94FA68961F82A4E54DF0C1CF751E62900FA22DA999F7A04D0C22E`。
+
+ICOは16/20/24/32/48/64/128/256pxの8件、32-bit RGBAで既存alpha契約を満たした。隔離buildは
+71/71、conformance 0。exeはICON 8、GROUP_ICON 1、manifest 1を持つ。Shell抽出は32×32と16×16。
+隔離`LOCALAPPDATA`の120 DPI窓でクラスHICONは40×40と20×20、終了0、foreground復元に成功した。
+結果は`out/icon-design-polish/ico-verification.json`と`out/icon-design-polish/win32-results.json`、
+実HICON明暗描画は`out/icon-design-polish/win32-icon-preview.png`。
+
+最終全体ゲートとCIはIssue #15のPRを進行状態の正本として確認する。設定スキーマ変更なし。
+Waivers: none。

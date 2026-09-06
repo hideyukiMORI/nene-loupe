@@ -1,28 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
   <title>NeNe Loupe application icon</title>
-  <desc>A solid charcoal loupe pictogram - thicker ring and handle, larger footprint - over a full-bleed 2x2 colour checker inherited from the NENE-PIXEL launcher icon.</desc>
-
-  <!-- 背景: 現行を継承。4マス全面、gutter なし、外周だけ小角丸 (r=20 / 7.8%)。 -->
-  <clipPath id="tile">
-    <rect x="0" y="0" width="256" height="256" rx="20" ry="20"/>
-  </clipPath>
-  <g clip-path="url(#tile)">
-    <rect x="0"   y="0"   width="128" height="128" fill="#F5F5F4"/>
-    <rect x="128" y="0"   width="128" height="128" fill="#F97316"/>
-    <rect x="0"   y="128" width="128" height="128" fill="#14B8A6"/>
+  <desc>Unified solid-charcoal loupe over the NENE-PIXEL 2x2 colour checker, with a light 1.5-unit visible outer edge.</desc>
+  <clipPath id="tileB"><rect width="256" height="256" rx="22"/></clipPath>
+  <g clip-path="url(#tileB)">
+    <rect width="128" height="128" fill="#F5F5F4"/>
+    <rect x="128" width="128" height="128" fill="#F97316"/>
+    <rect y="128" width="128" height="128" fill="#14B8A6"/>
     <rect x="128" y="128" width="128" height="128" fill="#F5F5F4"/>
-    <!-- 明タスクバーで外形を保つ単色ヘアライン。色は前景と同じ #18181B、可視幅 5 単位 (2.0%) -->
-    <rect x="0" y="0" width="256" height="256" rx="20" ry="20"
-          fill="none" stroke="#18181B" stroke-width="10"/>
+    <rect width="256" height="256" rx="22" fill="none" stroke="#18181B" stroke-width="3"/>
   </g>
-
-  <!-- 前景: 単色 #18181B のみ。ベタ塗り。
-       ring   中心 (105,105) / r60 / sw30  -> 外径 150、内径 90
-       handle 45度でリング中心を通る軸、sw36、始点はリング帯の内側 (中心から 69.3)
-       round cap を含む外形バウンディングは 30..231、数学中心は 130.5。
-       橙の右上マスと右下へ伸びる柄を含む光学的な重心で配置した。 -->
-  <g fill="none" stroke="#18181B" stroke-linecap="round">
-    <path d="M154 154L213 213" stroke-width="36"/>
-    <circle cx="105" cy="105" r="60" stroke-width="30"/>
-  </g>
+  <!-- Ring and handle form one continuous solid silhouette. Placement is optically balanced against the 2x2 crossing. -->
+  <path fill="#18181B" fill-rule="evenodd" d="
+    M185.21 163.99 L214.99 193.77 A5 5 0 0 1 214.99 200.85
+    L200.85 214.99 A5 5 0 0 1 193.77 214.99 L163.99 185.21
+    A8 8 0 0 0 154.40 183.90 A78 78 0 1 1 183.90 154.40
+    A8 8 0 0 0 185.21 163.99 Z
+    M164 116 A48 48 0 1 0 68 116 A48 48 0 1 0 164 116 Z"/>
 </svg>
