@@ -8,6 +8,10 @@ $installation = & $vswhere -latest -products '*' -requires Microsoft.VisualStudi
 if ($LASTEXITCODE -ne 0 -or -not $installation) { throw 'QLT-011: MSVC was not found.' }
 Import-Module (Join-Path $installation 'Common7/Tools/Microsoft.VisualStudio.DevShell.dll')
 Enter-VsDevShell -VsInstallPath $installation -SkipAutomaticLocation -DevCmdArguments "-arch=amd64 -host_arch=amd64 -vcvars_ver=$($versions.msvcToolset)" | Out-Null
+$utf8Encoding = [Text.UTF8Encoding]::new($false)
+[Console]::InputEncoding = $utf8Encoding
+[Console]::OutputEncoding = $utf8Encoding
+$OutputEncoding = $utf8Encoding
 $toolDirectories = @(
     (Join-Path $installation 'VC/Tools/Llvm/x64/bin'),
     (Join-Path $installation 'Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin'),
