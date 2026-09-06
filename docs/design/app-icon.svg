@@ -1,22 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
   <title>NeNe Loupe application icon</title>
-  <desc>A screen loupe with a central colour sample surrounded by eight soft pixels.</desc>
-  <!-- Pale separation strokes keep the silhouette legible on dark taskbars. -->
-  <path d="M169 167L221 219" fill="none" stroke="#C6D3D8" stroke-width="35" stroke-linecap="round"/>
-  <path d="M169 167L221 219" fill="none" stroke="#283747" stroke-width="29" stroke-linecap="round"/>
+  <desc>A solid charcoal loupe pictogram — thick ring and handle — over a full-bleed 2x2 colour checker inherited from the NENE-PIXEL launcher icon.</desc>
 
-  <circle cx="108" cy="106" r="72" fill="none" stroke="#C6D3D8" stroke-width="22"/>
-  <circle cx="108" cy="106" r="72" fill="#D9EEEC" stroke="#283747" stroke-width="16"/>
-  <circle cx="108" cy="106" r="61" fill="none" stroke="#F7F5EF" stroke-width="4"/>
+  <!-- 背景: 4マスを全面に広げる。gutter なし。外周だけ小角丸 (r=20 / 7.8%)。 -->
+  <clipPath id="tile">
+    <rect x="0" y="0" width="256" height="256" rx="20" ry="20"/>
+  </clipPath>
+  <g clip-path="url(#tile)">
+    <rect x="0"   y="0"   width="128" height="128" fill="#F5F5F4"/>
+    <rect x="128" y="0"   width="128" height="128" fill="#F97316"/>
+    <rect x="0"   y="128" width="128" height="128" fill="#14B8A6"/>
+    <rect x="128" y="128" width="128" height="128" fill="#F5F5F4"/>
+    <!-- 明タスクバーで外形を保つ単色ヘアライン。色は前景と同じ #18181B、可視幅 5 単位 (2.0%) -->
+    <rect x="0" y="0" width="256" height="256" rx="20" ry="20"
+          fill="none" stroke="#18181B" stroke-width="10"/>
+  </g>
 
-  <!-- 74px symmetric mosaic: 18px outer cells, 32px centre, 3px gaps. -->
-  <rect x="71" y="69" width="18" height="18" rx="2" fill="#B6DDD6"/>
-  <rect x="99" y="69" width="18" height="18" rx="2" fill="#A8D5D0"/>
-  <rect x="127" y="69" width="18" height="18" rx="2" fill="#C1E2DB"/>
-  <rect x="71" y="97" width="18" height="18" rx="2" fill="#A8D5D0"/>
-  <rect x="92" y="90" width="32" height="32" rx="3" fill="#EF856E"/>
-  <rect x="127" y="97" width="18" height="18" rx="2" fill="#B6DDD6"/>
-  <rect x="71" y="125" width="18" height="18" rx="2" fill="#C1E2DB"/>
-  <rect x="99" y="125" width="18" height="18" rx="2" fill="#B6DDD6"/>
-  <rect x="127" y="125" width="18" height="18" rx="2" fill="#A8D5D0"/>
+  <!-- 前景: 単色 #18181B のみ。太いリング + 太めハンドル。レンズ穴から4マスが見える。 -->
+  <g fill="none" stroke="#18181B" stroke-linecap="round">
+    <path d="M155 155L208 208" stroke-width="30"/>
+    <circle cx="108" cy="108" r="58" stroke-width="24"/>
+  </g>
 </svg>
