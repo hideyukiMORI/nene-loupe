@@ -328,3 +328,32 @@ clean rebuild後のexe SHA-256は`7A0A9B2647D8D1E8485243BB54174B0E76BB85326F34EF
 実OSテーマの大域切替と、実際のモニタ切断・work area変更は行っていない。system appearanceの実読込、
 単体テストのdark/light切替、実`WM_SETTINGCHANGE`による両窓再描画、synthetic通知の再配置を組み合わせて
 境界を確認した。これら大域変更を伴う2項目と15分を超える連続運転が、今回の検証上限である。
+
+### 10. アプリアイコン（Issue #9）
+
+変更前の`build/NeNeLoupe.exe`を`llvm-readobj --coff-resources`で調べるとmanifest 1件だけで、
+ICONとGROUP_ICONは無かった。起動中PID 34232の`NeNeLoupe.Window`も`GCLP_HICON`と
+`GCLP_HICONSM`がともに0だった。
+
+採用SVGから16、20、24、32、48、64、128、256pxを個別に透明RGBA描画した。generatorを3回実行し、
+ICOのSHA-256が毎回`D6DD319A1B69C2CAB103F1A2CEF5D2B5667AC4DACB7FF50121148BADE22960E5`に
+一致した。全8画像は32-bitとalpha範囲0〜255を持ち、16〜128pxはDIB、256pxはPNGである。
+
+起動中の旧exeを維持したまま、`out/build-icon`へ隔離buildした。RCを含む71/71とbuild graphの
+conformance違反0を確認した。新exeはICON 8件、GROUP_ICON 1件、manifest 1件を持つ。
+`ExtractIconExW`によるShell抽出はlarge 32×32、small 16×16だった。新exeを短時間実行した
+120 DPIの窓ではクラスアイコンがlarge 40×40、small 20×20で`GetSystemMetricsForDpi`の期待値と
+一致し、製品は終了0、元のforegroundも復元した。取得したHICONを`DrawIconEx`で明暗背景へ描いた
+結果は`out/icon-design/win32-icon-preview.png`。
+
+```powershell
+python -B eng/render-app-icon.py --chrome "C:\Program Files\Google\Chrome\Application\chrome.exe"
+cmake --fresh -S . -B out/build-icon -G Ninja -DCMAKE_BUILD_TYPE=Debug
+cmake --build out/build-icon --clean-first
+python -B eng/conformance.py --build-dir out/build-icon
+python -B eng/verify-window.py --executable out/build-icon/NeNeLoupe.exe
+```
+
+最後の実Windows fullは終了0で、4モニタ、画面端、設定窓、popup、全5形式のコピー、設定保存と
+不正設定拒否を含む。スタートアップ登録やショートカット生成は検証対象ではなく、実装もしていない。
+設定スキーマ変更なし。Waivers: none。

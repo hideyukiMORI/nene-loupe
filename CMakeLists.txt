@@ -56,7 +56,8 @@ neneloupe_link(neneloupe_window neneloupe_application)
 neneloupe_system_link(neneloupe_window user32)
 neneloupe_system_link(neneloupe_window gdi32)
 
-neneloupe_target(NeNeLoupe app EXECUTABLE src/app/Main.cpp src/app/NeNeLoupe.manifest)
+neneloupe_target(NeNeLoupe app EXECUTABLE src/app/Main.cpp src/app/NeNeLoupe.manifest
+    src/app/NeNeLoupe.rc)
 neneloupe_link(NeNeLoupe neneloupe_core)
 neneloupe_link(NeNeLoupe neneloupe_application)
 neneloupe_link(NeNeLoupe neneloupe_capture)

@@ -1,6 +1,7 @@
 #include "LoupeWindow.hpp"
 
 #include "ColorText.hpp"
+#include "LoupeIconResource.h"
 #include "LoupeLayout.hpp"
 #include "LoupeRenderer.hpp"
 #include "PopupCaptureExclusion.hpp"
@@ -53,12 +54,29 @@ LoupeWindow::create(HINSTANCE instance, LoupeController &controller)
 
 std::expected<void, WindowFailure> LoupeWindow::initialize()
 {
-    WNDCLASSW registration{};
+    large_icon_ = reinterpret_cast<HICON>(
+        LoadImageW(instance_, MAKEINTRESOURCEW(NENELOUPE_ICON_RESOURCE), IMAGE_ICON,
+                   GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON), LR_DEFAULTCOLOR));
+    if (!large_icon_)
+    {
+        return std::unexpected(WindowFailure::icon_loading_failed);
+    }
+    small_icon_ = reinterpret_cast<HICON>(
+        LoadImageW(instance_, MAKEINTRESOURCEW(NENELOUPE_ICON_RESOURCE), IMAGE_ICON,
+                   GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR));
+    if (!small_icon_)
+    {
+        return std::unexpected(WindowFailure::icon_loading_failed);
+    }
+    WNDCLASSEXW registration{};
+    registration.cbSize = sizeof(registration);
     registration.hInstance = instance_;
     registration.lpfnWndProc = procedure;
     registration.lpszClassName = class_name;
     registration.hCursor = LoadCursorW(nullptr, IDC_ARROW);
-    class_ = RegisterClassW(&registration);
+    registration.hIcon = large_icon_;
+    registration.hIconSm = small_icon_;
+    class_ = RegisterClassExW(&registration);
     if (!class_)
     {
         return std::unexpected(WindowFailure::registration_failed);
@@ -97,6 +115,14 @@ LoupeWindow::~LoupeWindow()
     if (class_)
     {
         UnregisterClassW(class_name, instance_);
+    }
+    if (small_icon_)
+    {
+        DestroyIcon(small_icon_);
+    }
+    if (large_icon_)
+    {
+        DestroyIcon(large_icon_);
     }
 }
 

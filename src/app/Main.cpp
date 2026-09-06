@@ -12,6 +12,8 @@ const wchar_t *reason_of(neneloupe::WindowFailure failure)
 {
     switch (failure)
     {
+    case neneloupe::WindowFailure::icon_loading_failed:
+        return L"アプリケーションアイコンを読み込めませんでした。";
     case neneloupe::WindowFailure::registration_failed:
         return L"ウィンドウクラスを登録できませんでした。";
     case neneloupe::WindowFailure::creation_failed:

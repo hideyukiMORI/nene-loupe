@@ -1,0 +1,3 @@
+#include "../ui/win32/LoupeIconResource.h"
+
+NENELOUPE_ICON_RESOURCE ICON "NeNeLoupe.ico"
