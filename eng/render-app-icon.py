@@ -38,9 +38,12 @@ def dib_frame(image: Image.Image) -> bytes:
 def render(chrome: Path, source: Path, directory: Path, size: int) -> Path:
     svg = source.read_text(encoding="utf-8")
     dimensions = 'width="256" height="256"'
-    if svg.count(dimensions) != 1:
+    root_start = svg.find("<svg")
+    root_end = svg.find(">", root_start)
+    if root_start < 0 or root_end < 0 or svg[root_start:root_end].count(dimensions) != 1:
         raise ValueError("accepted SVG must have one 256 by 256 root dimension")
-    svg = svg.replace(dimensions, f'width="{size}" height="{size}"')
+    root = svg[root_start:root_end].replace(dimensions, f'width="{size}" height="{size}"')
+    svg = svg[:root_start] + root + svg[root_end:]
     sized_source = directory / f"app-icon-{size}.svg"
     image = directory / f"app-icon-{size}.png"
     sized_source.write_text(svg, encoding="utf-8")
@@ -71,8 +74,9 @@ def make_icon(images: list[Path]) -> bytes:
         with Image.open(path) as image:
             if image.size != (size, size) or image.mode != "RGBA":
                 raise ValueError(f"unexpected render: {path} {image.size} {image.mode}")
-            if image.getchannel("A").getextrema() != (0, 255):
-                raise ValueError(f"render lacks full alpha range: {path}")
+            minimum_alpha, maximum_alpha = image.getchannel("A").getextrema()
+            if minimum_alpha >= 255 or maximum_alpha != 255:
+                raise ValueError(f"render lacks translucent and opaque pixels: {path}")
             frames.append(path.read_bytes() if size == 256 else dib_frame(image))
     offset = 6 + 16 * len(frames)
     entries = []

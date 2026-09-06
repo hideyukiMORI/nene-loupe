@@ -357,3 +357,32 @@ python -B eng/verify-window.py --executable out/build-icon/NeNeLoupe.exe
 最後の実Windows fullは終了0で、4モニタ、画面端、設定窓、popup、全5形式のコピー、設定保存と
 不正設定拒否を含む。スタートアップ登録やショートカット生成は検証対象ではなく、実装もしていない。
 設定スキーマ変更なし。Waivers: none。
+
+### 11. アイコン改訂（Issue #11）
+
+採用SVGは全面の角丸2×2市松模様と、単色charcoalのルーペで構成する。root `svg`要素の寸法だけを
+16、20、24、32、48、64、128、256pxへ変えて個別描画し、内側の背景rectは256 SVG unitを維持した。
+同じSVGから2回生成したICOはSHA-256
+`AF697DD19CDED727654E9CCD319DDBF7B510781B316EDE782D8B0BE090E0EA23`で一致した。
+SVGは`8DF19F2CDD5217AA177E32923C91E5AE03AD4EE85B29B8ED3772404347330A4A`。
+
+8画像は32-bit RGBAで、16〜128pxはDIB、256pxはPNG。alpha範囲は16px 202〜255、20px 157〜255、
+24px 137〜255、32px 70〜255、48/64/128/256px 0〜255だった。全面背景の小さい角では
+anti-aliasingによりalpha 0が無いことが正常であるため、最小値255未満かつ最大値255を契約とする。
+証拠は`out/icon-design-revision/ico-verification.json`。
+
+隔離した`out/build-icon-revision`はRCを含む71/71で、build graphのconformance違反0。exeはICON 8件、
+GROUP_ICON 1件、manifest 1件を持つ。Shell抽出はlarge 32×32、small 16×16。隔離`LOCALAPPDATA`で
+短時間起動した120 DPIの窓ではクラスHICONが40×40と20×20で期待寸法と一致し、終了0、foreground復元に
+成功した。結果は`out/icon-design-revision/win32-results.json`、実HICONの明暗描画は
+`out/icon-design-revision/win32-icon-preview.png`。
+
+```powershell
+python -B eng/render-app-icon.py --chrome "C:\Program Files\Google\Chrome\Application\chrome.exe"
+cmake --fresh -S . -B out/build-icon-revision -G Ninja -DCMAKE_BUILD_TYPE=Debug
+cmake --build out/build-icon-revision --clean-first
+python -B eng/conformance.py --build-dir out/build-icon-revision
+```
+
+最終全体ゲートとCIはIssue #11のPRを進行状態の正本として確認する。設定スキーマ変更なし。
+Waivers: none。
