@@ -82,8 +82,11 @@ CI で必要なゲートは、すべてローカルで実行できる。検査�
 ### QLT-011 — 依存は再現可能
 
 依存の版は 1 か所にだけ書き、lock ファイルのドリフトはビルドを落とす。
+MSVC の `/showIncludes` は実際の出力と CMake / Ninja の検出 prefix を一致させ、
+公開ヘッダだけを変更した差分ビルドで必要な翻訳単位が再コンパイルされなければならない。
 
-- 機械強制: **planned**
+- 機械強制: **planned** → `eng/toolchain.ps1` / `eng/prove-gates.py`。道具の版と
+  ヘッダ差分依存は実測するが、Windows SDK 全体の固定は未完了
 
 ### QLT-012 — 検証の頻度は変更に従う
 
@@ -216,7 +219,7 @@ CNF-006 が「本文に定義があるのにここに行が無い」を拒否す
 | QLT-008 | planned | レビュー事項 |
 | QLT-009 | active | LLVM計装・llvm-cov・eng/coverage.py、実プロファイルの反例 |
 | QLT-010 | 不能 | PR の手続き |
-| QLT-011 | planned | |
+| QLT-011 | planned | eng/toolchain.ps1 / eng/prove-gates.py（SDK全体の固定は未完了） |
 | QLT-012 | planned | |
 | QLT-013 | planned | |
 | CNF-001 | planned | eng/conformance.py / tests/conformance |

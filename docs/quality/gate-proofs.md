@@ -1,7 +1,7 @@
 # ゲート発火の証明 — NeNe Loupe
 
-> 記録: 2026-09-06 / Issue #1・#3。以下は実行した結果のみ。
-> 関連: QLT-007 / QLT-013 / ADR 0003
+> 記録: 2026-09-06 / Issue #1・#3・#5。以下は実行した結果のみ。
+> 関連: QLT-007 / QLT-011 / QLT-013 / ADR 0003
 
 ## 1. 環境と範囲
 
@@ -29,6 +29,7 @@ Issue #1時点では製品コードは0。Issue #3の製品・表示確認は第
 | CPP-002 | 同じビルド経路の分岐漏れをC4062で拒否。元のソースは成功 |
 | CPP-003 | メソッドを持つ公開メンバーをclang-tidyで拒否。aggregateだけの場合は漏れる |
 | CPP-012 | 5引数をreadability-function-sizeで拒否。元のソースは成功 |
+| QLT-007 / QLT-011 | 実MSVCの`/showIncludes`とCMake/Ninjaのprefix一致を検査。公開ヘッダだけのABI変更で関連3翻訳単位を再コンパイルし、無関係な1翻訳単位を再コンパイルせず、リンクと実行に成功 |
 | CNF-001 | 禁止型名・別名・モジュール名を拒否。普通の型名は通る |
 | CNF-002 | 複数型とファイル名不一致を拒否。主要宣言の完全な分類は未完了 |
 | CNF-003 | waiverなし・Scope違い・ファイル単位の抑制を拒否。有効な行単位waiverは通る |
@@ -46,7 +47,8 @@ pwsh -NoProfile -File ./eng/check.ps1
 ```
 
 Phase 0の19結果は [phase0-results.json](phase0-results.json)。
-実ツールの7反例と復帰結果はフルゲートから実行し、`out/proofs/results.json`に出力する。
+実ツールの7反例と復帰結果、ヘッダ差分依存の実測はフルゲートから実行し、
+`out/proofs/results.json`に出力する。
 反例は`out/proofs/`以下の使い捨てプロジェクトへ入れ、本体のソースは変更しない。
 検査器の正例・反例はフルゲートから常に呼ぶ。
 ローカルの単一ゲートは2026-09-06に終了コード0を確認した。
@@ -127,3 +129,30 @@ GDI資源の安定値は3秒前後で8→8、Escメッセージで終了コー�
 同じ中核ソースの計測は11/12分岐＝91.67%、反例は8.33%でQLT-009となった。
 位置の受け渡し・負の座標・位置未取得時に取得しないこと・位置エラーからの復帰を単体テストした。
 画面端・長時間の性能・HDR/ICCは未確認。コピー・形式切替・設定・保存は未実装。
+
+## 8. MSVCのヘッダ差分依存（Issue #5）
+
+固定したMSVC 19.44.35228の`cl /showIncludes`を`VSLANG=1033`と`1041`で直接実行した。
+この端末の固定toolsetに存在する`clui.dll`は`1041`（日本語）だけで、`1033`（英語）は無い。
+両方の`VSLANG`で実際の出力はUTF-8の`メモ: インクルード ファイル:  `だった。
+`VSLANG=1033`だけを根拠に英語版を実測したとは扱わない。
+
+修正前はconsole code page 932でCMakeの検出prefixが文字化けし、同じprefixが`rules.ninja`へ渡り、
+`ninja -t deps`は全objectを`#deps 0`と報告した。console入出力をUTF-8へ固定してから
+新しい子`pwsh -NonInteractive`で構成すると、子プロセスのcode pageは65001、CMakeとNinjaの
+prefixは実出力と一致し、fixtureの4 objectは期待する1件または2件のヘッダ依存を保持した。
+
+`eng/prove-gates.py`はこの実MSVC/CMake/Ninja経路を毎回検査する。fixtureの公開ヘッダだけで
+関数引数のaliasを`int`から`long long`へ変え、`consumer_a.cpp`、`consumer_b.cpp`、
+`provider.cpp`のobjectが変わり、公開ヘッダを含まない`main.cpp`のobjectが変わらないことを
+更新時刻とSHA-256で確認した。その後のリンクとexe実行は終了コード0で、依存表も維持された。
+fixtureの`rules.ninja`だけを、日本語の実prefixをUTF-8のbyte列としてCP932で誤復号した
+合成prefixへ置き換えた反例は、初回ビルドに成功しても4 objectすべての依存が0件となった。
+正しいprefixへ復帰した上記の差分ビルドは成功した。
+この変更を含む`python eng/prove-gates.py`単独実行は終了コード0。
+`pwsh -NoProfile -File ./eng/check.ps1`も終了コード0で、検査器54件、CTest 2件、
+11/12分岐（91.67%）、実ツール7反例と復帰、ヘッダ差分依存のproofを実行した。
+
+英語resourceを持つMSVCでの実出力はこの端末では採取できない。prefixを言語別に決め打ちせず、
+実際の`cl`出力、CMakeの検出値、Ninjaの値を照合する同じproofを英語CIでも実行する。
+CIの結果を取得するまでは英語環境の成功を未確認として扱う。Waivers: none。
