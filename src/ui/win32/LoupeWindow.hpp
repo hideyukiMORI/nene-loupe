@@ -46,6 +46,8 @@ class LoupeWindow final
     std::wstring title_;
     HWND window_ = nullptr;
     ATOM class_ = 0;
+    HICON large_icon_ = nullptr;
+    HICON small_icon_ = nullptr;
     UINT dpi_ = 96;
     LoupeHitArea pressed_ = LoupeHitArea::none;
     LoupeHitArea hover_ = LoupeHitArea::none;
