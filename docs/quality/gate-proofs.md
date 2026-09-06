@@ -153,3 +153,72 @@ CTest 2/2、分岐111/120＝92.50%、不足実行18.33%をQLT-009で拒否、実
 GDI rendererのダーク／ライト・コピー成否・設定失敗の画像を確認した。これらは全体ゲートの代替ではない。
 手動の操作感、右クリックメニュー、フォーカスの詳細、OSテーマ変更追従、画面端、長時間性能は未確認。
 HDR/ICCは仕様対象外。Waivers: none。
+
+### 8.1 レビュー後のUI修正と画面端回帰
+
+同日の再開後、Issue #6 / ADR 0006の実装を静的レビューし、次を修正した。
+
+- 操作領域からドラッグへ移る`WM_NCLBUTTONDOWN`に、開始点のスクリーン座標を渡す。
+- 設定窓のタイトル帯だけを`HTCAPTION`、操作領域を`HTCLIENT`として扱う。
+- 設定窓をownerのモニタとDPIで生成し、初期配置と`WM_DPICHANGED`の双方を同じwork areaへの
+  配置経路へ通す。
+- `WM_SETTINGCHANGE`でルーペと開いている設定窓の両方を再描画する。
+- 形式メニューの現在値を通常のチェックではなく、単一選択のラジオ印で示す。
+
+設定窓の旧配置は、モニタ移動後にDPIで拡大した最終寸法を再クランプしなかった。
+旧exe（SHA-256 `4454C6D6C8A39C679B5D0645CEFE27C49C7315304DA4DA1E9BB54AA8099AB02B`）へ
+次を実行すると終了1となった。
+
+```powershell
+python -B eng/verify-window.py --suite geometry --executable out/window-verification/runtime-diagnostics/NeNeLoupe-runtime.exe
+```
+
+144 DPIモニタのwork area `[-3840, 0, 0, 2160]`でownerを右下
+`[-360, 2064, 0, 2160]`へ置くと、設定窓は`[-400, 1670, 80, 2258]`となり右・下へはみ出した。
+修正版exe（SHA-256 `38B2393257EFD509379C26B590811892FC6AAEAAD1BD6BDBF4EF4AD17E81698A`）では
+同じgeometry suiteが終了0となった。
+
+`eng/verify-window.py`は既定の`full`と、クリップボードを扱わない`geometry`を明示選択できる。
+両suiteは、従来の4モニタ検証に加え、次を共通で実測する。
+
+- 4モニタの物理的な左右端に採取中心を置き、既知の中心色が一致すること。
+- 採取中心を仮想デスクトップ外へ出すと、古い色を残さず「画面取得不可」になること。
+- 各モニタのwork area左上・右下、計8配置で、設定窓の最終DPI寸法と配置、取り込み除外17、
+  ×のヒット領域による閉じる操作、ownerの再有効化を確認すること。
+- 右クリックの形式メニューが現れ、ownerモニタのwork area内に収まり、安全に閉じられること。
+
+`geometry`はクリップボードの退避・コピー、設定変更と保存、再起動復元、不正設定拒否を実行せず、
+JSONの`suite`と`skippedChecks`へ明記する。既定の`full`はgeometryを含む上位集合である。
+最終ビルドに対する次の既定コマンドは終了0となり、5形式の実クリップボード、設定保存、再起動復元、
+不正設定5種まで成功した。結果は`out/window-verification/lens-results.json`、geometryだけの結果は
+`out/window-verification/geometry-results.json`にある。
+
+```powershell
+python -B eng/verify-window.py
+```
+
+最初の再実行では、クリップボードに`GlobalSize`で安全に退避できない
+`EnterpriseDataProtectionId`形式があり、`ClipboardSnapshot`が変更前に終了1で停止した。
+これは製品のコピー失敗ではない。後の再実行時には全形式を安全に退避でき、値検証後の復元を含めて
+既定`full`が終了0となった。安全停止の条件は緩めていない。
+
+### 8.2 5分間の資源測定
+
+上記旧exeの専用コピーと隔離した`LOCALAPPDATA`だけを使い、300秒間、30秒ごとに資源を測定した。
+CPU時間は合計6.0625秒で、単一論理コア換算の平均は約2.0%、20論理CPU全体では約0.10%。
+GDI objectは11→11で変化しなかった。150秒時点で`WM_SETTINGCHANGE`を1回送った後、
+USER objectは14→16、handleは136→159、working setは+2,416,640 byte、private bytesは
++258,048 byteへ一段増え、その後120秒はUSER objectとhandleが横ばいだった。
+結果は`out/window-verification/runtime-diagnostics/endurance-results.json`。
+
+この測定が示すのは旧exeの5分間と通知後120秒の範囲だけであり、長時間リークが無いことの保証ではない。
+実ポインタ・実キーボード、利用者のOSテーマ設定は変更していない。Aero Snapを含む実ドラッグ、
+OSテーマを実際に切り替えた追従、実フォーカス復帰、長時間の連続運転は引き続き手動確認が必要である。
+今回の修正後に次の全体ゲートを実行し、終了0となった。ログは`out/check-issue6.log`。
+
+```powershell
+pwsh -NoProfile -File ./eng/check.ps1
+```
+
+Conformance違反0、Python gate tests 54/54、clean build 68/68、CTest 2/2、分岐111/120＝92.50%、
+実ツールによる反例・復帰7組が成功した。設定スキーマ変更なし。Waivers: none。

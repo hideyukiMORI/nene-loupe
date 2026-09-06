@@ -5,6 +5,7 @@
 #include "LoupeRenderer.hpp"
 #include "WindowLayerStyle.hpp"
 
+#include <algorithm>
 #include <array>
 #include <windowsx.h>
 
@@ -191,7 +192,7 @@ LRESULT LoupeWindow::on_mouse(UINT message, LPARAM data)
         {
             pressed_ = LoupeHitArea::none;
             ReleaseCapture();
-            SendMessageW(window_, WM_NCLBUTTONDOWN, HTCAPTION, 0);
+            begin_caption_drag(point);
             return 0;
         }
         track_hover(point);
@@ -204,6 +205,15 @@ LRESULT LoupeWindow::on_mouse(UINT message, LPARAM data)
     }
     pressed_ = LoupeHitArea::none;
     return 0;
+}
+
+void LoupeWindow::begin_caption_drag(POINT point)
+{
+    if (!ClientToScreen(window_, &point))
+    {
+        return;
+    }
+    SendMessageW(window_, WM_NCLBUTTONDOWN, HTCAPTION, MAKELPARAM(point.x, point.y));
 }
 
 LRESULT LoupeWindow::dispatch(UINT message, WPARAM word, LPARAM data)
@@ -242,6 +252,10 @@ LRESULT LoupeWindow::dispatch(UINT message, WPARAM word, LPARAM data)
     case WM_SETTINGCHANGE:
         controller_.refresh_appearance();
         InvalidateRect(window_, nullptr, FALSE);
+        if (settings_ && settings_->is_open())
+        {
+            InvalidateRect(settings_->handle(), nullptr, FALSE);
+        }
         return 0;
     case WM_KEYDOWN:
         if (word == VK_ESCAPE)
@@ -348,10 +362,12 @@ void LoupeWindow::show_format_menu(POINT client)
     }
     for (std::size_t index = 0; index < menu_formats.size(); ++index)
     {
-        const auto flags = static_cast<UINT>(
-            MF_STRING | (menu_formats[index] == controller_.format() ? MF_CHECKED : MF_UNCHECKED));
-        AppendMenuW(menu, flags, index + 1, widen(ColorText::label(menu_formats[index])).c_str());
+        AppendMenuW(menu, MF_STRING, index + 1,
+                    widen(ColorText::label(menu_formats[index])).c_str());
     }
+    const auto selected = std::find(menu_formats.begin(), menu_formats.end(), controller_.format());
+    CheckMenuRadioItem(menu, 1, static_cast<UINT>(menu_formats.size()),
+                       static_cast<UINT>(selected - menu_formats.begin() + 1), MF_BYCOMMAND);
     POINT screen = client;
     ClientToScreen(window_, &screen);
     const auto chosen = TrackPopupMenu(menu, TPM_RETURNCMD | TPM_RIGHTBUTTON, screen.x, screen.y, 0,

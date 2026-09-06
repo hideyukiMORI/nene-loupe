@@ -25,9 +25,12 @@ class SettingsWindow final
   private:
     SettingsWindow(HINSTANCE instance, HWND owner, LoupeController &controller);
     std::expected<void, WindowFailure> initialize();
-    void place();
+    RECT centered_on_owner() const;
+    RECT fit_to_work_area(RECT desired, HMONITOR monitor) const;
+    void place(RECT desired, HMONITOR monitor);
     static LRESULT CALLBACK procedure(HWND window, UINT message, WPARAM word, LPARAM data) noexcept;
     LRESULT dispatch(UINT message, WPARAM word, LPARAM data);
+    LRESULT hit_result(LPARAM data) const;
     void render();
     void activate(SettingsHitArea area);
     void change_dpi(WPARAM word, LPARAM data);

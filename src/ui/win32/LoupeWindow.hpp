@@ -31,6 +31,7 @@ class LoupeWindow final
     LRESULT on_mouse(UINT message, LPARAM data);
     LRESULT hit_result(LPARAM data) const;
     bool controls_enabled() const;
+    void begin_caption_drag(POINT point);
     void track_hover(POINT point);
     void render();
     void refresh();

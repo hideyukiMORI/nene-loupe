@@ -48,6 +48,7 @@ api(user, "PeekMessageW", w.BOOL, c.POINTER(w.MSG), w.HWND, w.UINT, w.UINT, w.UI
 api(user, "TranslateMessage", w.BOOL, c.POINTER(w.MSG))
 api(user, "DispatchMessageW", c.c_ssize_t, c.POINTER(w.MSG))
 api(user, "GetDpiForWindow", w.UINT, w.HWND)
+api(user, "MonitorFromWindow", w.HANDLE, w.HWND, w.DWORD)
 api(user, "SetWindowPos", w.BOOL, w.HWND, w.HWND, c.c_int, c.c_int, c.c_int, c.c_int, w.UINT)
 api(user, "SendMessageW", c.c_ssize_t, w.HWND, w.UINT, w.WPARAM, w.LPARAM)
 api(user, "PostMessageW", w.BOOL, w.HWND, w.UINT, w.WPARAM, w.LPARAM)
@@ -77,11 +78,23 @@ api(kernel, "GlobalLock", w.LPVOID, w.HGLOBAL)
 api(kernel, "GlobalUnlock", w.BOOL, w.HGLOBAL)
 api(kernel, "GlobalSize", c.c_size_t, w.HGLOBAL)
 api(kernel, "GlobalFree", w.HGLOBAL, w.HGLOBAL)
+api(kernel, "MulDiv", c.c_int, c.c_int, c.c_int, c.c_int)
 monitor_callback = c.WINFUNCTYPE(w.BOOL, w.HANDLE, w.HDC, c.POINTER(w.RECT), w.LPARAM)
 api(user, "EnumDisplayMonitors", w.BOOL, w.HDC, c.POINTER(w.RECT), monitor_callback, w.LPARAM)
 enum_window_callback = c.WINFUNCTYPE(w.BOOL, w.HWND, w.LPARAM)
 api(user, "EnumWindows", w.BOOL, enum_window_callback, w.LPARAM)
 
+
+class MONITORINFO(c.Structure):
+    _fields_ = [
+        ("cbSize", w.DWORD),
+        ("rcMonitor", w.RECT),
+        ("rcWork", w.RECT),
+        ("dwFlags", w.DWORD),
+    ]
+
+
+api(user, "GetMonitorInfoW", w.BOOL, w.HANDLE, c.POINTER(MONITORINFO))
 
 
 def pause(seconds):
@@ -244,6 +257,26 @@ def verify_copy_formats(window, helper):
         snapshot.restore(window)
 
 
+def monitor_details():
+    monitors = []
+
+    @monitor_callback
+    def collect(handle, dc, rectangle, data):
+        info = MONITORINFO()
+        info.cbSize = c.sizeof(info)
+        assert user.GetMonitorInfoW(handle, c.byref(info))
+        bounds = rectangle.contents
+        monitors.append({
+            "handle": handle,
+            "bounds": [bounds.left, bounds.top, bounds.right, bounds.bottom],
+            "work": [info.rcWork.left, info.rcWork.top, info.rcWork.right, info.rcWork.bottom],
+        })
+        return True
+
+    assert user.EnumDisplayMonitors(None, None, collect, 0)
+    return monitors
+
+
 def await_caption(window, expected):
     for _ in range(100):
         if caption(window).endswith(expected):
@@ -372,6 +405,179 @@ def move_over_fixture(window, helper, x, y):
     pause(0.2)
 
 
+def await_stable_geometry(window):
+    previous = None
+    stable = 0
+    for _ in range(100):
+        current = (user.GetDpiForWindow(window), bounds(window))
+        if current == previous:
+            stable += 1
+            if stable == 3:
+                return current
+        else:
+            stable = 0
+            previous = current
+        pause(0.03)
+    raise AssertionError("Window geometry did not settle")
+
+
+def place_owner_at_corner(window, helper, monitor, corner):
+    left, top, right, bottom = monitor["work"]
+    rectangle = bounds(window)
+    width = rectangle[2] - rectangle[0]
+    height = rectangle[3] - rectangle[1]
+    center_x = left + (right - left - width) // 2
+    center_y = top + (bottom - top - height) // 2
+    move_over_fixture(window, helper, center_x, center_y)
+    _, rectangle = await_stable_geometry(window)
+    width = rectangle[2] - rectangle[0]
+    height = rectangle[3] - rectangle[1]
+    if corner == "topLeft":
+        x, y = left, top
+    elif corner == "bottomRight":
+        x, y = right - width, bottom - height
+    else:
+        raise AssertionError(corner)
+    move_over_fixture(window, helper, x, y)
+    dpi, rectangle = await_stable_geometry(window)
+    assert user.MonitorFromWindow(window, 2) == monitor["handle"], (monitor, rectangle)
+    return dpi, rectangle
+
+
+def verify_edge_sampling(window, helper, monitors):
+    results = []
+    colors = (0x003355, 0x004466, 0x005577, 0x006688)
+    for index, monitor in enumerate(monitors):
+        left, top, right, bottom = monitor["bounds"]
+        center_x = left if index % 2 == 0 else right - 1
+        center_y = top + (bottom - top) // 2
+        dpi = user.GetDpiForWindow(window)
+        offset = round(32 * dpi / 96)
+        move_over_fixture(window, helper, center_x - offset, center_y - offset)
+        dpi, _ = await_stable_geometry(window)
+        offset = round(32 * dpi / 96)
+        move_over_fixture(window, helper, center_x - offset, center_y - offset)
+        color = colors[index % len(colors)]
+        paint_color(helper, color)
+        expected = "#{:02X}{:02X}{:02X}".format(
+            color & 0xFF, (color >> 8) & 0xFF, (color >> 16) & 0xFF)
+        await_caption(window, expected)
+        results.append({"monitor": monitor["bounds"], "sampleCenter": [center_x, center_y],
+                        "caption": caption(window), "centerPixelPassed": True})
+
+    virtual_left = user.GetSystemMetrics(76)
+    virtual_top = user.GetSystemMetrics(77)
+    virtual_width = user.GetSystemMetrics(78)
+    virtual_height = user.GetSystemMetrics(79)
+    dpi = user.GetDpiForWindow(window)
+    offset = round(32 * dpi / 96)
+    center_x = virtual_left - 8
+    center_y = virtual_top + virtual_height // 2
+    move_over_fixture(window, helper, center_x - offset, center_y - offset)
+    await_caption(window, "画面取得不可")
+    results.append({
+        "virtualDesktop": [virtual_left, virtual_top, virtual_left + virtual_width,
+                           virtual_top + virtual_height],
+        "sampleCenter": [center_x, center_y], "caption": caption(window),
+        "staleValueCleared": True,
+    })
+    return results
+
+
+def verify_settings_at_edges(window, helper, process, monitors):
+    results = []
+    for monitor in monitors:
+        for corner in ("topLeft", "bottomRight"):
+            owner_dpi, owner_bounds = place_owner_at_corner(window, helper, monitor, corner)
+            click(window, 224, 16)
+            modal = await_modal(process.pid, window)
+            modal_dpi, modal_bounds = await_stable_geometry(modal)
+            affinity = w.DWORD()
+            assert user.GetWindowDisplayAffinity(modal, c.byref(affinity))
+            assert affinity.value == 0x11
+            width = modal_bounds[2] - modal_bounds[0]
+            height = modal_bounds[3] - modal_bounds[1]
+            assert width == kernel.MulDiv(320, modal_dpi, 96), (modal_bounds, modal_dpi)
+            assert height == kernel.MulDiv(392, modal_dpi, 96), (modal_bounds, modal_dpi)
+            work_left, work_top, work_right, work_bottom = monitor["work"]
+            work_width = work_right - work_left
+            work_height = work_bottom - work_top
+            horizontal_oversized = width > work_width
+            vertical_oversized = height > work_height
+            horizontal = ((horizontal_oversized and modal_bounds[0] == work_left)
+                          or (not horizontal_oversized and modal_bounds[0] >= work_left
+                              and modal_bounds[2] <= work_right))
+            vertical = ((vertical_oversized and modal_bounds[1] == work_top)
+                        or (not vertical_oversized and modal_bounds[1] >= work_top
+                            and modal_bounds[3] <= work_bottom))
+            assert horizontal and vertical, (monitor, owner_bounds, modal_bounds, modal_dpi)
+            click(modal, 296, 22)
+            for _ in range(100):
+                if find_modal(process.pid, window) is None and user.IsWindowEnabled(window):
+                    break
+                pause(0.03)
+            assert find_modal(process.pid, window) is None
+            assert user.IsWindowEnabled(window)
+            results.append({
+                "monitor": monitor["bounds"], "work": monitor["work"], "corner": corner,
+                "ownerDpi": owner_dpi, "ownerBounds": owner_bounds, "modalDpi": modal_dpi,
+                "modalBounds": modal_bounds,
+                "fitsWorkArea": not horizontal_oversized and not vertical_oversized,
+                "oversizedAxes": (["horizontal"] if horizontal_oversized else [])
+                + (["vertical"] if vertical_oversized else []),
+                "placementContractPassed": True,
+                "captureExclusion": affinity.value,
+                "closeHitRegionPassed": True,
+                "ownerReenabled": True,
+            })
+    return results
+
+
+def find_popup_menu(process_id):
+    found = []
+
+    @enum_window_callback
+    def collect(window, data):
+        owner = w.DWORD()
+        user.GetWindowThreadProcessId(window, c.byref(owner))
+        name = c.create_unicode_buffer(128)
+        user.GetClassNameW(window, name, len(name))
+        if owner.value == process_id and name.value == "#32768" and user.IsWindowVisible(window):
+            found.append(window)
+        return True
+
+    assert user.EnumWindows(collect, 0)
+    return found[0] if found else None
+
+
+def verify_context_menu(window, process, monitors):
+    dpi = user.GetDpiForWindow(window)
+    point = point_parameter(round(112 * dpi / 96), round(16 * dpi / 96))
+    assert user.PostMessageW(window, 0x0205, 0, point)
+    menu = None
+    for _ in range(100):
+        menu = find_popup_menu(process.pid)
+        if menu:
+            break
+        pause(0.02)
+    assert menu, "Format popup menu did not appear"
+    menu_bounds = bounds(menu)
+    owner_monitor = user.MonitorFromWindow(window, 2)
+    work = next(monitor["work"] for monitor in monitors
+                if monitor["handle"] == owner_monitor)
+    assert menu_bounds[0] >= work[0] and menu_bounds[1] >= work[1]
+    assert menu_bounds[2] <= work[2] and menu_bounds[3] <= work[3]
+    assert user.PostMessageW(window, 0x001F, 0, 0)
+    for _ in range(100):
+        if find_popup_menu(process.pid) is None:
+            break
+        pause(0.02)
+    assert find_popup_menu(process.pid) is None, "Format popup menu did not close"
+    return {"appeared": True, "bounds": menu_bounds, "withinOwnerMonitorWorkArea": True,
+            "cancelled": True,
+            "automaticPointerOrKeyboardInput": False}
+
+
 def verify_palette(window, helper):
     for color, text in ((0, "#000000"), (0xFFFFFF, "#FFFFFF"),
                         (0x0080FF, "#FF8000"), (0x0F0100, "#00010F")):
@@ -403,22 +609,17 @@ def verify_grid_center(window, helper):
 
 def verify(window, helper, process):
     results = []
-    monitors = []
-    @monitor_callback
-    def collect(handle, dc, rectangle, data):
-        rect = rectangle.contents
-        monitors.append([rect.left, rect.top, rect.right, rect.bottom])
-        return True
-    assert user.EnumDisplayMonitors(None, None, collect, 0)
+    monitors = monitor_details()
     affinity = w.DWORD()
     assert user.GetWindowDisplayAffinity(window, c.byref(affinity)) and affinity.value == 0x11
-    for left, top, right, bottom in monitors:
+    for monitor in monitors:
+        left, top, right, bottom = monitor["bounds"]
         x, y = left + (right - left) // 2, top + (bottom - top) // 2
         move_over_fixture(window, helper, x, y)
         dpi = user.GetDpiForWindow(window)
         rectangle = bounds(window)
-        assert rectangle[2] - rectangle[0] == 240 * dpi // 96, (rectangle, dpi)
-        assert rectangle[3] - rectangle[1] == 64 * dpi // 96, (rectangle, dpi)
+        assert rectangle[2] - rectangle[0] == kernel.MulDiv(240, dpi, 96), (rectangle, dpi)
+        assert rectangle[3] - rectangle[1] == kernel.MulDiv(64, dpi, 96), (rectangle, dpi)
         assert not user.GetWindowLongPtrW(window, -16) & 0x00C40000
         assert user.GetWindowLongPtrW(window, -20) & 8
         verify_palette(window, helper)
@@ -443,15 +644,16 @@ def verify(window, helper, process):
         assert before == after, (before, after)
     finally:
         kernel.CloseHandle(handle)
-    copied = verify_copy_formats(window, helper)
-    return {"monitors": results, "gdiObjects": [before, after], "copiedValues": copied,
-            "captureExclusion": affinity.value, "automaticPointerOrKeyboardInput": False}
+    result = {"monitors": results, "gdiObjects": [before, after],
+              "captureExclusion": affinity.value, "automaticPointerOrKeyboardInput": False}
+    return result
 
 
 def main():
     root = Path(__file__).resolve().parents[1]
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--executable", type=Path, default=root / "build/NeNeLoupe.exe")
+    parser.add_argument("--suite", choices=("full", "geometry"), default="full")
     arguments = parser.parse_args()
     output = root / "out/window-verification"
     output.mkdir(parents=True, exist_ok=True)
@@ -471,6 +673,27 @@ def main():
         user.ShowWindow(helper, 4)
         process, window = start(executable, environment)
         result = verify(window, helper, process)
+        result["suite"] = arguments.suite
+        monitors = monitor_details()
+        result["edgeSampling"] = verify_edge_sampling(window, helper, monitors)
+        result["settingsAtEdges"] = verify_settings_at_edges(window, helper, process, monitors)
+        result["contextMenu"] = verify_context_menu(window, process, monitors)
+        if arguments.suite == "geometry":
+            result["skippedChecks"] = [
+                "clipboard copy and restoration",
+                "settings selection and save",
+                "restart persistence",
+                "malformed settings rejection",
+            ]
+            assert user.PostMessageW(window, 0x0010, 0, 0)
+            assert process.wait(timeout=5) == 0
+            result["windowCloseExit"] = 0
+            (output / "geometry-results.json").write_text(
+                json.dumps(result, indent=2) + "\n", encoding="utf-8")
+            print(json.dumps(result, indent=2))
+            return
+        result["skippedChecks"] = []
+        result["copiedValues"] = verify_copy_formats(window, helper)
         result["settings"] = verify_settings(window, process)
         assert user.PostMessageW(window, 0x0100, 0x1B, 0)
         assert process.wait(timeout=5) == 0
