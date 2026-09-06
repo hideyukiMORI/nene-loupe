@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
   <title>NeNe Loupe application icon</title>
-  <desc>A solid charcoal loupe pictogram — thick ring and handle — over a full-bleed 2x2 colour checker inherited from the NENE-PIXEL launcher icon.</desc>
+  <desc>A solid charcoal loupe pictogram - thicker ring and handle, larger footprint - over a full-bleed 2x2 colour checker inherited from the NENE-PIXEL launcher icon.</desc>
 
-  <!-- 背景: 4マスを全面に広げる。gutter なし。外周だけ小角丸 (r=20 / 7.8%)。 -->
+  <!-- 背景: 現行を継承。4マス全面、gutter なし、外周だけ小角丸 (r=20 / 7.8%)。 -->
   <clipPath id="tile">
     <rect x="0" y="0" width="256" height="256" rx="20" ry="20"/>
   </clipPath>
@@ -16,9 +16,13 @@
           fill="none" stroke="#18181B" stroke-width="10"/>
   </g>
 
-  <!-- 前景: 単色 #18181B のみ。太いリング + 太めハンドル。レンズ穴から4マスが見える。 -->
+  <!-- 前景: 単色 #18181B のみ。ベタ塗り。
+       ring   中心 (105,105) / r60 / sw30  -> 外径 150、内径 90
+       handle 45度でリング中心を通る軸、sw36、始点はリング帯の内側 (中心から 69.3)
+       round cap を含む外形バウンディングは 30..231、数学中心は 130.5。
+       橙の右上マスと右下へ伸びる柄を含む光学的な重心で配置した。 -->
   <g fill="none" stroke="#18181B" stroke-linecap="round">
-    <path d="M155 155L208 208" stroke-width="30"/>
-    <circle cx="108" cy="108" r="58" stroke-width="24"/>
+    <path d="M154 154L213 213" stroke-width="36"/>
+    <circle cx="105" cy="105" r="60" stroke-width="30"/>
   </g>
 </svg>

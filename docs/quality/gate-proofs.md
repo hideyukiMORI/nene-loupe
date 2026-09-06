@@ -386,3 +386,20 @@ python -B eng/conformance.py --build-dir out/build-icon-revision
 
 最終全体ゲートとCIはIssue #11のPRを進行状態の正本として確認する。設定スキーマ変更なし。
 Waivers: none。
+
+### 12. 太い虫眼鏡アイコン（Issue #13）
+
+背景4マスのrect属性がIssue #11の正本と同一であることをXML比較した。前景はルーペ中心(105,105)、
+半径60、線幅30、ハンドル(154,154)〜(213,213)、線幅36。採用SVGのSHA-256は
+`EDE91D0AB024B01C1EC1311C78FCB3D3D072597610CF6D316B8B29F47334F873`、2回生成して一致したICOは
+`1D40C499A7FCAF4C35FC2EDA753B6AE59664F50FE3C60FFD5A8A2F39AE30C987`。
+
+ICOは16/20/24/32/48/64/128/256pxの8件、32-bit RGBA。alphaは第11節と同じ妥当性契約を満たした。
+隔離buildはRCを含む71/71、conformance 0。exeはICON 8、GROUP_ICON 1、manifest 1を持つ。
+Shell抽出は32×32と16×16。隔離`LOCALAPPDATA`で短時間起動した120 DPIのクラスHICONは40×40と
+20×20で期待値に一致し、終了0、foreground復元に成功した。結果は
+`out/icon-design-bold/ico-verification.json`と`out/icon-design-bold/win32-results.json`、
+実HICON明暗描画は`out/icon-design-bold/win32-icon-preview.png`。
+
+最終全体ゲートとCIはIssue #13のPRを進行状態の正本として確認する。設定スキーマ変更なし。
+Waivers: none。
