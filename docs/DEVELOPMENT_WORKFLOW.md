@@ -180,7 +180,9 @@ pwsh -NoProfile -File ./eng/package-release.ps1 -StoreMsix   # out/msix/NeNeLoup
 
 1. 版を上げる PR を統合する（版の入力は `CMakeLists.txt` だけ）。
 2. clean な `main` で上のコマンドを実行する。
-3. Windows App Certification Kit を通す。**手順はまだ無い**（Issue #35）。
+3. Windows App Certification Kit を通す。提出用の MSIX は未署名で入れられないので、同じ exe から作った検証用パッケージ（`eng/package-msix.ps1 -CertificateThumbprint …`）を入れて回す。
+   手順と 2026-10-03 の結果（PASS 23・WARNING 1・FAIL 0）は [quality/gate-proofs.md](quality/gate-proofs.md) 第 16 節。
+   高 DPI の警告は原因が分かっていない（Issue #56）。
 4. Partner Center で申請を始め、パッケージ・掲載文・スクリーンショット・年齢区分の回答・プライバシーポリシーの URL を入れる。
    掲載文と年齢区分の根拠の正本は [release/store-listing.md](release/store-listing.md)、画像は `docs/images/store/` にある。
    提出オプションに、下の `runFullTrust` の説明文と審査員向けの注記を入れる。
