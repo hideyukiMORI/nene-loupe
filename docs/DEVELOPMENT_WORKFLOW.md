@@ -182,6 +182,7 @@ pwsh -NoProfile -File ./eng/package-release.ps1 -StoreMsix   # out/msix/NeNeLoup
 2. clean な `main` で上のコマンドを実行する。
 3. Windows App Certification Kit を通す。**手順はまだ無い**（Issue #35）。
 4. Partner Center で申請を始め、パッケージ・掲載文・スクリーンショット・年齢区分の回答・プライバシーポリシーの URL を入れる。
+   掲載文と年齢区分の根拠の正本は [release/store-listing.md](release/store-listing.md)、画像は `docs/images/store/` にある。
    提出オプションに、下の `runFullTrust` の説明文と審査員向けの注記を入れる。
 5. 申請の直前に Store Policies を読み直す（下調べで読んだのは版 7.20・2026-10-22 発効）。
 6. **Store の認定が出てから**、提出したのと同じ commit に `v<PROJECT_VERSION>` の tag を打ち、GitHub Release へ ZIP と `SHA256SUMS` を公開する。
