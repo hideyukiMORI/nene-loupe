@@ -12,7 +12,7 @@ hideが2026-10-03に受理した（[Issue #29](https://github.com/hideyukiMORI/n
 
 プライバシーポリシー（[Issue #32](https://github.com/hideyukiMORI/nene-loupe/issues/32)）はhideが読んで統合済み（`PRIVACY.md`）。
 スキップされた`check`でも統合できてしまう穴は[Issue #30](https://github.com/hideyukiMORI/nene-loupe/issues/30)で塞いだ。
-統合の前にheadのSHAで最新の`check`の成功を読む手順は続ける（[引き継ぎ書](../handoffs/2026-10-03.md)）。
+統合の前にheadのSHAで最新の`check`の成功を読む手順は続ける（[引き継ぎ書](../handoffs/2026-10-04.md)）。
 
 [Issue #25](https://github.com/hideyukiMORI/nene-loupe/issues/25)（下調べ）と
 [Issue #27](https://github.com/hideyukiMORI/nene-loupe/issues/27)（CIのMSVCの版ずれ）は完了し、mainへ統合済み。
@@ -40,7 +40,8 @@ hideが2026-10-03に受理した（[Issue #29](https://github.com/hideyukiMORI/n
 ## 次に行うこと
 
 **2026-10-03にMicrosoft Storeへ提出した（Submission 1・認定中）。** 審査の結果待ちである。
-認定されたら、main `0c26ed4`に`v1.0.0`のtagを打ち、控えてあるZIPをGitHub Releaseへ出す（手順は[引き継ぎ書](../handoffs/2026-10-03.md)）。
+認定されたら、main `0c26ed4`に`v1.0.0`のtagを打ち、控えてあるZIPをGitHub Releaseへ出す。
+再開の手順は[引き継ぎ書](../handoffs/2026-10-04.md)、セッション全体の記録は[日報](../reports/2026-10-04.md)にある。
 Windows App Certification KitはPASS 23・WARNING 1・FAIL 0（高DPIの警告は原因が分かっていない。`docs/quality/gate-proofs.md`第16節）。
 掲載用の画像は`docs/images/store/`、掲載文と年齢区分の根拠は`docs/release/store-listing.md`にある。アプリの表示は英語だけになった（Issue #52）。
 mainの版は1.0.0だが、tagとGitHub Releaseは作っていない（公開済みの最新はv0.2.0）。
