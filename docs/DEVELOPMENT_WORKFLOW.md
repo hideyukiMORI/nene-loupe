@@ -184,10 +184,11 @@ pwsh -NoProfile -File ./eng/package-release.ps1 -StoreMsix   # out/msix/NeNeLoup
 4. Partner Center で申請を始め、パッケージ・掲載文・スクリーンショット・年齢区分の回答・プライバシーポリシーの URL を入れる。
    提出オプションに、下の `runFullTrust` の説明文と審査員向けの注記を入れる。
 5. 申請の直前に Store Policies を読み直す（下調べで読んだのは版 7.20・2026-10-22 発効）。
+6. **Store の認定が出てから**、提出したのと同じ commit に `v<PROJECT_VERSION>` の tag を打ち、GitHub Release へ ZIP と `SHA256SUMS` を公開する。
+   審査で製品の修正を求められた場合は、版を上げて 1 からやり直す。認定の前に ZIP を出さないのは、ZIP と Store の版をずらさないためである
+   （hide の決定・2026-10-03）。
 
-**決めていないこと:** tag と GitHub Release（ZIP）を、Store の認定の前に公開するか後に公開するか。hide が決める。
-
-`runFullTrust` の説明文（提出オプションの入力欄へ。**案**であり、提出の前に hide が確かめる）:
+`runFullTrust` の説明文（提出オプションの入力欄へ。hide が 2026-10-03 にこの文面でよいとした）:
 
 ```text
 NeNe Loupe is an existing Win32 desktop application (C++ / Win32, no UWP components) packaged
@@ -198,7 +199,7 @@ user clicks the value, and saves three settings to a local file. It does not req
 makes no network connections, and installs no services or drivers.
 ```
 
-審査員向けの注記（Notes for certification の入力欄へ。同じく**案**）:
+審査員向けの注記（Notes for certification の入力欄へ。同じく hide がこの文面でよいとした）:
 
 ```text
 The application window is intentionally excluded from screen capture
