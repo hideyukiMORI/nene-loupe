@@ -185,36 +185,11 @@ pwsh -NoProfile -File ./eng/package-release.ps1 -StoreMsix   # out/msix/NeNeLoup
    高 DPI の警告は原因が分かっていない（Issue #56）。
 4. Partner Center で申請を始め、パッケージ・掲載文・スクリーンショット・年齢区分の回答・プライバシーポリシーの URL を入れる。
    掲載文と年齢区分の根拠の正本は [release/store-listing.md](release/store-listing.md)、画像は `docs/images/store/` にある。
-   提出オプションに、下の `runFullTrust` の説明文と審査員向けの注記を入れる。
+   申請オプションに、`runFullTrust` が必要な理由と認定の注意書きを入れる（文面の場所は下）。
 5. 申請の直前に Store Policies を読み直す（下調べで読んだのは版 7.20・2026-10-22 発効）。
 6. **Store の認定が出てから**、提出したのと同じ commit に `v<PROJECT_VERSION>` の tag を打ち、GitHub Release へ ZIP と `SHA256SUMS` を公開する。
    審査で製品の修正を求められた場合は、版を上げて 1 からやり直す。認定の前に ZIP を出さないのは、ZIP と Store の版をずらさないためである
    （hide の決定・2026-10-03）。
 
-`runFullTrust` の説明文（提出オプションの入力欄へ。hide が 2026-10-03 にこの文面でよいとした）:
-
-```text
-NeNe Loupe is an existing Win32 desktop application (C++ / Win32, no UWP components) packaged
-with MSIX. runFullTrust is required because the packaged executable is a classic Win32 process
-(EntryPoint "Windows.FullTrustApplication"). The app reads the pixels behind its own window
-through GDI to show a magnified view and the colour value, writes text to the clipboard when the
-user clicks the value, and saves three settings to a local file. It does not require elevation,
-makes no network connections, and installs no services or drivers.
-```
-
-審査員向けの注記（Notes for certification の入力欄へ。同じく hide がこの文面でよいとした）:
-
-```text
-The application window is intentionally excluded from screen capture
-(SetWindowDisplayAffinity with WDA_EXCLUDEFROMCAPTURE) so that the loupe can see what is behind
-it. Because of this, the window does not appear in screenshots or screen recordings. This is
-by design, not a rendering failure.
-
-To test: launch the app and drag it over any content. The left pane shows the 7x7 pixels behind
-the lens magnified 8x; the value on the right is the colour of the centre pixel. Click the value
-to copy it. Click the format label to cycle RGB / HEX / CMYK / HSL / HSV. The gear opens the
-settings. Press Esc to close. No account or sign-in is needed.
-```
-
-この注記について確かめていないこと: 審査員がリモート接続や仮想マシンの画面越しに試した場合に、窓が見えるかどうか。
-見えない場合の逃げ道は、除外を外す診断用の起動引数 `--allow-screen-capture`（ADR 0007）だが、包んだアプリに引数を渡す手順は確かめていない。
+申請オプションに貼る文面（`runFullTrust` が必要な理由と、認定の注意書き）の正本は [release/store-listing.md](release/store-listing.md) の「申請オプションに貼る文面」にある。hide が 2026-10-03 に確認した文面で、
+貼りやすいよう段落の途中に改行を入れていない。ここには複製しない。

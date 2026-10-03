@@ -1,7 +1,7 @@
 # Microsoft Store の掲載文と年齢区分の根拠 — NeNe Loupe
 
 > Issue #51 / ADR 0008。Partner Center への入力は hide が行う。ここは入力する文面の正本であり、
-> 入力欄の名前と字数の上限は Partner Center の画面で確かめること（**下の「確かめていないこと」を参照**）。
+> 入力欄の上限と、実際に入力して分かったことは「2026-10-03 の入力で分かったこと」にある。
 
 掲載の言語は英語と日本語の 2 つ（hide の決定・2026-10-03）。アプリの表示は英語だけである（Issue #52）。
 各文は README・SPECIFICATION・実装と突き合わせた。できないことは書いていない。
@@ -157,7 +157,31 @@ HEX
 | サポートの連絡先 | `https://github.com/hideyukiMORI/nene-loupe/issues` | `PRIVACY.md` の連絡先と同じ |
 | Web サイト | `https://github.com/hideyukiMORI/nene-loupe` | |
 | 著作権 | `© 2026 Hideyuki Mori` | 設定窓の表示と同じ |
-| `runFullTrust` の説明文・審査員向けの注記 | `docs/DEVELOPMENT_WORKFLOW.md` 第 9 節 | hide が確認済み |
+| `runFullTrust` が必要な理由・認定の注意書き | 下の「申請オプションに貼る文面」 | hide が確認済み |
+| 公開の保留オプション | 「認定されたらすぐに公開する」 | tag と ZIP は認定の後に出す（DEVELOPMENT_WORKFLOW 第 9 節） |
+| デバイス ファミリ | 「Windows 10/11 Desktop」だけ | 包んだ Win32 のアプリ |
+
+## 申請オプションに貼る文面
+
+どの段落も 1 行で、途中に改行を入れていない。端末の表示からではなく、このファイルをエディタで開いてコピーすること
+（端末からコピーすると、折り返しの位置に改行や空白が入る）。
+
+### 認定の注意書き（Notes for certification）
+
+```text
+The application window is intentionally excluded from screen capture (SetWindowDisplayAffinity with WDA_EXCLUDEFROMCAPTURE) so that the loupe can see what is behind it. Because of this, the window does not appear in screenshots or screen recordings. This is by design, not a rendering failure.
+
+To test: launch the app and drag it over any content. The left pane shows the 7x7 pixels behind the lens magnified 8x; the value on the right is the colour of the centre pixel. Click the value to copy it. Click the format label to cycle RGB / HEX / CMYK / HSL / HSV. The gear opens the settings. Press Esc to close. No account or sign-in is needed.
+```
+
+### `runFullTrust` が必要な理由
+
+```text
+NeNe Loupe is an existing Win32 desktop application (C++ / Win32, no UWP components) packaged with MSIX. runFullTrust is required because the packaged executable is a classic Win32 process (EntryPoint "Windows.FullTrustApplication"). The app reads the pixels behind its own window through GDI to show a magnified view and the colour value, writes text to the clipboard when the user clicks the value, and saves three settings to a local file. It does not require elevation, makes no network connections, and installs no services or drivers.
+```
+
+確かめていないこと: 審査員がリモート接続や仮想マシンの画面越しに試した場合に、窓が見えるかどうか。
+見えない場合の逃げ道は、除外を外す診断用の起動引数 `--allow-screen-capture`（ADR 0007）だが、包んだアプリに引数を渡す手順は確かめていない。
 
 ## 年齢区分（IARC）のアンケートに答えるための事実
 
@@ -175,10 +199,23 @@ HEX
 
 利用者の画面に映っているものを拡大するので、表示される内容は利用者の画面しだいである。アプリが内容を取り寄せたり保存したりはしない。
 
+## 2026-10-03 の入力で分かったこと
+
+hide が Partner Center で申請（Submission 1）を入力した。画面の文言は hide が貼ったものを読んだ。
+
+| 項目 | 結果 |
+| --- | --- |
+| パッケージの検証 | `NeNeLoupe-v1.0.0-windows-x64-store.msix` は `Validated`。`v1.0.0.0`・X64・`Windows.Desktop min version 10.0.19041.0`。身元・発行者・版のエラーは出なかった |
+| パッケージの警告 | `The following restricted capabilities require approval before you can use them in your app: runFullTrust.`（想定どおり。申請オプションで理由を書く） |
+| 年齢区分 | アプリの種類は「その他のすべてのアプリの種類」、設問はすべて「いいえ」。結果は IARC 3+ / Microsoft 3+ / ESRB E / PEGI 3 / USK Everyone / DJCTQ L / CCC TE / PCBP 0（IARC バージョン 10.3） |
+| プライバシーポリシーの設問 | 「個人情報へのアクセス、収集、または送信を行いますか」には「はい」と答え、URL を入れる（画面の画素を読むことと、規約 10.5.1 のため） |
+| 製品の機能 | 最大 20 件 |
+| キーワード | 最大 7 個、各 40 文字以内、全体で 21 単語まで |
+| 短い説明 | 推奨 270 文字以下 |
+| スクリーンショット | 1 つ以上が必須。4 つ以上を推奨。1366×768 以上を推奨。PNG・50 MB 未満・最大 30 ファイル |
+| アプリ タイル アイコン | 300×300 の PNG（`docs/images/store/store-logo-300.png`） |
+
 ## 確かめていないこと
 
-- **入力欄の名前・必須かどうか・字数や件数の上限。** 下調べで公式文書から確かめたのは、説明文が必須で 1 万字まで、
-  少なくとも 1 言語ぶんの掲載ページが要ること、スクリーンショットの条件、年齢区分の回答が必須であることだけである。
-  短い説明・製品の特長・検索語の上限は確かめていない。Partner Center が受け付けなければ、その場で削る。
-- 年齢区分のアンケートの実際の設問。上の表は事実の一覧で、設問との対応は入力のときに hide が見る。
+- 日本語のキーワードで「全体で 21 単語まで」がどう数えられるか。
 - この掲載文で審査に足りるか。
