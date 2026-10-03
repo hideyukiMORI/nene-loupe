@@ -13,9 +13,9 @@ std::wstring status_caption(SettingsStatus status)
     case SettingsStatus::ok:
         return std::wstring();
     case SettingsStatus::load_failed:
-        return L"設定を読み込めませんでした。既定値で動いています。";
+        return L"Could not load settings. Using defaults.";
     case SettingsStatus::save_failed:
-        return L"設定を保存できませんでした。";
+        return L"Could not save settings.";
     }
     std::unreachable();
 }

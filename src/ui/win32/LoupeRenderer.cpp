@@ -232,14 +232,14 @@ void LoupeRenderer::render_toast(HDC dc, const LoupeFrame &frame, UINT dpi)
     case CopyState::copied:
         draw_check(dc, LoupeLayout::toast_icon(dpi), brush.color(PaletteRole::accent), dpi);
         SetTextColor(dc, brush.color(PaletteRole::accent));
-        write_text(dc, LoupeLayout::toast_text(dpi), L"コピー",
+        write_text(dc, LoupeLayout::toast_text(dpi), L"Copied",
                    font_of(L"Segoe UI", 12, FW_SEMIBOLD, dpi));
         return;
     case CopyState::failed:
-        // 成功と同じ枠に収める。通知欄は 54 DIP しかないので語は 2 文字に収める。
+        // 成功と同じ枠に収める。通知欄は 60 DIP しかないので語は "Copied" より長くしない。
         draw_cross(dc, LoupeLayout::toast_icon(dpi), brush.color(PaletteRole::warning), dpi);
         SetTextColor(dc, brush.color(PaletteRole::warning));
-        write_text(dc, LoupeLayout::toast_text(dpi), L"失敗",
+        write_text(dc, LoupeLayout::toast_text(dpi), L"Failed",
                    font_of(L"Segoe UI", 12, FW_SEMIBOLD, dpi));
         return;
     }

@@ -369,9 +369,9 @@ void verify_updates()
     require(original.format_label() == L"HEX", "format label follows the settings");
     controller.refresh(point);
     require(!controller.frame().sample(), "capture failure removes stale pixels");
-    require(controller.frame().caption() == L"画面取得不可", "capture failure caption");
+    require(controller.frame().caption() == L"No capture", "capture failure caption");
     controller.refresh(point);
-    require(controller.frame().caption() == L"位置取得不可", "position failure caption");
+    require(controller.frame().caption() == L"No position", "position failure caption");
     controller.refresh(point);
     require(controller.frame().caption() == L"#00010F", "recovery uses fresh data");
     require(original.caption() == L"#FF8000", "previous immutable frame is unchanged");

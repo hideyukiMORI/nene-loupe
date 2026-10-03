@@ -15,16 +15,16 @@ const wchar_t *reason_of(neneloupe::WindowFailure failure)
     switch (failure)
     {
     case neneloupe::WindowFailure::icon_loading_failed:
-        return L"アプリケーションアイコンを読み込めませんでした。";
+        return L"Could not load the application icon.";
     case neneloupe::WindowFailure::registration_failed:
-        return L"ウィンドウクラスを登録できませんでした。";
+        return L"Could not register the window class.";
     case neneloupe::WindowFailure::creation_failed:
-        return L"ウィンドウを作成できませんでした。";
+        return L"Could not create the window.";
     case neneloupe::WindowFailure::capture_exclusion_failed:
-        return L"ルーペ自身を画面の取り込みから除外できませんでした。"
-               L"Windows 10 version 2004 以降が必要です。";
+        return L"Could not exclude the loupe from screen capture. "
+               L"Windows 10 version 2004 or later is required.";
     case neneloupe::WindowFailure::timer_failed:
-        return L"表示を更新するタイマを作成できませんでした。";
+        return L"Could not create the refresh timer.";
     }
     std::unreachable();
 }
