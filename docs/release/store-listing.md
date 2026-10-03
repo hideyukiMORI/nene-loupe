@@ -168,6 +168,8 @@ HEX
 
 ### 認定の注意書き（Notes for certification）
 
+入力欄は「申請オプション」のページには無い。そのページの「認定の注意書き」の説明文にある「追加のテスト情報」のリンクを押し、開いた別のページで入れる（2026-10-03 に hide の画面で確かめた）。先に申請オプションを保存してから移ること。
+
 ```text
 The application window is intentionally excluded from screen capture (SetWindowDisplayAffinity with WDA_EXCLUDEFROMCAPTURE) so that the loupe can see what is behind it. Because of this, the window does not appear in screenshots or screen recordings. This is by design, not a rendering failure.
 
