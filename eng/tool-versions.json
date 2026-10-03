@@ -1,6 +1,6 @@
 {
   "msvcToolset": "14.44.35207",
-  "msvcCompiler": "19.44.35228.0",
+  "msvcCompiler": "19.44.35229.0",
   "cmake": "3.31.6-msvc6",
   "ninja": "1.12.1",
   "llvm": "19.1.5",
