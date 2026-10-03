@@ -1,12 +1,38 @@
 # ADR 0008 — 配布経路に Microsoft Store（MSIX）を足し、ZIP は残す
 
-- 状態: 提案
-- 日付: 2026-10-03
-- Issue: #25
+- 状態: 受理
+- 日付: 2026-10-03（提案・受理とも同日）
+- Issue: #25（提案）、#29（受理）
 - 影響する規則: ARC-001 / ARC-012 / QLT-010 / GIT-001（DEVELOPMENT_WORKFLOW 第 9 節「リリース」を変える）
 
-> この ADR は**提案**である。受理するかどうかは hide が決める。受理されるまで、配布経路は
-> portable ZIP と `SHA256SUMS` の 1 本のままで、README・DEVELOPMENT_WORKFLOW・ゲートは何も変わらない。
+> hide が 2026-10-03 に**受理**した。受理で変わったのは方針だけで、実装はこれからである。
+> 下の「決定」の 1〜7 と「強制」の planned が終わるまで、実際に配っているのは portable ZIP と `SHA256SUMS` の 1 本のままで、
+> README・DEVELOPMENT_WORKFLOW・ゲートはまだ何も変わっていない。
+
+## 受理の記録（2026-10-03）
+
+| 項目 | hide の決定 |
+| --- | --- |
+| この ADR | 受理する |
+| 副業・個人活動の届け出 | 無料で配るので副業に当たらない。個人活動は自由。個人アカウントで進める |
+| 発行者の表示名 | `hideyukiMORI` |
+| Store で予約するアプリ名 | `NeNe Loupe`（空白あり） |
+
+開発者アカウントの登録・本人確認・アプリ名の予約は hide の操作で、この時点では済んでいない。
+`Identity/Name`・`Identity/Publisher`・`PublisherDisplayName` は、予約のあと Partner Center が示す値を使う。
+
+受理のあとの作業は次の Issue で進める。
+
+| 作業 | Issue |
+| --- | --- |
+| 1. 製品の版を 1.0.0 へ上げる | #31 |
+| 2. プライバシーポリシーをリポジトリに置く | #32 |
+| 3. 掲載用のスクリーンショットを作る経路を決める | #33 |
+| 4. ロゴ一式と `resources.pri` を作る | #34 |
+| 5. Windows App Certification Kit を通す | #35 |
+| 6. Store 版では設定の場所が違うことを書く | #36 |
+| 7. DEVELOPMENT_WORKFLOW 第 9 節に提出の手順を足す | #37 |
+| 「強制」の planned の 3 行を active にする | #38 |
 
 ## 文脈
 
@@ -55,13 +81,13 @@ hide は「ほぼ完成しているので、どこかで公開したい」と言
 
 ## 強制
 
-受理の前なので、**いま active な強制は無い。** `eng/package-msix.ps1` はゲートの外にある実測用の道具である。
+受理はしたが実装は Issue #38 で行うので、**いま active な強制は無い。** `eng/package-msix.ps1` はゲートの外にある実測用の道具である。
 
 | 守りたいこと | 状態 | active にする条件 |
 | --- | --- | --- |
-| MSIX の exe は Release の正規経路が作ったものである | planned | スクリプトは入力を `out/release/stage/NeNeLoupe.exe` に固定している。受理のとき、`package-release.ps1` から続けて呼ぶ形にし、ZIP の中の exe と MSIX の中の exe のハッシュが同じであることを検査する |
-| Store に出す版の先頭が 0 でない | planned | いまは警告を出すだけ。受理のとき、提出用の作成では失敗にする |
-| 証明書と鍵をリポジトリに入れない | planned | いまは「ファイルを作らない」運用（証明書ストアの拇印で指す）と `/out/` の除外だけ。受理のとき、`.pfx` / `.cer` / `.pvk` を拒否する検査を規約検査に足す |
+| MSIX の exe は Release の正規経路が作ったものである | planned | スクリプトは入力を `out/release/stage/NeNeLoupe.exe` に固定している。Issue #38 で、`package-release.ps1` から続けて呼ぶ形にし、ZIP の中の exe と MSIX の中の exe のハッシュが同じであることを検査する |
+| Store に出す版の先頭が 0 でない | planned | いまは警告を出すだけ。Issue #38 で、提出用の作成では失敗にする |
+| 証明書と鍵をリポジトリに入れない | planned | いまは「ファイルを作らない」運用（証明書ストアの拇印で指す）と `/out/` の除外だけ。Issue #38 で、`.pfx` / `.cer` / `.pvk` を拒否する検査を規約検査に足す |
 | マニフェストの身元が Partner Center の値と一致する | 不能 | 値は Partner Center の中にあり、リポジトリからは確かめられない。提出時に Partner Center が拒否する |
 | 審査に通ること・Store が署名すること | 不能 | Microsoft の側で行われる |
 
