@@ -439,3 +439,10 @@ single-thread PMv2 smokeは終了0。120 DPIの実矩形は`[100,100,400,180]`�
 最終全体ゲートとCIはIssue #17のPR、merged mainから再生成する公開ZIPとchecksumはv0.2.0の
 GitHub Releaseを正本として確認する。今回の実測はWindows 10 version 2004以降の全環境を網羅せず、
 公開exeはコード署名していない。
+
+## 11. Draftでは必須checkを失敗させる（Issue #30）
+
+2026-10-03、PR #24を、`check`が実行されていないhead `06c24c1`で統合した。そのheadのcheck runは`cancelled`と`skipped`の
+2本だけだったが、`mergeStateStatus`は`CLEAN`だった。GitHubはスキップされた必須checkを通過として扱う。
+jobの`if: github.event.pull_request.draft == false`を外し、Draftのイベントでは`eng/validate-git.ps1`の
+`QLT-012`でビルドの前に失敗させる形にした。PR #43自身で実測した。
