@@ -1,4 +1,4 @@
-"""Render the accepted SVG into the checked-in Windows icon asset."""
+"""Render the accepted SVG into the checked-in Windows icon and MSIX logo assets."""
 
 import argparse
 import struct
@@ -10,6 +10,24 @@ from PIL import Image
 
 
 SIZES = (16, 20, 24, 32, 48, 64, 128, 256)
+
+# MSIX visual assets (Issue #34 / ADR 0008). The logo fills its square, so each file is the
+# accepted SVG rendered at that pixel size. Scales are 100/125/150/200/400% of the base size.
+SCALES = (100, 125, 150, 200, 400)
+TARGET_SIZES = (16, 24, 32, 48, 256)
+MSIX_BASES = {"Square44x44Logo": 44, "Square150x150Logo": 150, "StoreLogo": 50}
+STORE_LISTING_LOGO = 300
+
+
+def msix_assets() -> dict[str, int]:
+    assets = {}
+    for name, base in MSIX_BASES.items():
+        for scale in SCALES:
+            assets[f"{name}.scale-{scale}.png"] = (base * scale + 50) // 100
+    for size in TARGET_SIZES:
+        for form in ("unplated", "lightunplated"):
+            assets[f"Square44x44Logo.targetsize-{size}_altform-{form}.png"] = size
+    return assets
 
 
 def dib_frame(image: Image.Image) -> bytes:
@@ -94,6 +112,9 @@ def main() -> int:
     parser.add_argument("--chrome", type=Path, required=True)
     parser.add_argument("--source", type=Path, default=Path("docs/design/app-icon.svg"))
     parser.add_argument("--output", type=Path, default=Path("src/app/NeNeLoupe.ico"))
+    parser.add_argument("--msix-assets", type=Path, default=Path("src/app/msix"))
+    parser.add_argument("--listing-logo", type=Path,
+                        default=Path("docs/images/store/store-logo-300.png"))
     arguments = parser.parse_args()
     if not arguments.chrome.is_file() or not arguments.source.is_file():
         raise FileNotFoundError("Chrome or the accepted SVG was not found")
@@ -101,8 +122,23 @@ def main() -> int:
         directory = Path(temporary).resolve()
         images = [render(arguments.chrome.resolve(), arguments.source.resolve(), directory, size) for size in SIZES]
         icon = make_icon(images)
+        logos = dict(msix_assets())
+        rendered = {size: render(arguments.chrome.resolve(), arguments.source.resolve(), directory, size)
+                    for size in sorted(set(logos.values()) | {STORE_LISTING_LOGO})}
+        arguments.msix_assets.mkdir(parents=True, exist_ok=True)
+        for stale in arguments.msix_assets.glob("*.png"):
+            stale.unlink()
+        for name, size in logos.items():
+            with Image.open(rendered[size]) as image:
+                if image.size != (size, size) or image.mode != "RGBA":
+                    raise ValueError(f"unexpected render: {name} {image.size} {image.mode}")
+                image.save(arguments.msix_assets / name, optimize=True)
+        with Image.open(rendered[STORE_LISTING_LOGO]) as image:
+            arguments.listing_logo.parent.mkdir(parents=True, exist_ok=True)
+            image.save(arguments.listing_logo, optimize=True)
     arguments.output.write_bytes(icon)
     print(f"Rendered {arguments.output} ({len(icon)} bytes, {len(SIZES)} sizes).")
+    print(f"Rendered {len(logos)} MSIX logo files into {arguments.msix_assets} and {arguments.listing_logo}.")
     return 0
 
 
