@@ -7,11 +7,13 @@
 [ADR 0008](../adr/0008-add-msix-store-channel.md)（配布経路にMicrosoft Store（MSIX）を足し、ZIPは残す）を
 hideが2026-10-03に受理した（[Issue #29](https://github.com/hideyukiMORI/nene-loupe/issues/29)）。実装はこれからで、
 実際に配っているのはportable ZIPの1本のまま。Store提出までの作業は
-[Issue #31](https://github.com/hideyukiMORI/nene-loupe/issues/31)〜[#38](https://github.com/hideyukiMORI/nene-loupe/issues/38)に分けてある
+[Issue #31](https://github.com/hideyukiMORI/nene-loupe/issues/31)〜[#38](https://github.com/hideyukiMORI/nene-loupe/issues/38)に分けてある（#31と#38は完了）
 （対応表はADR 0008の「受理の記録」）。開発者アカウントの登録とアプリ名`NeNe Loupe`の予約は済んだ（下書き段階・申請は始めていない）。身元の値はADR 0008の追記にある。
 
-[Issue #30](https://github.com/hideyukiMORI/nene-loupe/issues/30)が、スキップ・取り消しされた`check`でも統合できてしまう穴の追跡先。
-塞がるまで、統合の前にheadのSHAで`check`の成功を読む（[引き継ぎ書](../handoffs/2026-10-03.md)）。
+[Issue #32](https://github.com/hideyukiMORI/nene-loupe/issues/32)（プライバシーポリシー）は
+[PR #42](https://github.com/hideyukiMORI/nene-loupe/pull/42)がReadyで、hideが読んでから統合する。
+スキップされた`check`でも統合できてしまう穴は[Issue #30](https://github.com/hideyukiMORI/nene-loupe/issues/30)で塞いだ。
+統合の前にheadのSHAで最新の`check`の成功を読む手順は続ける（[引き継ぎ書](../handoffs/2026-10-03.md)）。
 
 [Issue #25](https://github.com/hideyukiMORI/nene-loupe/issues/25)（下調べ）と
 [Issue #27](https://github.com/hideyukiMORI/nene-loupe/issues/27)（CIのMSVCの版ずれ）は完了し、mainへ統合済み。
@@ -38,6 +40,7 @@ hideが2026-10-03に受理した（[Issue #29](https://github.com/hideyukiMORI/n
 
 ## 次に行うこと
 
-Issue #30（統合の穴）を先に塞ぎ、次にIssue #31（版を1.0.0へ）とIssue #32（プライバシーポリシー）を進める。
+PR #42をhideが読んだら統合し、続けてIssue #33〜#37を進める。Issue #31（版を1.0.0へ）とIssue #38（提出用MSIXの検査）は済んだ。
+mainの版は1.0.0だが、tagとGitHub Releaseは作っていない（公開済みの最新はv0.2.0）。
 公開状態はGitHub Releaseを正本とする。新しい製品作業は焦点Issueを作成してから始める。
 Issue #21の統合後は、READMEの画像がUIの変更に追随しないこと（機械の検査が無いこと）が残る穴である。

@@ -215,6 +215,8 @@ def configuration_checks(root: Path, paths: list[Path], rules: dict) -> list[Fin
         name = path.as_posix()
         if any(word in path.name.lower() for word in rules["forbiddenFileWords"]):
             findings.append(Finding("CNF-005", name, "forbidden configuration filename"))
+        if path.suffix.lower() in rules["signingFileExtensions"]:
+            findings.append(Finding("CNF-009", name, "signing certificate or key file"))
         if path.name in {".clang-tidy", ".clang-format"} and name not in bindings:
             findings.append(Finding("CNF-007", name, "unregistered tool configuration"))
         if path.suffix in rules["configurationExtensions"] or path.name in {"CMakeLists.txt", ".clang-tidy"}:

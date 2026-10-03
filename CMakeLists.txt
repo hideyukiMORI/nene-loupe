@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.31)
 # 版はここが唯一の出どころ。設定モーダルの表示はこれをビルド時に受け取る（FR-011）。
-project(NeNeLoupe VERSION 0.2.0 LANGUAGES CXX)
+project(NeNeLoupe VERSION 1.0.0 LANGUAGES CXX)
 
 set(NENELOUPE_GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
 file(MAKE_DIRECTORY "${NENELOUPE_GENERATED_DIR}")

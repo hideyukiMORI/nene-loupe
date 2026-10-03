@@ -18,6 +18,7 @@ Issue #1時点では製品コードは0。Issue #3の製品・表示確認は第
 | QLT-009 | 失敗系の単体テストを省いて実行 | eng/coverage.py / 同一exeの別プロファイル | 8.33%でQLT-009。全テストへ復帰すると11/12分岐、91.67%で成功 |
 | CNF-006 | 未定義ID・重複定義・状態不一致・証明行欠落・未置換値 | tests/conformance の document_checks 正例・反例 | 正例は指摘0、反例はCNF-006 |
 | CNF-008 | Issue番号のないタスクコメント | tests/conformance の configuration_checks 正例・反例 | 番号付きは指摘0、番号なしはCNF-008 |
+| CNF-009 | `.pfx` / `.p12` / `.cer` / `.pvk` のファイル | tests/conformance の configuration_checks 正例・反例、実リポジトリへの反例 | 証明書の手順を書いた`.md`は指摘0、4つの拡張子はCNF-009（大文字の拡張子を含む） |
 
 ## 3. plannedの部分的な証明
 
@@ -439,3 +440,40 @@ single-thread PMv2 smokeは終了0。120 DPIの実矩形は`[100,100,400,180]`�
 最終全体ゲートとCIはIssue #17のPR、merged mainから再生成する公開ZIPとchecksumはv0.2.0の
 GitHub Releaseを正本として確認する。今回の実測はWindows 10 version 2004以降の全環境を網羅せず、
 公開exeはコード署名していない。
+
+## 11. Draftでは必須checkを失敗させる（Issue #30）
+
+2026-10-03、PR #24を、`check`が実行されていないhead `06c24c1`で統合した。そのheadのcheck runは`cancelled`と`skipped`の
+2本だけだったが、`mergeStateStatus`は`CLEAN`だった。GitHubはスキップされた必須checkを通過として扱う。
+jobの`if: github.event.pull_request.draft == false`を外し、Draftのイベントでは`eng/validate-git.ps1`の
+`QLT-012`でビルドの前に失敗させる形にした。PR #43自身で実測した。
+
+| 実験 | 行ったこと | 結果 |
+| --- | --- | --- |
+| A | DraftのPRへpush（head `0a118cc`） | `check` = `failure`（[run 37096671795](https://github.com/hideyukiMORI/nene-loupe/actions/runs/37096671795)、`QLT-012: full CI gate must not run for draft pull requests.`）。ビルドの前で止まった |
+| B | Draftへpushして、待たずにReady（head `86bd8e1`）。事故と同じ操作 | 2本のrunが同じ秒に作られ、1本は`cancelled`、残った1本は`success`。成功するまで`BLOCKED`、成功してから`CLEAN` |
+| C | Draftへ戻す → 本文を編集 → 待たずにReady、を3回 | 3回とも、Draft側のrunが`cancelled`、Ready側が`success` |
+| D | Readyのrunが走っている間にDraftへ戻して本文を編集（Ready側が取り消される順番を作った） | Ready側のrunは`cancelled`、残ったDraft側のrun（[run 37097178080](https://github.com/hideyukiMORI/nene-loupe/actions/runs/37097178080)）は`failure`。同じheadの最新のcheck runは`failure` |
+
+事故のときに残ったのは`skipped`だった。同じ順番（D）で、いま残るのは`failure`である。
+**確かめられなかったこと:** 事故と同じ順番（Ready側が取り消され、Draft側が残る）は、待たずにReadyにする操作（B・Cの計4回）では再現しなかった。
+Dは同じ順番を別の操作で作ったもので、そのときPRはDraftなので、`mergeStateStatus`が`BLOCKED`になる理由がDraftなのか`failure`なのかは
+この実験では分けられない。Readyのまま最新のcheckが`failure`のPRが`BLOCKED`になることは、PR #26の最初のCI（`failure`と`cancelled`）で見ている。
+
+## 12. 提出用MSIXの検査（Issue #38 / ADR 0008）
+
+2026-10-03、main `15881ae`（製品の版1.0.0）に対して、作業木で実行した。Windows 11 Pro 10.0.26200、Windows SDK 10.0.26100.0。
+
+| 実行 | 結果 |
+| --- | --- |
+| `pwsh -NoProfile -File ./eng/package-release.ps1 -StoreMsix` | 終了0。ZIPと`NeNeLoupe-v1.0.0-windows-x64-store.msix`ができた。stage・ZIP・MSIXのexeのSHA-256はどれも`0379C6E6…DA0AF1FE` |
+| できたMSIXを`makeappx unpack`で開いてマニフェストを読む | `Identity Name="HideyukiMori.NeNeLoupe"`、`Publisher="CN=C37230AA-B52D-403B-9BFD-E7980F088422"`、`Version="1.0.0.0"`、`PublisherDisplayName`は`Hideyuki Mori` |
+| 反例: `package-msix.ps1 -Submission -PackageVersion 0.2.0.0` | 終了1。`MSIX version 0.2.0.0 starts with 0. Microsoft Store rejects it (ADR 0008).` |
+| 反例: `package-msix.ps1 -Submission -CertificateThumbprint ABCDEF` | 終了1。`-CertificateThumbprint cannot be combined with -Submission.` |
+| 反例: stageのexeの末尾に1バイト足して`package-msix.ps1 -Submission` | 終了1。`Release stage executable differs from the executable inside the release archive.` 元のexeへ戻すと終了0 |
+| `package-msix.ps1`（手元の検証用・引数なし） | 終了0。身元は`NeNeLoupe.LocalTest`のまま |
+| 反例: リポジトリ直下に空の`proof.pfx`を置いて`python eng/conformance.py` | `CNF-009: proof.pfx: signing certificate or key file`、違反1件。消すと違反0件 |
+
+**確かめていないこと:** 提出用のMSIXは未署名なので、実機には入れていない（入れて動かした実測は、自己署名の検証用パッケージでの、2026-10-03の調査報告B節のもの）。
+Partner CenterがこのMSIXを受け付けるかは、提出するまで分からない。ロゴは3枚を縮めただけのまま（Issue #34）。
+MSIXの中のexeを別のものに差し替える反例は作っていない（`makeappx`が作った直後に開いて照合する検査は、正常系でハッシュが一致することだけを見た）。

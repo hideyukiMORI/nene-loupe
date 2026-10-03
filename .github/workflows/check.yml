@@ -14,7 +14,6 @@ concurrency:
 jobs:
   check:
     name: check
-    if: github.event.pull_request.draft == false
     runs-on: windows-2022
     timeout-minutes: 20
     steps:
