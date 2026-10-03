@@ -474,7 +474,7 @@ def verify_edge_sampling(window, helper, monitors):
     center_x = virtual_left - 8
     center_y = virtual_top + virtual_height // 2
     move_over_fixture(window, helper, center_x - offset, center_y - offset)
-    await_caption(window, "画面取得不可")
+    await_caption(window, "No capture")
     results.append({
         "virtualDesktop": [virtual_left, virtual_top, virtual_left + virtual_width,
                            virtual_top + virtual_height],

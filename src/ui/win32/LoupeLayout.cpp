@@ -77,7 +77,7 @@ RECT LoupeLayout::toast_icon(UINT dpi)
 
 RECT LoupeLayout::toast_text(UINT dpi)
 {
-    return scaled(RECT{169, 7, 208, 25}, dpi);
+    return scaled(RECT{169, 7, 214, 25}, dpi);
 }
 
 RECT LoupeLayout::gear_glyph(UINT dpi)

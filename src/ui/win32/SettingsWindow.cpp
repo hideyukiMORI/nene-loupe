@@ -51,7 +51,7 @@ std::expected<void, WindowFailure> SettingsWindow::initialize()
     const HMONITOR owner_monitor = MonitorFromWindow(owner_, MONITOR_DEFAULTTONEAREST);
     const auto bounds = fit_to_work_area(centered_on_owner(), owner_monitor);
     if (!CreateWindowExW(WindowLayerStyle::extended(controller_.layer()), class_name,
-                         L"NeNe Loupe 設定", WS_POPUP, bounds.left, bounds.top,
+                         L"NeNe Loupe Settings", WS_POPUP, bounds.left, bounds.top,
                          bounds.right - bounds.left, bounds.bottom - bounds.top, owner_, nullptr,
                          instance_, this))
     {

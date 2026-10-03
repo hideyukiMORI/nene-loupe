@@ -17,8 +17,8 @@ namespace neneloupe
 {
 namespace
 {
-constexpr std::array<const wchar_t *, SettingsLayout::theme_choices> theme_names{
-    L"ダーク", L"ライト", L"システムに従う"};
+constexpr std::array<const wchar_t *, SettingsLayout::theme_choices> theme_names{L"Dark", L"Light",
+                                                                                 L"Follow system"};
 
 int index_of(Theme theme)
 {
@@ -73,7 +73,7 @@ void SettingsRenderer::render_content(HDC dc, const SettingsFrame &frame, UINT d
     brush.fill(dc, bounds, PaletteRole::background);
     brush.outline(dc, bounds, PaletteRole::border);
     SetTextColor(dc, brush.color(PaletteRole::text));
-    LoupeRenderer::write_text(dc, SettingsLayout::title(dpi), L"設定",
+    LoupeRenderer::write_text(dc, SettingsLayout::title(dpi), L"Settings",
                               LoupeRenderer::font_of(L"Segoe UI", 14, FW_BOLD, dpi));
     SetTextColor(dc, brush.color(PaletteRole::muted_text));
     LoupeRenderer::write_text(dc, SettingsLayout::close_glyph(dpi), L"×",
@@ -90,7 +90,7 @@ void SettingsRenderer::render_theme(HDC dc, const SettingsFrame &frame, UINT dpi
 {
     const PaletteBrush brush(frame.palette());
     SetTextColor(dc, brush.color(PaletteRole::muted_text));
-    LoupeRenderer::write_text(dc, SettingsLayout::theme_label(dpi), L"テーマ",
+    LoupeRenderer::write_text(dc, SettingsLayout::theme_label(dpi), L"Theme",
                               LoupeRenderer::font_of(L"Segoe UI", 12, FW_BOLD, dpi));
     const int selected = index_of(frame.theme());
     for (int index = 0; index < SettingsLayout::theme_choices; ++index)
@@ -117,10 +117,10 @@ void SettingsRenderer::render_layer(HDC dc, const SettingsFrame &frame, UINT dpi
 {
     const PaletteBrush brush(frame.palette());
     SetTextColor(dc, brush.color(PaletteRole::muted_text));
-    LoupeRenderer::write_text(dc, SettingsLayout::window_label(dpi), L"ウィンドウ",
+    LoupeRenderer::write_text(dc, SettingsLayout::window_label(dpi), L"Window",
                               LoupeRenderer::font_of(L"Segoe UI", 12, FW_BOLD, dpi));
     SetTextColor(dc, brush.color(PaletteRole::text));
-    LoupeRenderer::write_text(dc, SettingsLayout::topmost_text(dpi), L"常に最前面",
+    LoupeRenderer::write_text(dc, SettingsLayout::topmost_text(dpi), L"Always on top",
                               LoupeRenderer::font_of(L"Segoe UI", 13, FW_NORMAL, dpi));
     const auto layer = frame.layer();
     const bool on = layer == WindowLayer::topmost;
@@ -137,7 +137,7 @@ void SettingsRenderer::render_layer(HDC dc, const SettingsFrame &frame, UINT dpi
     draw_disc(dc, SettingsLayout::switch_knob(layer, dpi), knob_color, knob_color);
     SetTextColor(dc, brush.color(PaletteRole::muted_text));
     LoupeRenderer::write_text(dc, SettingsLayout::topmost_help(dpi),
-                              L"オフにすると通常の重なり順になります。",
+                              L"When off, normal stacking order applies.",
                               LoupeRenderer::font_of(L"Segoe UI", 11, FW_NORMAL, dpi));
 }
 
@@ -146,16 +146,16 @@ void SettingsRenderer::render_about(HDC dc, const SettingsFrame &frame, UINT dpi
     const PaletteBrush brush(frame.palette());
     const auto body = LoupeRenderer::font_of(L"Segoe UI", 12, FW_NORMAL, dpi);
     SetTextColor(dc, brush.color(PaletteRole::muted_text));
-    LoupeRenderer::write_text(dc, SettingsLayout::about_label(dpi), L"このアプリについて",
+    LoupeRenderer::write_text(dc, SettingsLayout::about_label(dpi), L"About",
                               LoupeRenderer::font_of(L"Segoe UI", 12, FW_BOLD, dpi));
     SetTextColor(dc, brush.color(PaletteRole::text));
     LoupeRenderer::write_text(dc, SettingsLayout::about_version(dpi),
-                              std::wstring(L"NeNe Loupe  版 ") + NENELOUPE_VERSION, body);
+                              std::wstring(L"NeNe Loupe  version ") + NENELOUPE_VERSION, body);
     SetTextColor(dc, brush.color(PaletteRole::muted_text));
     LoupeRenderer::write_text(dc, SettingsLayout::about_copyright(dpi),
                               L"© 2026 Hideyuki Mori — MIT License", body);
     LoupeRenderer::write_text(dc, SettingsLayout::about_cmyk(dpi),
-                              L"CMYK は ICC を使わない素朴換算です。", body);
+                              L"CMYK is a naive conversion without ICC.", body);
     if (frame.status() == SettingsStatus::ok)
     {
         return;

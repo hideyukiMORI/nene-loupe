@@ -51,7 +51,7 @@ window with `PrintWindow`. Ordinary runs take no arguments; see
   <img src="docs/images/loupe-light.png" width="240"
        alt="The same window in its light theme: the magnified colour grid, the green colour bar, the HEX label and the value #33E699 on a white panel.">
   <img src="docs/images/loupe-settings.png" width="320"
-       alt="The settings window in Japanese: theme options for dark, light and follow the system with dark selected, an always-on-top switch turned on, and the version, copyright and a note that CMYK is a naive conversion.">
+       alt="The settings window: theme options for dark, light and follow the system with dark selected, an always-on-top switch turned on, and the version, copyright and a note that CMYK is a naive conversion.">
 </p>
 
 <p align="center">

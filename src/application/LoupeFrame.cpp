@@ -19,9 +19,9 @@ std::wstring failure_caption(SamplingFailure failure)
     switch (failure)
     {
     case SamplingFailure::position_unavailable:
-        return L"位置取得不可";
+        return L"No position";
     case SamplingFailure::capture_unavailable:
-        return L"画面取得不可";
+        return L"No capture";
     }
     std::unreachable();
 }
