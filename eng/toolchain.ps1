@@ -27,7 +27,8 @@ foreach ($variable in @('CL', '_CL_', 'CFLAGS', 'CXXFLAGS', 'LDFLAGS')) {
     if ([Environment]::GetEnvironmentVariable($variable)) { throw "QLT-011: clear external build flags in $variable." }
 }
 $compiler = (Get-Command cl -ErrorAction Stop).Source
-if ((Get-Item -LiteralPath $compiler).VersionInfo.FileVersion -ne $versions.msvcCompiler) { throw "QLT-011: MSVC must be $($versions.msvcCompiler)." }
+$compilerVersion = (Get-Item -LiteralPath $compiler).VersionInfo.FileVersion
+if ($compilerVersion -ne $versions.msvcCompiler) { throw "QLT-011: MSVC must be $($versions.msvcCompiler); actual: $compilerVersion at $compiler" }
 $checks = @(
     @{ Name = 'cmake'; Expected = $versions.cmake },
     @{ Name = 'ninja'; Expected = $versions.ninja },
