@@ -98,7 +98,9 @@ head が動いたら Draft に戻して再度 Ready にする。古い成功 SHA
 job を `if` で飛ばすと「実行されていない」が「通った」に化ける。draft のときは `eng/validate-git.ps1` がビルドの前に
 `QLT-012` で止め、失敗した `check` が統合を止める。
 
-- 機械強制: **planned**（ruleset の必須 check と strict up-to-date）
+- 機械強制: **planned**（ruleset の必須 check と strict up-to-date。draft のイベントで `check` が失敗することは
+  Issue #30 で実測した: [quality/gate-proofs.md](quality/gate-proofs.md) 第 11 節。
+  head が動いたら Draft に戻す処理は未実装で、人の手順のまま）
 
 ### QLT-013 — 環境依存の主張は正直に名付ける
 
