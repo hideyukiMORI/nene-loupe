@@ -534,3 +534,37 @@ Windows 11 Pro 10.0.26200、Windows SDK 10.0.26100.0。証明書は持ち出し�
 **確かめていないこと:** スタートメニューとタスクバーの実際の画面は見ていない（シェルが返すアイコンを取り出して見ただけ）。
 24pxでシェルがどの候補を使ったかは特定していない。Storeが署名したパッケージでは確かめていない。
 `Wide310x150Logo`・`Square71x71Logo`・`Square310x310Logo`は作っていない。
+
+## 16. Windows App Certification Kit（Issue #35 / #56）
+
+2026-10-03、Windows App Certification Kit 10.0.26100.7705を、自己署名の検証用パッケージ（`NeNeLoupe.LocalTest` 1.0.0.0、main `023e462`のRelease）に対して
+管理者権限で実行した。Windows 11 Pro 10.0.26200。報告は`D:/NeNeLoupe/wack/report.xml`（Git対象外）。
+
+```powershell
+# 管理者の PowerShell で。<PackageFullName> は Get-AppxPackage NeNeLoupe.LocalTest の値
+& 'C:\Program Files (x86)\Windows Kits\10\App Certification Kit\appcert.exe' reset
+& 'C:\Program Files (x86)\Windows Kits\10\App Certification Kit\appcert.exe' test -packagefullname <PackageFullName> -reportoutputpath <報告の.xml>
+```
+
+| 結果 | 件数 | 項目 |
+| --- | --- | --- |
+| PASS | 23 | 署名されたファイル、UACの実行レベル、アプリケーション数、アプリ マニフェスト、ファイル関連付け、レジストリ、エンタープライズ機能、リソース パッケージ、禁止されたファイル、プライベート コード署名、アプリ リソース、ブランド化、デバッグの構成、特殊用途の機能、Windowsランタイム メタデータ6項目、アーカイブ ファイル、ブロック済みの実行可能ファイル、プラットフォームに適したファイル |
+| WARNING | 1 | 高DPIサポート（`DPIAwarenessValidation`）。「バイナリ …\NeNeLoupe.exe を処理できませんでした。アプリ … は DPI 対応ではありません。」 |
+| FAIL | 0 | — |
+
+全体の結果は`WARNING`、`appcert.exe`の終了コードは0。アプリの種類は`Centennial`（包んだWin32）と判定された。
+「アプリ リソース」と「ブランド化」がPASSなので、Issue #34のロゴ一式と`resources.pri`は検査を通っている。
+
+高DPIの警告について（Issue #56）:
+
+- 製品はDPI対応である。埋め込みのmanifestは`dpiAwareness`で`PerMonitorV2`を宣言し、120 DPIと144 DPIの実機で窓が300×80・360×96画素になる（第13節・第14節の実写）。
+- **仮説「古い形式の`dpiAware`（2005の名前空間）が無いから」は外れた。** manifestに`<dpiAware>true/pm</dpiAware>`を足したReleaseを同じ手順で検査すると、
+  同じ警告が同じ文言で出た（PASS 23・WARNING 1）。効果が無いので、この変更は製品に入れていない。
+- 原因は特定できていない。文言は「バイナリを処理できませんでした」であり、検査がexeを読めなかった結果としての警告とみられるが、確かめていない。
+
+実測の後片付け: 検証用パッケージは消し、パッケージ専用の保存場所も残っていない。秘密鍵は証明書ごと消した。hideの設定ファイルのSHA-256は実測の前後で同じ。
+**「ローカル コンピューター → 信頼されたユーザー」に入れた公開側の証明書（`CN=NeNe Loupe MSIX Local Test`、拇印`1A4625C251A0331DFD6F9CA83C08AB5208EDB7F8`、
+2026-10-17失効）は、消すための昇格がUACで取り消されたため残っている。** 対になる秘密鍵は消してあるので、この証明書で新しく署名することはできない。
+
+**確かめていないこと:** Storeが署名したパッケージ・提出用の身元（`HideyukiMori.NeNeLoupe`）のパッケージでは回していない（未署名では入れられないため）。
+警告があっても提出できるかは、Microsoftの文書で確かめていない。

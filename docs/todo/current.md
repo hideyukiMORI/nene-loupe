@@ -7,7 +7,7 @@
 [ADR 0008](../adr/0008-add-msix-store-channel.md)（配布経路にMicrosoft Store（MSIX）を足し、ZIPは残す）を
 hideが2026-10-03に受理した（[Issue #29](https://github.com/hideyukiMORI/nene-loupe/issues/29)）。実装はこれからで、
 実際に配っているのはportable ZIPの1本のまま。Store提出までの作業は
-[Issue #31](https://github.com/hideyukiMORI/nene-loupe/issues/31)〜[#38](https://github.com/hideyukiMORI/nene-loupe/issues/38)に分けてある（#34と#35を除いて完了）
+[Issue #31](https://github.com/hideyukiMORI/nene-loupe/issues/31)〜[#38](https://github.com/hideyukiMORI/nene-loupe/issues/38)に分けてある（すべて完了）
 （対応表はADR 0008の「受理の記録」）。開発者アカウントの登録とアプリ名`NeNe Loupe`の予約は済んだ（下書き段階・申請は始めていない）。身元の値はADR 0008の追記にある。
 
 プライバシーポリシー（[Issue #32](https://github.com/hideyukiMORI/nene-loupe/issues/32)）はhideが読んで統合済み（`PRIVACY.md`）。
@@ -39,7 +39,8 @@ hideが2026-10-03に受理した（[Issue #29](https://github.com/hideyukiMORI/n
 
 ## 次に行うこと
 
-残りはIssue #34（ロゴ一式）と#35（WACK）。どちらも実機への導入と管理者権限が要る。
+Store提出までのIssueはすべて済んだ。残りはhideの操作（Partner Centerでの申請）である。
+Windows App Certification KitはPASS 23・WARNING 1・FAIL 0（高DPIの警告は原因が分かっていない。`docs/quality/gate-proofs.md`第16節）。
 掲載用の画像は`docs/images/store/`、掲載文と年齢区分の根拠は`docs/release/store-listing.md`にある。アプリの表示は英語だけになった（Issue #52）。
 mainの版は1.0.0だが、tagとGitHub Releaseは作っていない（公開済みの最新はv0.2.0）。
 公開状態はGitHub Releaseを正本とする。新しい製品作業は焦点Issueを作成してから始める。
