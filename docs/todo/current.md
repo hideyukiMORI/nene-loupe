@@ -39,7 +39,8 @@ hideが2026-10-03に受理した（[Issue #29](https://github.com/hideyukiMORI/n
 
 ## 次に行うこと
 
-Store提出までのIssueはすべて済んだ。残りはhideの操作（Partner Centerでの申請）である。
+**2026-10-03にMicrosoft Storeへ提出した（Submission 1・認定中）。** 審査の結果待ちである。
+認定されたら、main `0c26ed4`に`v1.0.0`のtagを打ち、控えてあるZIPをGitHub Releaseへ出す（手順は[引き継ぎ書](../handoffs/2026-10-03.md)）。
 Windows App Certification KitはPASS 23・WARNING 1・FAIL 0（高DPIの警告は原因が分かっていない。`docs/quality/gate-proofs.md`第16節）。
 掲載用の画像は`docs/images/store/`、掲載文と年齢区分の根拠は`docs/release/store-listing.md`にある。アプリの表示は英語だけになった（Issue #52）。
 mainの版は1.0.0だが、tagとGitHub Releaseは作っていない（公開済みの最新はv0.2.0）。

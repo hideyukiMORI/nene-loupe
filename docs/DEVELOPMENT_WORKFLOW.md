@@ -188,6 +188,8 @@ pwsh -NoProfile -File ./eng/package-release.ps1 -StoreMsix   # out/msix/NeNeLoup
    申請オプションに、`runFullTrust` が必要な理由と認定の注意書きを入れる（文面の場所は下）。
 5. 申請の直前に Store Policies を読み直す（下調べで読んだのは版 7.20・2026-10-22 発効）。
 6. **Store の認定が出てから**、提出したのと同じ commit に `v<PROJECT_VERSION>` の tag を打ち、GitHub Release へ ZIP と `SHA256SUMS` を公開する。
+   公開する ZIP は、提出用の MSIX と同じ実行で作ったもの（exe の SHA-256 が同じもの）を使い、作り直さない。
+   そのため、提出のときに ZIP・`SHA256SUMS`・MSIX を `out/` の外へ控えておく。ビルドがバイト単位で再現するかは確かめていない。
    審査で製品の修正を求められた場合は、版を上げて 1 からやり直す。認定の前に ZIP を出さないのは、ZIP と Store の版をずらさないためである
    （hide の決定・2026-10-03）。
 
