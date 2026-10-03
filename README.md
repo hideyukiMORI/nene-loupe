@@ -25,6 +25,8 @@ the centre colour. Drag the lens or background to move; press Esc or Alt+F4 to c
 - Cycle formats with the label, or choose one from the right-click menu.
 - The gear opens theme (dark / light / system), always-on-top, copyright and version.
 - Settings apply immediately and persist in `%LOCALAPPDATA%\NeNeLoupe\settings.v1.txt`.
+- Nothing is collected or sent, and the application never connects to a network: see the
+  [privacy policy](PRIVACY.md).
 
 The window is excluded from desktop capture to reveal its backdrop, so it will also be absent
 from ordinary screenshots and screen sharing. HDR and ICC colour management are outside the
