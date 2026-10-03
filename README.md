@@ -65,6 +65,10 @@ last picture is the same window at 150% (144 DPI), 360×96 pixels. This machine 
 display. The lens is magnifying a 7×7 patch of screen pixels the capture script painted behind
 it, and the value is the centre pixel of that patch.
 
+The same script also writes the Microsoft Store listing pictures to `docs/images/store/`. Those
+three are composed, not photographs: the captures above, enlarged by whole numbers without
+smoothing, placed on a plain 1920×1080 card with a caption.
+
 ## Development
 
 Install the versions in `eng/tool-versions.json` (Visual Studio Build Tools with C++ tools,

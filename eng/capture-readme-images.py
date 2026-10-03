@@ -409,6 +409,57 @@ def social_preview(shot_image, path):
             "composed": "real capture of the dark shot, scaled 2x, on a plain card"}
 
 
+STORE_SIZE = (1920, 1080)  # Microsoft Store desktop screenshots must be at least 1366x768
+
+
+def store_card(path, background, ink, muted, headline, detail, placements, text_at):
+    """A Store listing picture: real captures, scaled by whole numbers, on a plain card."""
+    from PIL import ImageDraw, ImageFont
+    card = Image.new("RGB", STORE_SIZE, background)
+    for image, scale, position in placements:
+        enlarged = image.resize((image.width * scale, image.height * scale), Image.NEAREST)
+        assert position[0] >= 0 and position[1] >= 0
+        assert position[0] + enlarged.width <= STORE_SIZE[0], "capture does not fit the card"
+        assert position[1] + enlarged.height <= STORE_SIZE[1], "capture does not fit the card"
+        card.paste(enlarged, position)
+    draw = ImageDraw.Draw(card)
+    fonts = Path(os.environ["WINDIR"]) / "Fonts"
+    title = ImageFont.truetype(str(fonts / "segoeuib.ttf"), 84)
+    body = ImageFont.truetype(str(fonts / "segoeui.ttf"), 38)
+    x, y, anchor = text_at
+    draw.text((x, y), headline, font=title, fill=ink, anchor=anchor)
+    draw.text((x, y + 92), detail, font=body, fill=muted, anchor=anchor)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    card.save(path, optimize=True)
+    return {"name": path.stem, "file": str(path).replace("\\", "/"),
+            "pixels": list(card.size), "bytes": path.stat().st_size,
+            "composed": "real captures scaled by whole numbers on a plain card: " + ", ".join(
+                f"{image.width}x{image.height} x{scale}" for image, scale, _ in placements)}
+
+
+def store_listing(images, directory):
+    """The Store listing pictures (Issue #33). Composed, like the social preview."""
+    dark, light, settings = images["dark"], images["light"], images["settings"]
+
+    def centred(image, scale, top):
+        return (image, scale, ((STORE_SIZE[0] - image.width * scale) // 2, top))
+
+    return [
+        store_card(directory / "store-1-loupe-dark.png", (18, 23, 29), (240, 244, 248),
+                   (150, 162, 175), "NeNe Loupe",
+                   "See the pixels behind the lens, and copy the colour in the centre",
+                   [centred(dark, 4, 520)], (960, 250, "mm")),
+        store_card(directory / "store-2-loupe-light.png", (236, 240, 244), (24, 30, 38),
+                   (88, 100, 114), "Dark or light",
+                   "Pick a theme or follow Windows. HEX, RGB, CMYK, HSL and HSV",
+                   [centred(light, 4, 520)], (960, 250, "mm")),
+        store_card(directory / "store-3-settings.png", (18, 23, 29), (240, 244, 248),
+                   (150, 162, 175), "Small on purpose",
+                   "Theme and always-on-top. Nothing else to set up",
+                   [(dark, 3, (70, 600)), (settings, 2, (1050, 50))], (70, 330, "lm")),
+    ]
+
+
 def main():
     root = Path(__file__).resolve().parents[1]
     parser = argparse.ArgumentParser(description=__doc__)
@@ -442,6 +493,7 @@ def main():
     for shot in shots:
         images[shot["name"]] = capture(executable, output, shot["monitor"], shot, results)
     results.append(social_preview(images["dark"], arguments.images / "social-preview.png"))
+    results.extend(store_listing(images, arguments.images / "store"))
     (output / "capture-results.json").write_text(
         json.dumps({"shots": results, "monitors": available}, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(results, indent=2, ensure_ascii=False))
