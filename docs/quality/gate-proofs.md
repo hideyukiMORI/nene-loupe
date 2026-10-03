@@ -439,3 +439,22 @@ single-thread PMv2 smokeは終了0。120 DPIの実矩形は`[100,100,400,180]`�
 最終全体ゲートとCIはIssue #17のPR、merged mainから再生成する公開ZIPとchecksumはv0.2.0の
 GitHub Releaseを正本として確認する。今回の実測はWindows 10 version 2004以降の全環境を網羅せず、
 公開exeはコード署名していない。
+
+## 11. Draftでは必須checkを失敗させる（Issue #30）
+
+2026-10-03、PR #24を、`check`が実行されていないhead `06c24c1`で統合した。そのheadのcheck runは`cancelled`と`skipped`の
+2本だけだったが、`mergeStateStatus`は`CLEAN`だった。GitHubはスキップされた必須checkを通過として扱う。
+jobの`if: github.event.pull_request.draft == false`を外し、Draftのイベントでは`eng/validate-git.ps1`の
+`QLT-012`でビルドの前に失敗させる形にした。PR #43自身で実測した。
+
+| 実験 | 行ったこと | 結果 |
+| --- | --- | --- |
+| A | DraftのPRへpush（head `0a118cc`） | `check` = `failure`（[run 37096671795](https://github.com/hideyukiMORI/nene-loupe/actions/runs/37096671795)、`QLT-012: full CI gate must not run for draft pull requests.`）。ビルドの前で止まった |
+| B | Draftへpushして、待たずにReady（head `86bd8e1`）。事故と同じ操作 | 2本のrunが同じ秒に作られ、1本は`cancelled`、残った1本は`success`。成功するまで`BLOCKED`、成功してから`CLEAN` |
+| C | Draftへ戻す → 本文を編集 → 待たずにReady、を3回 | 3回とも、Draft側のrunが`cancelled`、Ready側が`success` |
+| D | Readyのrunが走っている間にDraftへ戻して本文を編集（Ready側が取り消される順番を作った） | Ready側のrunは`cancelled`、残ったDraft側のrun（[run 37097178080](https://github.com/hideyukiMORI/nene-loupe/actions/runs/37097178080)）は`failure`。同じheadの最新のcheck runは`failure` |
+
+事故のときに残ったのは`skipped`だった。同じ順番（D）で、いま残るのは`failure`である。
+**確かめられなかったこと:** 事故と同じ順番（Ready側が取り消され、Draft側が残る）は、待たずにReadyにする操作（B・Cの計4回）では再現しなかった。
+Dは同じ順番を別の操作で作ったもので、そのときPRはDraftなので、`mergeStateStatus`が`BLOCKED`になる理由がDraftなのか`failure`なのかは
+この実験では分けられない。Readyのまま最新のcheckが`failure`のPRが`BLOCKED`になることは、PR #26の最初のCI（`failure`と`cancelled`）で見ている。
