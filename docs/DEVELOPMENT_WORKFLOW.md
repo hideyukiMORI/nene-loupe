@@ -161,3 +161,56 @@ pwsh -NoProfile -File ./eng/package-release.ps1
 公開はsquash統合後のcleanな`main`から同じコマンドで作り直し、x64、埋込版、manifest、ICON、
 静的runtime、ZIP内容、checksum、短い実Windows起動を確認してから行う。`v<PROJECT_VERSION>`のtagと
 同名GitHub ReleaseへZIPと`SHA256SUMS`を添付する。署名、インストーラ、自動更新は別の焦点Issueとする。
+
+### Microsoft Store への提出（ADR 0008）
+
+Store へは、ZIP で配るのと同じ exe を MSIX に包んで出す。提出用の MSIX を作る経路は次の 1 つである。
+
+```powershell
+pwsh -NoProfile -File ./eng/package-release.ps1 -StoreMsix   # out/msix/NeNeLoupe-v<版>-windows-x64-store.msix
+```
+
+- **身元**は `eng/store-identity.json` の 1 か所にある。Partner Center の「製品 ID の表示」の値と一字一句同じにする。
+  値が変わったら、このファイルだけを直す。
+- **署名しない。** 認定のあと Store が署名する。証明書と鍵のファイルはリポジトリに置かない（CNF-009）。
+- **版**は製品の版に `.0` を足した 4 つ組になる。Store は先頭が 0 の版を受け付けず、4 つ目は Store が使うので 0 のままにする。
+- スクリプトは、stage・ZIP の中・MSIX の中の exe の SHA-256 が同じでなければ失敗する。この検査は全体ゲートの外にある。
+
+提出の順番:
+
+1. 版を上げる PR を統合する（版の入力は `CMakeLists.txt` だけ）。
+2. clean な `main` で上のコマンドを実行する。
+3. Windows App Certification Kit を通す。**手順はまだ無い**（Issue #35）。
+4. Partner Center で申請を始め、パッケージ・掲載文・スクリーンショット・年齢区分の回答・プライバシーポリシーの URL を入れる。
+   提出オプションに、下の `runFullTrust` の説明文と審査員向けの注記を入れる。
+5. 申請の直前に Store Policies を読み直す（下調べで読んだのは版 7.20・2026-10-22 発効）。
+
+**決めていないこと:** tag と GitHub Release（ZIP）を、Store の認定の前に公開するか後に公開するか。hide が決める。
+
+`runFullTrust` の説明文（提出オプションの入力欄へ。**案**であり、提出の前に hide が確かめる）:
+
+```text
+NeNe Loupe is an existing Win32 desktop application (C++ / Win32, no UWP components) packaged
+with MSIX. runFullTrust is required because the packaged executable is a classic Win32 process
+(EntryPoint "Windows.FullTrustApplication"). The app reads the pixels behind its own window
+through GDI to show a magnified view and the colour value, writes text to the clipboard when the
+user clicks the value, and saves three settings to a local file. It does not require elevation,
+makes no network connections, and installs no services or drivers.
+```
+
+審査員向けの注記（Notes for certification の入力欄へ。同じく**案**）:
+
+```text
+The application window is intentionally excluded from screen capture
+(SetWindowDisplayAffinity with WDA_EXCLUDEFROMCAPTURE) so that the loupe can see what is behind
+it. Because of this, the window does not appear in screenshots or screen recordings. This is
+by design, not a rendering failure.
+
+To test: launch the app and drag it over any content. The left pane shows the 7x7 pixels behind
+the lens magnified 8x; the value on the right is the colour of the centre pixel. Click the value
+to copy it. Click the format label to cycle RGB / HEX / CMYK / HSL / HSV. The gear opens the
+settings. Press Esc to close. No account or sign-in is needed.
+```
+
+この注記について確かめていないこと: 審査員がリモート接続や仮想マシンの画面越しに試した場合に、窓が見えるかどうか。
+見えない場合の逃げ道は、除外を外す診断用の起動引数 `--allow-screen-capture`（ADR 0007）だが、包んだアプリに引数を渡す手順は確かめていない。
