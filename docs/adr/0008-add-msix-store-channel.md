@@ -110,6 +110,19 @@ hide は「ほぼ完成しているので、どこかで公開したい」と言
 | マニフェストの身元が Partner Center の値と一致する | 不能 | 値は Partner Center の中にあり、リポジトリからは確かめられない。提出時に Partner Center が拒否する |
 | 審査に通ること・Store が署名すること | 不能 | Microsoft の側で行われる |
 
+### 追記（2026-10-03・Issue #38）— 強制の実装
+
+上の表は受理の時点の記録なので書き換えない。Issue #38 で次のとおり実装した。
+
+| 守りたいこと | いまの強制 |
+| --- | --- |
+| MSIX の exe は Release の正規経路が作ったものである | `eng/package-release.ps1 -StoreMsix` が ZIP を作って検査したあと、続けて `eng/package-msix.ps1 -Submission` を呼ぶ。`package-msix.ps1` は stage の exe・ZIP の中の exe・作った MSIX を開いて取り出した exe の SHA-256 が同じでなければ失敗する。**スクリプトの中の検査で、全体ゲート（`eng/check.ps1`）の外にある** |
+| Store に出す版の先頭が 0 でない | `-Submission` のとき、先頭が 0 の版は失敗する（手元の検証用の作成では警告のまま）。同じくスクリプトの中の検査 |
+| 証明書と鍵をリポジトリに入れない | **active。** 規約検査 CNF-009 が `.pfx` / `.p12` / `.cer` / `.pvk` を拒否する（全体ゲートの中） |
+| マニフェストの身元が Partner Center の値と一致する | 不能のまま。値の置き場は `eng/store-identity.json` の 1 か所にし、`-Submission` はそこからしか読まない（引数での上書きと署名の併用は失敗する）。値そのものが Partner Center と合っているかは、提出時に Partner Center が判定する |
+
+反例の実測は [quality/gate-proofs.md](../quality/gate-proofs.md) 第 12 節にある。
+
 ## 結果
 
 得られるもの:
