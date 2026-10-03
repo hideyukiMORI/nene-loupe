@@ -47,24 +47,6 @@ function Get-ZipEntryHash([string]$archive, [string]$entryName) {
     finally { $zip.Dispose() }
 }
 
-function Save-Logo([Drawing.Icon]$icon, [int]$size, [string]$path) {
-    $source = $icon.ToBitmap()
-    $logo = [Drawing.Bitmap]::new($size, $size, [Drawing.Imaging.PixelFormat]::Format32bppArgb)
-    $graphics = [Drawing.Graphics]::FromImage($logo)
-    try {
-        $graphics.InterpolationMode = [Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
-        $graphics.PixelOffsetMode = [Drawing.Drawing2D.PixelOffsetMode]::HighQuality
-        $graphics.Clear([Drawing.Color]::Transparent)
-        $graphics.DrawImage($source, 0, 0, $size, $size)
-        $logo.Save($path, [Drawing.Imaging.ImageFormat]::Png)
-    }
-    finally {
-        $graphics.Dispose()
-        $logo.Dispose()
-        $source.Dispose()
-    }
-}
-
 if (-not (Test-Path -LiteralPath $executable -PathType Leaf)) {
     throw 'Release stage executable is missing. Run eng/package-release.ps1 first.'
 }
@@ -103,16 +85,10 @@ Remove-MsixDirectory $layoutDir
 New-Item -ItemType Directory -Force -Path $assetsDir | Out-Null
 Copy-Item -LiteralPath $executable -Destination (Join-Path $layoutDir 'NeNeLoupe.exe')
 
-Add-Type -AssemblyName System.Drawing
-$icon = [Drawing.Icon]::new((Join-Path $repoRoot 'src/app/NeNeLoupe.ico'), 256, 256)
-try {
-    Save-Logo $icon 44 (Join-Path $assetsDir 'Square44x44Logo.png')
-    Save-Logo $icon 150 (Join-Path $assetsDir 'Square150x150Logo.png')
-    Save-Logo $icon 50 (Join-Path $assetsDir 'StoreLogo.png')
-}
-finally {
-    $icon.Dispose()
-}
+# ロゴは eng/render-app-icon.py が正本の SVG から作って置いたもの（倍率別・targetsize 別）を、そのまま入れる。
+$logos = @(Get-ChildItem -LiteralPath (Join-Path $repoRoot 'src/app/msix') -Filter '*.png' -File)
+if ($logos.Count -ne 25) { throw "Expected 25 MSIX logo files in src/app/msix; found $($logos.Count)." }
+foreach ($logo in $logos) { Copy-Item -LiteralPath $logo.FullName -Destination (Join-Path $assetsDir $logo.Name) }
 
 # MinVersion は ADR 0005 の対応環境（Windows 10 version 2004）と同じ。
 $manifest = @"
@@ -151,6 +127,18 @@ $manifest = @"
 </Package>
 "@
 [IO.File]::WriteAllText((Join-Path $layoutDir 'AppxManifest.xml'), $manifest, [Text.UTF8Encoding]::new($false))
+
+# 倍率別・targetsize 別のロゴを Windows が選べるよう、資源の索引（resources.pri）を作って入れる。
+$priConfig = Join-Path $msixRoot 'priconfig.xml'
+& makepri.exe createconfig /cf $priConfig /dq en-US /pv 10.0.0 /o | Out-Null
+if ($LASTEXITCODE -ne 0) { throw 'MSIX resource index configuration failed.' }
+# 既定の設定は言語・倍率ごとに別の資源パッケージへ分ける。1 つのパッケージに 1 つの索引を入れるので、その指定を外す。
+$configText = [IO.File]::ReadAllText($priConfig)
+$configText = [regex]::Replace($configText, '(?s)\s*<packaging>.*?</packaging>', '')
+[IO.File]::WriteAllText($priConfig, $configText, [Text.UTF8Encoding]::new($false))
+& makepri.exe new /pr $layoutDir /cf $priConfig /mn (Join-Path $layoutDir 'AppxManifest.xml') /of (Join-Path $layoutDir 'resources.pri') /o | Out-Null
+if ($LASTEXITCODE -ne 0) { throw 'MSIX resource index creation failed.' }
+if (-not (Test-Path -LiteralPath (Join-Path $layoutDir 'resources.pri') -PathType Leaf)) { throw 'MSIX resource index is missing.' }
 
 $packageSuffix = if ($Submission) { '-store' } else { '' }
 $packagePath = Join-Path $msixRoot "NeNeLoupe-v$version-windows-x64$packageSuffix.msix"

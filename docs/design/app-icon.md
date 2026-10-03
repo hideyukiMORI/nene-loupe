@@ -34,6 +34,12 @@ Chrome 152.0.7977.76をdevice scale factor 1、透明背景で使い、SVGのroo
 width/heightだけを各対象pxへ変えた一時入力を個別に描画する。内側の背景rectは256 SVG unitのまま
 維持する。Pillow 12.3.0で32-bit ICOへ格納し、256px画像だけをPNG圧縮する。
 
+同じコマンドが、MSIXのロゴ一式（Issue #34）も同じSVGから描いて`src/app/msix/`へ置く。ロゴは正方形いっぱいに描くので、
+各ファイルはSVGをその画素数で描いたものである。`Square44x44Logo`・`Square150x150Logo`・`StoreLogo`を倍率100・125・150・200・400%で、
+`Square44x44Logo`を`targetsize`16・24・32・48・256の`altform-unplated`と`altform-lightunplated`で持つ（計25枚）。
+Storeの掲載用の300pxのロゴは`docs/images/store/store-logo-300.png`へ置く。`eng/package-msix.ps1`は25枚をそのまま包み、
+`makepri`で資源の索引（`resources.pri`）を作って入れる。
+
 ```powershell
 python -B eng/render-app-icon.py --chrome "C:\Program Files\Google\Chrome\Application\chrome.exe"
 ```

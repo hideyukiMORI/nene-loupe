@@ -514,3 +514,23 @@ Windows 11 Pro 10.0.26200。モニタは4枚（120 DPIが主、144 DPIが2枚、
 **確かめていないこと:** `Failed`（コピー失敗）、`No position`・`No capture`（採取失敗）、起動失敗のメッセージボックス、設定の読み書き失敗の文言は、
 失敗を実機で起こしていないので画面では見ていない。`No capture`と`No position`は単体テストで文字列だけを確かめた。
 `Failed`は`Copied`より幅が狭い（同じ書体での見積もり）。144 DPIと168 DPIでは通知を撮っていない。
+
+## 15. MSIXのロゴ一式と資源の索引（Issue #34）
+
+2026-10-03、作業木でロゴを作り、自己署名の検証用パッケージ（`NeNeLoupe.LocalTest` 1.0.0.0）を実機に入れて確かめた。
+Windows 11 Pro 10.0.26200、Windows SDK 10.0.26100.0。証明書は持ち出し不可の鍵で証明書ストアに作り、ファイルの鍵は作っていない。
+
+| 確かめたこと | 結果 |
+| --- | --- |
+| `python -B eng/render-app-icon.py --chrome …` | ロゴ25枚（`src/app/msix/`）と掲載用の300pxのロゴができた。ICOは再生成の前後でSHA-256が同じ |
+| `pwsh -NoProfile -File ./eng/package-msix.ps1 -Submission` | 終了0。`resources.pri`が入った |
+| `makepri dump`で索引を読む | `Square44x44Logo.png`に`TargetSize-16/24/32/48/256`×`AlternateForm-UNPLATED/LIGHTUNPLATED`と`Scale-100〜400`、`Square150x150Logo.png`と`StoreLogo.png`に`Scale-100〜400`の候補が入っている |
+| 検証用パッケージの導入 | 証明書を「ローカル コンピューター → 信頼されたユーザー」に入れた後（管理者権限）、`Add-AppxPackage`で入った。`SignatureKind: Developer` |
+| シェルが選ぶアイコン（`IShellItemImageFactory::GetImage`を`shell:AppsFolder\<AUMID>`に対して呼ぶ） | 16・32・48・256pxは、リポジトリの`targetsize`のロゴと不透明な画素がすべて一致（差0）。24pxは同じ寸法で返るが画素は一致しない（最大差58）。シェルが別の候補から作っているとみられる |
+| 取り出したアイコンを白と濃い灰色の地に置いて見る | 5つの寸法とも、4色の市松と虫眼鏡が読める |
+
+探針は`D:/NeNeLoupe/probe/shell-icon-probe.py`（Git対象外）。画面もポインタも操作していない。
+
+**確かめていないこと:** スタートメニューとタスクバーの実際の画面は見ていない（シェルが返すアイコンを取り出して見ただけ）。
+24pxでシェルがどの候補を使ったかは特定していない。Storeが署名したパッケージでは確かめていない。
+`Wide310x150Logo`・`Square71x71Logo`・`Square310x310Logo`は作っていない。
