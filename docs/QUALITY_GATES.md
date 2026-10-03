@@ -94,6 +94,10 @@ MSVC の `/showIncludes` は実際の出力と CMake / Ninja の検出 prefix �
 CI の起動条件は `ready_for_review`（＋非 draft の `synchronize` / `edited`）。draft の間にフルゲートを回さない。
 head が動いたら Draft に戻して再度 Ready にする。古い成功 SHA・スキップされたジョブ・狭い検査は、通ったフルゲートの代わりにならない。
 
+**draft のイベントでは、必須 check の `check` をスキップさせず、失敗させる。** GitHub はスキップされた必須 check を通過として扱うので、
+job を `if` で飛ばすと「実行されていない」が「通った」に化ける。draft のときは `eng/validate-git.ps1` がビルドの前に
+`QLT-012` で止め、失敗した `check` が統合を止める。
+
 - 機械強制: **planned**（ruleset の必須 check と strict up-to-date）
 
 ### QLT-013 — 環境依存の主張は正直に名付ける
