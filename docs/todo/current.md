@@ -4,6 +4,12 @@
 
 ## 現在のIssue
 
+[Issue #25](https://github.com/hideyukiMORI/nene-loupe/issues/25)が、MSIX化とMicrosoft Store申請の下調べの追跡先。
+裏取りと実測は[調査報告](../reports/2026-10-03-store-msix-research.md)、配布経路の判断は
+[ADR 0008](../adr/0008-add-msix-store-channel.md)にある。ADR 0008は提案の状態で、受理はhideが決める。
+受理されるまで配布経路はportable ZIPの1本のまま。
+当日の記録は[日報](../reports/2026-10-03.md)、止まっているものと再開の手順は[引き継ぎ書](../handoffs/2026-10-03.md)にある。
+
 [Issue #21](https://github.com/hideyukiMORI/nene-loupe/issues/21)が、READMEのトップへ実機の
 スクリーンショットを置く今回の作業の追跡先。撮影経路の選定は[ADR 0007](../adr/0007-photograph-the-loupe-for-the-readme.md)、
 実測は`out/readme-capture/`にある。
