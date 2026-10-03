@@ -8,7 +8,7 @@
 hideが2026-10-03に受理した（[Issue #29](https://github.com/hideyukiMORI/nene-loupe/issues/29)）。実装はこれからで、
 実際に配っているのはportable ZIPの1本のまま。Store提出までの作業は
 [Issue #31](https://github.com/hideyukiMORI/nene-loupe/issues/31)〜[#38](https://github.com/hideyukiMORI/nene-loupe/issues/38)に分けてある
-（対応表はADR 0008の「受理の記録」）。開発者アカウントの登録とアプリ名の予約はhideの操作で、まだ済んでいない。
+（対応表はADR 0008の「受理の記録」）。開発者アカウントの登録とアプリ名`NeNe Loupe`の予約は済んだ（下書き段階・申請は始めていない）。身元の値はADR 0008の追記にある。
 
 [Issue #30](https://github.com/hideyukiMORI/nene-loupe/issues/30)が、スキップ・取り消しされた`check`でも統合できてしまう穴の追跡先。
 塞がるまで、統合の前にheadのSHAで`check`の成功を読む（[引き継ぎ書](../handoffs/2026-10-03.md)）。

@@ -21,6 +21,25 @@
 開発者アカウントの登録・本人確認・アプリ名の予約は hide の操作で、この時点では済んでいない。
 `Identity/Name`・`Identity/Publisher`・`PublisherDisplayName` は、予約のあと Partner Center が示す値を使う。
 
+### 追記（2026-10-03・Issue #40）— 予約で決まった身元と、表示名の訂正
+
+上の記録のあと、hide が開発者アカウントを登録し、Partner Center でアプリ名 `NeNe Loupe`（MSIX または PWA アプリ）を予約した。
+製品は下書き段階で、申請は始めていない。「製品 ID の表示」に出た値は次のとおり。
+
+| 項目 | 値 |
+| --- | --- |
+| `Package/Identity/Name` | `HideyukiMori.NeNeLoupe` |
+| `Package/Identity/Publisher` | `CN=C37230AA-B52D-403B-9BFD-E7980F088422` |
+| `Package/Properties/PublisherDisplayName` | `Hideyuki Mori` |
+| Package Family Name | `HideyukiMori.NeNeLoupe_3sft4ch5kzywy` |
+| Microsoft Store ID | `9N6HZB1SXKBM` |
+
+**発行者の表示名は `Hideyuki Mori` とする。** 上の表の `hideyukiMORI` は予約の前の決定で、Partner Center が示した値と違った。
+hide は同日、Partner Center の値のまま使うと決めた。理由は、表示名を後から変えられるかが公式文書で食い違っていること、
+個人アカウントは自分の名前で公開するためのものであること、GitHub のアカウント名から同じ名前が読めるので公開範囲が変わらないこと。
+
+これらの値をマニフェストへ写すのは Issue #38、リポジトリの中の恒久的な置き場を決めるのは Issue #37 である。
+
 受理のあとの作業は次の Issue で進める。
 
 | 作業 | Issue |
