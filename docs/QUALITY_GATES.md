@@ -172,6 +172,15 @@ eng/config-bindings.jsonの設定と参照先を照合する。文字列参照�
 - 対応する規則: QLT-008
 - 機械強制: **active**（`eng/conformance.py`）
 
+### CNF-009 — 署名の証明書と鍵のファイルを置かない
+
+リポジトリの追跡対象と、除外されていない未追跡のファイルに、`.pfx` / `.p12` / `.cer` / `.pvk` を置かない。
+検証用の証明書は証明書ストアに持ち出し不可の鍵で作り、拇印で指す。除外済みの場所（`out/`）は検査器から見えないが、
+そこに置いたものは `git add -f` をしない限り追跡されず、追跡された時点でこの検査に掛かる。拡張子を変えた鍵は検出できない。
+
+- 対応する決定: ADR 0008
+- 機械強制: **active**（`eng/conformance.py`）
+
 🔴 **検出語は検査器のソースに直書きしない**（検査器が自分自身を違反として報告する。前例: xi-tools 初版で 7 件の自己検出）。
 🔴 **テストソースは検査対象から外す**（テストは意図的な違反を書く場所）。
 
@@ -236,6 +245,7 @@ CNF-006 が「本文に定義があるのにここに行が無い」を拒否す
 | CNF-006 | active | eng/conformance.py / tests/conformance |
 | CNF-007 | planned | eng/conformance.py / tests/conformance |
 | CNF-008 | active | eng/conformance.py / tests/conformance |
+| CNF-009 | active | eng/conformance.py / tests/conformance |
 
 ---
 

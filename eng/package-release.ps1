@@ -1,5 +1,8 @@
 [CmdletBinding()]
-param()
+param(
+    # ZIP を作って検査したあと、同じ exe から Store 提出用の MSIX も作る（ADR 0008）。
+    [switch]$StoreMsix
+)
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -82,6 +85,11 @@ try {
 
     Write-Host "Release archive: $archivePath"
     Write-Host "SHA256: $archiveHash"
+
+    if ($StoreMsix) {
+        & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'package-msix.ps1') -Submission
+        if ($LASTEXITCODE -ne 0) { throw 'Store MSIX packaging failed.' }
+    }
 }
 finally {
     Pop-Location

@@ -170,6 +170,19 @@ class RepositoryChecks(unittest.TestCase):
         self.write("src/.clang-tidy", "Checks: '*'")
         self.assertIn("CNF-007", self.config_ids())
 
+    def test_cnf009_positive(self):
+        self.seed_config()
+        self.write("docs/certificates.md", "# how to make a local test certificate")
+        self.assertNotIn("CNF-009", self.config_ids())
+
+    def test_cnf009_negative(self):
+        for name in ("local-test.pfx", "eng/local-test.cer", "keys/Signing.PVK", "out-of-tree/store.p12"):
+            with self.subTest(name=name):
+                self.seed_config()
+                self.write(name, "")
+                self.assertIn("CNF-009", self.config_ids())
+                (self.root / name).unlink()
+
     def test_cnf008_positive(self):
         self.seed_config()
         self.write("src/Color.cpp", "// TODO #1: implement color")
