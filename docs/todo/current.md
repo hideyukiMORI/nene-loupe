@@ -12,7 +12,7 @@ hideが2026-10-03に受理した（[Issue #29](https://github.com/hideyukiMORI/n
 
 プライバシーポリシー（[Issue #32](https://github.com/hideyukiMORI/nene-loupe/issues/32)）はhideが読んで統合済み（`PRIVACY.md`）。
 スキップされた`check`でも統合できてしまう穴は[Issue #30](https://github.com/hideyukiMORI/nene-loupe/issues/30)で塞いだ。
-統合の前にheadのSHAで最新の`check`の成功を読む手順は続ける（[引き継ぎ書](../handoffs/2026-10-03.md)）。
+統合の前にheadのSHAで最新の`check`の成功を読む手順は続ける（[引き継ぎ書](../handoffs/2026-10-04.md)）。
 
 [Issue #25](https://github.com/hideyukiMORI/nene-loupe/issues/25)（下調べ）と
 [Issue #27](https://github.com/hideyukiMORI/nene-loupe/issues/27)（CIのMSVCの版ずれ）は完了し、mainへ統合済み。
