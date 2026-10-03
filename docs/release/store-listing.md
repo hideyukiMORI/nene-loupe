@@ -168,6 +168,8 @@ HEX
 
 ### 認定の注意書き（Notes for certification）
 
+入力欄は「申請オプション」のページには無い。そのページの「認定の注意書き」の説明文にある「追加のテスト情報」のリンクを押し、開いた別のページで入れる（2026-10-03 に hide の画面で確かめた）。先に申請オプションを保存してから移ること。
+
 ```text
 The application window is intentionally excluded from screen capture (SetWindowDisplayAffinity with WDA_EXCLUDEFROMCAPTURE) so that the loupe can see what is behind it. Because of this, the window does not appear in screenshots or screen recordings. This is by design, not a rendering failure.
 
@@ -176,8 +178,10 @@ To test: launch the app and drag it over any content. The left pane shows the 7x
 
 ### `runFullTrust` が必要な理由
 
+入力欄の上限は 500 文字である（2026-10-03 に、540 文字の文面が 500 文字で切れた）。下の文面は 468 文字。
+
 ```text
-NeNe Loupe is an existing Win32 desktop application (C++ / Win32, no UWP components) packaged with MSIX. runFullTrust is required because the packaged executable is a classic Win32 process (EntryPoint "Windows.FullTrustApplication"). The app reads the pixels behind its own window through GDI to show a magnified view and the colour value, writes text to the clipboard when the user clicks the value, and saves three settings to a local file. It does not require elevation, makes no network connections, and installs no services or drivers.
+NeNe Loupe is an existing Win32 desktop app (C++, no UWP components) packaged with MSIX. runFullTrust is required because the packaged executable is a classic Win32 process (EntryPoint "Windows.FullTrustApplication"). It reads the screen pixels behind its own window through GDI to show a magnified view and the colour value, copies text to the clipboard on click, and saves three settings to a local file. No elevation, no network connections, no services or drivers.
 ```
 
 確かめていないこと: 審査員がリモート接続や仮想マシンの画面越しに試した場合に、窓が見えるかどうか。
@@ -212,6 +216,7 @@ hide が Partner Center で申請（Submission 1）を入力した。画面の�
 | 製品の機能 | 最大 20 件 |
 | キーワード | 最大 7 個、各 40 文字以内、全体で 21 単語まで |
 | 短い説明 | 推奨 270 文字以下 |
+| `runFullTrust` が必要な理由 | 上限 500 文字 |
 | スクリーンショット | 1 つ以上が必須。4 つ以上を推奨。1366×768 以上を推奨。PNG・50 MB 未満・最大 30 ファイル |
 | アプリ タイル アイコン | 300×300 の PNG（`docs/images/store/store-logo-300.png`） |
 
