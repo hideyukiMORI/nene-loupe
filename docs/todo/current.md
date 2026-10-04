@@ -40,6 +40,7 @@ hideが2026-10-03に受理した（[Issue #29](https://github.com/hideyukiMORI/n
 ## 次に行うこと
 
 **2026-10-03にMicrosoft Storeへ提出した（Submission 1・認定中）。** 審査の結果待ちである。
+IARCの年齢区分の確定の通知は2026-10-04に届いた（審査の結果ではない。[Issue #66](https://github.com/hideyukiMORI/nene-loupe/issues/66)）。
 認定されたら、main `0c26ed4`に`v1.0.0`のtagを打ち、控えてあるZIPをGitHub Releaseへ出す。
 再開の手順は[引き継ぎ書](../handoffs/2026-10-04.md)、セッション全体の記録は[日報](../reports/2026-10-04.md)にある。
 Windows App Certification KitはPASS 23・WARNING 1・FAIL 0（高DPIの警告は原因が分かっていない。`docs/quality/gate-proofs.md`第16節）。
