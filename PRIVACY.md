@@ -26,9 +26,9 @@ nothing about you, your screen or the colours you picked.
 
 - Portable ZIP version: `%LOCALAPPDATA%\NeNeLoupe\settings.v1.txt`. It stays on your device
   until you delete it.
-- Microsoft Store version: if that file already exists, the application uses it. Otherwise
-  Windows keeps the file inside the application's own package storage, and removes it when you
-  uninstall the application.
+- Microsoft Store version: if that file or its `NeNeLoupe` folder already exists, the application
+  uses that location. Otherwise Windows keeps the file inside the application's own package
+  storage, and removes it when you uninstall the application.
 
 ## Network
 
@@ -76,7 +76,7 @@ Questions: open an issue at <https://github.com/hideyukiMORI/nene-loupe/issues>.
 設定ファイルに入るのは、形式の版と上の 3 つの選択だけです。利用者・画面・採取した色についての情報は入りません。
 
 - ZIP 版: `%LOCALAPPDATA%\NeNeLoupe\settings.v1.txt`。削除するまで端末に残ります。
-- Microsoft Store 版: このファイルがすでにあればそれを使います。無ければ Windows がアプリ専用の保存場所に置き、
+- Microsoft Store 版: このファイルか、その `NeNeLoupe` フォルダがすでにあれば、その場所を使います。無ければ Windows がアプリ専用の保存場所に置き、
   アンインストールすると消えます。
 
 ## ネットワーク
