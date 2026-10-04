@@ -568,3 +568,44 @@ Windows 11 Pro 10.0.26200、Windows SDK 10.0.26100.0。証明書は持ち出し�
 
 **確かめていないこと:** Storeが署名したパッケージ・提出用の身元（`HideyukiMori.NeNeLoupe`）のパッケージでは回していない（未署名では入れられないため）。
 警告があっても提出できるかは、Microsoftの文書で確かめていない。
+
+## 17. Storeが署名したパッケージ（Issue #70）
+
+2026-10-04、hideがMicrosoft Storeから入れたパッケージ（`HideyukiMori.NeNeLoupe_1.0.0.0_x64__3sft4ch5kzywy`）を、下調べと同じ探針で測った。
+Windows 11 Pro 10.0.26200、測った窓は144 DPIのモニタ上。操作はメッセージの送信で行い、ポインタは動かしていない。
+実測の前にhideの設定ファイルの控えを取った。
+
+| 確かめたこと | 結果 |
+| --- | --- |
+| パッケージの素性（`Get-AppxPackage`） | `SignatureKind: Store`、`Status: Ok`、`IsDevelopmentMode: False`。`AppxSignature.p7x`がある |
+| manifestの身元 | `HideyukiMori.NeNeLoupe` / `CN=C37230AA-B52D-403B-9BFD-E7980F088422` / `Hideyuki Mori` / `1.0.0.0` / x64。`eng/store-identity.json`と同じ |
+| 入っているexeのSHA-256 | `587268D15A362970562FD1650A40A700F8B736A6B62DCC481C9B14DBD2612FDA`。GitHub Release v1.0.0のZIPの中のexeと同じ |
+| 起動（`explorer.exe shell:AppsFolder\HideyukiMori.NeNeLoupe_3sft4ch5kzywy!NeNeLoupe`） | 窓ができた。プロセスの場所は`C:\Program Files\WindowsApps\…\NeNeLoupe.exe`で、`GetPackageFullName`がパッケージ名を返した。5回の起動とも同じ |
+| 窓 | 240×64 DIP（144 DPIで360×96画素）。常に最前面。`GetWindowDisplayAffinity`は`0x11`（キャプチャ除外が効いている） |
+| 採取・当たり判定・複写・終了 | 色の検査、1画素の移動、4か所の当たり判定が通った。`#FF8000`と`0, 50, 100, 0`を複写できた。`WM_CLOSE`から5秒以内に終了した |
+| シェルが返すアイコン（第15節と同じ方法） | 16・32・48・256pxは`targetsize`のロゴと不透明な画素がすべて一致（差0）。24pxは一致しない（最大差58）。第15節の検証用パッケージと同じ結果 |
+
+設定の保存先。本物の場所は`%LOCALAPPDATA%\NeNeLoupe\settings.v1.txt`、パッケージ専用の場所は
+`%LOCALAPPDATA%\Packages\HideyukiMori.NeNeLoupe_3sft4ch5kzywy\LocalCache\Local\NeNeLoupe\settings.v1.txt`である。
+それぞれの場面で起動し、形式を切り替えて、どちらのファイルが変わったかを外から読んだ。
+
+| 場面（起動の前） | 読んだ場所 | 書いた場所 |
+| --- | --- | --- |
+| S1: 本物の場所にファイルがある | 本物の場所（`format=rgb`の表示で起動した） | 本物の場所。パッケージ専用の場所には何もできなかった |
+| S2: 本物の場所のフォルダごと無い | —（既定値で起動した） | パッケージ専用の場所。本物の場所にはフォルダもできなかった |
+| S2b: 本物の場所のフォルダはあるが、ファイルが無い | —（既定値で起動した） | **本物の場所。** パッケージ専用の場所には何もできなかった |
+| S3: 両方にある | パッケージ専用の場所（`format=cmyk`の表示で起動した） | パッケージ専用の場所。本物の場所は変わらなかった |
+
+S1・S2・S3は、下調べ（`docs/reports/2026-10-03-store-msix-research.md`、検証用パッケージ）と同じ結果である。
+**S2bは今回初めて測った。** 分かれ目は「ファイルがあるか」ではなく「本物の場所のフォルダがあるか」だった。
+ZIP版を使ったあとで設定ファイルだけを消した人は、Store版でも本物の場所に書かれる。
+
+探針と結果は`D:/NeNeLoupe/probe/`（Git対象外）にある（`store-probe.py`、`store-settings-state.ps1`、`result-Store-*.json`、`store-icons/`）。
+S1だけは、探針が下調べの作業木の`eng/verify-window.py`（0.2.0の時点）を読み込んで実行した。S2・S2b・S3は今のmainのものである。
+
+実測の後片付け: 探針が作ったパッケージ専用の場所の設定ファイルは消した。hideの設定ファイルは控えから戻し、
+SHA-256（`D29B6BC6…`）と更新時刻が実測の前と同じであることを確かめた。実測のあいだhideが使っていたStore版のルーペ（別のプロセス）には触れていない。
+
+**確かめていないこと:** スタートメニューとタスクバーの実際の画面。Storeから入れる操作そのもの（hideが入れた後の状態から測った）。
+アンインストール後に何が残るか。版を上げたときに設定が引き継がれること。Windows 10、144 DPI以外。
+設定窓・右クリックメニュー・テーマ切り替えの、包んだ状態での操作。WACKはStoreが署名したパッケージでは回していない。

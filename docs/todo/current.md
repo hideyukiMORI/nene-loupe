@@ -48,9 +48,11 @@ hideが2026-10-03に受理した（[Issue #29](https://github.com/hideyukiMORI/n
 
 **Microsoft Storeの認定を通り、1.0.0をStoreとGitHub Releaseの両方で公開した（2026-10-04・[Issue #68](https://github.com/hideyukiMORI/nene-loupe/issues/68)）。**
 IARCの年齢区分の確定の通知も2026-10-04に届いた（[Issue #66](https://github.com/hideyukiMORI/nene-loupe/issues/66)）。
-残っているのは、Storeが署名したパッケージでまだ測っていないことの実測である（設定の保存先、アイコンの見え方、起動）。
-hideのPCでの操作が要るので、実測の前にhideの設定ファイルの控えを取る（[引き継ぎ書](../handoffs/2026-10-04.md)の「気を付けること」5番）。
-提出までの記録は[日報](../reports/2026-10-04.md)にある。引き継ぎ書の「認定された場合」の1〜3番は済んだ。
+Storeが署名したパッケージの実測（起動、設定の保存先、シェルが返すアイコン）も2026-10-04に済んだ
+（[Issue #70](https://github.com/hideyukiMORI/nene-loupe/issues/70)、`docs/quality/gate-proofs.md`第17節）。結果は検証用パッケージと同じで、
+新しく分かったのは、設定のフォルダが残っていてファイルだけが無いと、Store版は本物の場所へ書くことである。
+提出までの記録は[日報](../reports/2026-10-04.md)にある。[引き継ぎ書](../handoffs/2026-10-04.md)の「認定された場合」の1〜4番は済み、いま進行中の作業は無い。
+測っていないのは、スタートメニューとタスクバーの画面、アンインストール後の残留、版を上げたときの設定の引き継ぎ、Windows 10である。
 Windows App Certification KitはPASS 23・WARNING 1・FAIL 0（高DPIの警告は原因が分かっていない。`docs/quality/gate-proofs.md`第16節）。
 掲載用の画像は`docs/images/store/`、掲載文と年齢区分の根拠は`docs/release/store-listing.md`にある。アプリの表示は英語だけになった（Issue #52）。
 公開状態はGitHub Releaseを正本とする。新しい製品作業は焦点Issueを作成してから始める。

@@ -30,11 +30,13 @@ the centre colour. Drag the lens or background to move; press Esc or Alt+F4 to c
 - Cycle formats with the label, or choose one from the right-click menu.
 - The gear opens theme (dark / light / system), always-on-top, copyright and version.
 - Settings apply immediately and persist in `%LOCALAPPDATA%\NeNeLoupe\settings.v1.txt`.
-  The Microsoft Store version
-  keeps using that file when it already exists; on a PC where it does not, Windows stores the
-  settings in the package's own storage (`%LOCALAPPDATA%\Packages\HideyukiMori.NeNeLoupe_3sft4ch5kzywy\LocalCache\Local\NeNeLoupe\settings.v1.txt`)
-  and removes them on uninstall. When both files exist, the packaged build uses its own copy.
-  This was measured with a self-signed test package, not with a Store-signed one.
+  The Microsoft Store version keeps using that file when it already exists, and writes it there
+  when the `%LOCALAPPDATA%\NeNeLoupe` folder already exists. On a PC where that folder does not
+  exist, Windows stores the settings in the package's own storage
+  (`%LOCALAPPDATA%\Packages\HideyukiMori.NeNeLoupe_3sft4ch5kzywy\LocalCache\Local\NeNeLoupe\settings.v1.txt`).
+  When both files exist, the Store version uses its own copy. This was measured with the
+  Store-signed 1.0.0 package ([gate proofs](docs/quality/gate-proofs.md), section 17). Removal of
+  the package's own storage on uninstall was measured only with a self-signed test package.
 - Nothing is collected or sent, and the application never connects to a network: see the
   [privacy policy](PRIVACY.md).
 
