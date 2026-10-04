@@ -12,7 +12,7 @@ hideが2026-10-03に受理した（[Issue #29](https://github.com/hideyukiMORI/n
 
 プライバシーポリシー（[Issue #32](https://github.com/hideyukiMORI/nene-loupe/issues/32)）はhideが読んで統合済み（`PRIVACY.md`）。
 スキップされた`check`でも統合できてしまう穴は[Issue #30](https://github.com/hideyukiMORI/nene-loupe/issues/30)で塞いだ。
-統合の前にheadのSHAで最新の`check`の成功を読む手順は続ける（[引き継ぎ書](../handoffs/2026-10-04.md)）。
+統合の前にheadのSHAで最新の`check`の成功を読む手順は続ける（[引き継ぎ書](../handoffs/2026-10-04-store-release.md)）。
 
 [Issue #25](https://github.com/hideyukiMORI/nene-loupe/issues/25)（下調べ）と
 [Issue #27](https://github.com/hideyukiMORI/nene-loupe/issues/27)（CIのMSVCの版ずれ）は完了し、mainへ統合済み。
@@ -51,7 +51,8 @@ IARCの年齢区分の確定の通知も2026-10-04に届いた（[Issue #66](htt
 Storeが署名したパッケージの実測（起動、設定の保存先、シェルが返すアイコン）も2026-10-04に済んだ
 （[Issue #70](https://github.com/hideyukiMORI/nene-loupe/issues/70)、`docs/quality/gate-proofs.md`第17節）。結果は検証用パッケージと同じで、
 新しく分かったのは、設定のフォルダが残っていてファイルだけが無いと、Store版は本物の場所へ書くことである。
-提出までの記録は[日報](../reports/2026-10-04.md)にある。[引き継ぎ書](../handoffs/2026-10-04.md)の「認定された場合」の1〜4番は済み、いま進行中の作業は無い。
+認定・公開・実測の記録は[日報](../reports/2026-10-04-store-release.md)、提出までの記録は[前の日報](../reports/2026-10-04.md)、
+再開の手順は[引き継ぎ書](../handoffs/2026-10-04-store-release.md)にある。いま進行中の作業は無い。
 測っていないのは、スタートメニューとタスクバーの画面、アンインストール後の残留、版を上げたときの設定の引き継ぎ、Windows 10である。
 Windows App Certification KitはPASS 23・WARNING 1・FAIL 0（高DPIの警告は原因が分かっていない。`docs/quality/gate-proofs.md`第16節）。
 掲載用の画像は`docs/images/store/`、掲載文と年齢区分の根拠は`docs/release/store-listing.md`にある。アプリの表示は英語だけになった（Issue #52）。
