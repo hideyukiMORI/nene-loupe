@@ -10,11 +10,16 @@ A tiny frameless screen loupe and colour picker for Windows. C++ / Win32, no UI 
 ## Download and run
 
 NeNe Loupe requires Windows 10 version 2004 or later (x64) with DWM enabled.
-Download the ZIP and `SHA256SUMS` from the
-[latest release](https://github.com/hideyukiMORI/nene-loupe/releases/latest), verify the ZIP,
-extract it, and run `NeNeLoupe.exe`. No installer or additional Visual C++ runtime is required.
-The published executable is not code signed, so Windows may show an unknown-publisher warning.
-Use `Get-FileHash <downloaded-zip> -Algorithm SHA256` and compare the result with `SHA256SUMS`.
+There are two ways to get it. Both contain the same executable.
+
+- **Microsoft Store**: install it from
+  [the Store page](https://apps.microsoft.com/detail/9N6HZB1SXKBM). The package is signed by
+  Microsoft, and the Store handles updates.
+- **Portable ZIP**: download the ZIP and `SHA256SUMS` from the
+  [latest release](https://github.com/hideyukiMORI/nene-loupe/releases/latest), verify the ZIP,
+  extract it, and run `NeNeLoupe.exe`. No installer or additional Visual C++ runtime is required.
+  The executable in the ZIP is not code signed, so Windows may show an unknown-publisher warning.
+  Use `Get-FileHash <downloaded-zip> -Algorithm SHA256` and compare the result with `SHA256SUMS`.
 
 A 240×64 DIP window shows a sharp 8× loupe of the 7×7 pixels directly behind the lens and
 the centre colour. Drag the lens or background to move; press Esc or Alt+F4 to close.
@@ -25,7 +30,7 @@ the centre colour. Drag the lens or background to move; press Esc or Alt+F4 to c
 - Cycle formats with the label, or choose one from the right-click menu.
 - The gear opens theme (dark / light / system), always-on-top, copyright and version.
 - Settings apply immediately and persist in `%LOCALAPPDATA%\NeNeLoupe\settings.v1.txt`.
-  A Microsoft Store build is planned but not yet published. Packaged that way, the application
+  The Microsoft Store version
   keeps using that file when it already exists; on a PC where it does not, Windows stores the
   settings in the package's own storage (`%LOCALAPPDATA%\Packages\HideyukiMori.NeNeLoupe_3sft4ch5kzywy\LocalCache\Local\NeNeLoupe\settings.v1.txt`)
   and removes them on uninstall. When both files exist, the packaged build uses its own copy.

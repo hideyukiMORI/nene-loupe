@@ -1,6 +1,6 @@
 # Privacy Policy — NeNe Loupe
 
-Last updated: 2026-10-03 · Publisher: Hideyuki Mori
+Last updated: 2026-10-04 · Publisher: Hideyuki Mori
 
 **NeNe Loupe does not collect, store or transmit any personal information. It never connects to
 a network.**
@@ -26,7 +26,7 @@ nothing about you, your screen or the colours you picked.
 
 - Portable ZIP version: `%LOCALAPPDATA%\NeNeLoupe\settings.v1.txt`. It stays on your device
   until you delete it.
-- Microsoft Store version (when available): if that file already exists, the application uses it. Otherwise
+- Microsoft Store version: if that file already exists, the application uses it. Otherwise
   Windows keeps the file inside the application's own package storage, and removes it when you
   uninstall the application.
 
@@ -56,7 +56,7 @@ Questions: open an issue at <https://github.com/hideyukiMORI/nene-loupe/issues>.
 
 # プライバシーポリシー（日本語）
 
-最終更新: 2026-10-03 · 発行者: Hideyuki Mori
+最終更新: 2026-10-04 · 発行者: Hideyuki Mori
 
 **NeNe Loupe は個人情報を収集・保存・送信しません。ネットワークには一切接続しません。**
 
@@ -76,7 +76,7 @@ Questions: open an issue at <https://github.com/hideyukiMORI/nene-loupe/issues>.
 設定ファイルに入るのは、形式の版と上の 3 つの選択だけです。利用者・画面・採取した色についての情報は入りません。
 
 - ZIP 版: `%LOCALAPPDATA%\NeNeLoupe\settings.v1.txt`。削除するまで端末に残ります。
-- Microsoft Store 版（公開後）: このファイルがすでにあればそれを使います。無ければ Windows がアプリ専用の保存場所に置き、
+- Microsoft Store 版: このファイルがすでにあればそれを使います。無ければ Windows がアプリ専用の保存場所に置き、
   アンインストールすると消えます。
 
 ## ネットワーク
