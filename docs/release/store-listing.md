@@ -203,6 +203,9 @@ NeNe Loupe is an existing Win32 desktop app (C++, no UWP components) packaged wi
 
 利用者の画面に映っているものを拡大するので、表示される内容は利用者の画面しだいである。アプリが内容を取り寄せたり保存したりはしない。
 
+**答え直す条件:** 更新で上の表の事実が変わり、アンケートの答えが変わるときは、アンケートを答え直して区分を取り直す（IARC の通知の条項。下の「2026-10-03 の入力で分かったこと」）。
+いまの区分は「設問はすべて『いいえ』」に基づくので、通信・利用者同士のやり取り・購入や広告・Web の内容の表示のどれかを足す変更が、その合図である。
+
 ## 2026-10-03 の入力で分かったこと
 
 hide が Partner Center で申請（Submission 1）を入力した。画面の文言は hide が貼ったものを読んだ。
@@ -212,6 +215,7 @@ hide が Partner Center で申請（Submission 1）を入力した。画面の�
 | パッケージの検証 | `NeNeLoupe-v1.0.0-windows-x64-store.msix` は `Validated`。`v1.0.0.0`・X64・`Windows.Desktop min version 10.0.19041.0`。身元・発行者・版のエラーは出なかった |
 | パッケージの警告 | `The following restricted capabilities require approval before you can use them in your app: runFullTrust.`（想定どおり。申請オプションで理由を書く） |
 | 年齢区分 | アプリの種類は「その他のすべてのアプリの種類」、設問はすべて「いいえ」。結果は IARC 3+ / Microsoft 3+ / ESRB E / PEGI 3 / USK Everyone / DJCTQ L / CCC TE / PCBP 0（IARC バージョン 10.3） |
+| 年齢区分の確定の通知 | 2026-10-04 に IARC から「Live Rating Notice」のメールが hide に届いた（Rating Date は 2026-10-03、Storefront は Microsoft）。区分が有効になったという通知で、Store の審査の結果ではない。メールに区分の値は書かれていない。Global Rating ID は hide のメールにあり、ここには写さない（IARC と契約している別のストアへ出すときに入れると、同じ区分を使える） |
 | プライバシーポリシーの設問 | 「個人情報へのアクセス、収集、または送信を行いますか」には「はい」と答え、URL を入れる（画面の画素を読むことと、規約 10.5.1 のため） |
 | 製品の機能 | 最大 20 件 |
 | キーワード | 最大 7 個、各 40 文字以内、全体で 21 単語まで |
