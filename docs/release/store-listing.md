@@ -224,7 +224,22 @@ hide が Partner Center で申請（Submission 1）を入力した。画面の�
 | スクリーンショット | 1 つ以上が必須。4 つ以上を推奨。1366×768 以上を推奨。PNG・50 MB 未満・最大 30 ファイル |
 | アプリ タイル アイコン | 300×300 の PNG（`docs/images/store/store-logo-300.png`） |
 
+## 審査の結果（2026-10-04）
+
+Submission 1 は認定され、Store で公開された。2026-10-04 に hide が貼った Partner Center の画面を読んだ（リナは画面を直接見ていない）。
+
+| 項目 | 結果 |
+| --- | --- |
+| 状態 | 「Microsoft Store で取り扱い中」。「Microsoft Store のプレゼンス (Submission 1: 最終変更日 2026/10/03)」 |
+| 差し戻し・追加の質問 | 無かった。この掲載文、`runFullTrust` の理由、認定の注意書きで審査を通った。WACK の高 DPI の警告（WARNING 1）があっても認定された |
+| Store の URL | <https://apps.microsoft.com/detail/9N6HZB1SXKBM>（ディープ リンクは `ms-windows-store://pdp/?productid=9N6HZB1SXKBM`） |
+| 身元の値 | 画面の Package/Identity/Name・Publisher・PublisherDisplayName・Package Family Name は `eng/store-identity.json` と README の記述と同じだった |
+| GitHub Release | 同じ日に `v1.0.0` の tag を main `0c26ed4` に打ち、提出のときに控えた ZIP と `SHA256SUMS` を公開した（Issue #68） |
+
+認定された時刻は分かっていない（提出は 2026-10-03、hide が公開を確認したのは 2026-10-04）。
+
 ## 確かめていないこと
 
 - 日本語のキーワードで「全体で 21 単語まで」がどう数えられるか。
-- この掲載文で審査に足りるか。
+- Store のページに、掲載文と画像が入力したとおりに出ているか。
+- Store が署名したパッケージの挙動（設定の保存先、アイコンの見え方、起動）。
