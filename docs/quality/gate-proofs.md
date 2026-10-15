@@ -609,3 +609,38 @@ SHA-256（`D29B6BC6…`）と更新時刻が実測の前と同じであること
 **確かめていないこと:** スタートメニューとタスクバーの実際の画面。Storeから入れる操作そのもの（hideが入れた後の状態から測った）。
 アンインストール後に何が残るか。版を上げたときに設定が引き継がれること。Windows 10、144 DPI以外。
 設定窓・右クリックメニュー・テーマ切り替えの、包んだ状態での操作。WACKはStoreが署名したパッケージでは回していない。
+
+## 18. 設定窓を閉じる順序（Issue #74）
+
+2026-10-15、外部講評（P1-2）の指摘を再現し、修正を確かめた。Windows 11 Pro 10.0.26300、測った窓は120 DPIのモニタ上。
+操作はメッセージの送信だけで行い、ポインタもキーボードも動かしていない。probeと結果は`D:/NeNeLoupe/review-2026-10-15/`（Git対象外）にある
+（`order-probe/OrderProbe.cpp`、`settings-close-probe.py`、`settings-close-before.json`、`settings-close-after.json`）。
+
+### 18.1 Win32の順序だけを測る（製品コードを使わない）
+
+`OrderProbe.cpp`は、オーナー窓と所有窓を作り、オーナーを無効にして所有窓を前面にしてから、2つの順序で所有窓を壊し、
+壊した5 ms後の前面の窓を`GetForegroundWindow`で読む。3回繰り返した。
+
+| 順序 | 壊した5 ms後の前面 |
+| --- | --- |
+| 修正前と同じ（`DestroyWindow` → 30 ms後に`EnableWindow(owner, TRUE)`と`SetForegroundWindow(owner)`） | 3/3で別のアプリ（別プロセスの`SunAwtFrame`） |
+| 修正後と同じ（`EnableWindow(owner, TRUE)` → `DestroyWindow` → `SetForegroundWindow(owner)`） | 3/3でオーナー |
+
+### 18.2 実アプリ
+
+`settings-close-probe.py`は、作業木でビルドした`NeNeLoupe.exe`を起動し、歯車の当たり判定の中心へ`WM_LBUTTONDOWN`/`WM_LBUTTONUP`を送って設定窓を開き、
+3つの経路（Escの`WM_KEYDOWN`、`WM_CLOSE`、×の当たり判定への`WM_LBUTTONDOWN`/`WM_LBUTTONUP`）で閉じ、送った直後から5 msごとに60回、前面の窓を読む。
+起動したプロセスに`AllowSetForegroundWindow`で前面の権限を与えてから測った（与えないと設定窓が最初から前面にならず、移り先を測れない）。
+3経路とも、閉じる前の前面は設定窓だった。
+
+| 経路 | 修正前: 別の窓が前面だったサンプル | 修正前: 60サンプル目の前面 | 修正後: 別の窓 | 修正後: 60サンプル目 |
+| --- | --- | --- | --- | --- |
+| Esc | 55/60（最初は5.6 ms） | 別のアプリ | 0/60 | ルーペ窓 |
+| `WM_CLOSE` | 1/60（18.3 ms） | ルーペ窓（デストラクタの遅い`SetForegroundWindow`で戻った） | 0/60 | ルーペ窓 |
+| × | 57/60（最初は13.4 ms） | 別のアプリ | 0/60 | ルーペ窓 |
+
+修正は`SettingsWindow::close()`の1関数に閉じる経路をまとめ、`EnableWindow(owner_, TRUE)` → `DestroyWindow` → `SetForegroundWindow(owner_)`の順にしたこと。
+デストラクタも同じ関数を呼ぶ。`ui_win32`は単体テストの範囲外（`eng/architecture.json`の`unit_tests`はcore/applicationだけ）なので、この実測が再現テストの代わりである。
+
+**確かめていないこと:** 120 DPI以外。Alt+F4（`WS_POPUP`では`DefWindowProc`が`WM_SYSCOMMAND`の`SC_CLOSE`を`WM_CLOSE`にするので同じ経路になるはずだが、送っていない）。
+前面の権限が無い状態（設定窓が最初から前面にならない場合）の見え方。修正前の「別のアプリ」は、そのとき動いていた別プロセスの窓で、どの窓へ行くかはZ順で変わる。
