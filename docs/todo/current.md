@@ -4,6 +4,18 @@
 
 ## 現在のIssue
 
+**2026-10-15、外部講評（hubの指示書）への対応が進行中。** 事実確認の表とhideの決定は[日報](../reports/2026-10-15.md)、
+再開の手順は[引き継ぎ書](../handoffs/2026-10-15.md)にある。P1-2（設定窓を閉じる順序）は
+[Issue #74](https://github.com/hideyukiMORI/nene-loupe/issues/74)で修正・統合済み。
+残りは[#75](https://github.com/hideyukiMORI/nene-loupe/issues/75)（モニタの外で黒を返さない）、
+[#76](https://github.com/hideyukiMORI/nene-loupe/issues/76)（`OpenClipboard`の再試行）、
+[#77](https://github.com/hideyukiMORI/nene-loupe/issues/77)（ADR 0009 終わり方の契約）、
+[#78](https://github.com/hideyukiMORI/nene-loupe/issues/78)・[#79](https://github.com/hideyukiMORI/nene-loupe/issues/79)（文書）。
+[#80](https://github.com/hideyukiMORI/nene-loupe/issues/80)〜[#82](https://github.com/hideyukiMORI/nene-loupe/issues/82)はIssueのみ（着手しない）、
+[#83](https://github.com/hideyukiMORI/nene-loupe/issues/83)はhideの判断待ち。
+
+以下は2026-10-04時点の要約。
+
 [ADR 0008](../adr/0008-add-msix-store-channel.md)（配布経路にMicrosoft Store（MSIX）を足し、ZIPは残す）を
 hideが2026-10-03に受理した（[Issue #29](https://github.com/hideyukiMORI/nene-loupe/issues/29)）。実装と提出は済み、
 2026-10-04からStoreとportable ZIPの2本で配っている。Store提出までの作業は
@@ -52,7 +64,7 @@ Storeが署名したパッケージの実測（起動、設定の保存先、シ
 （[Issue #70](https://github.com/hideyukiMORI/nene-loupe/issues/70)、`docs/quality/gate-proofs.md`第17節）。結果は検証用パッケージと同じで、
 新しく分かったのは、設定のフォルダが残っていてファイルだけが無いと、Store版は本物の場所へ書くことである。
 認定・公開・実測の記録は[日報](../reports/2026-10-04-store-release.md)、提出までの記録は[前の日報](../reports/2026-10-04.md)、
-再開の手順は[引き継ぎ書](../handoffs/2026-10-04-store-release.md)にある。いま進行中の作業は無い。
+再開の手順は[引き継ぎ書](../handoffs/2026-10-04-store-release.md)にある。
 測っていないのは、スタートメニューとタスクバーの画面、アンインストール後の残留、版を上げたときの設定の引き継ぎ、Windows 10である。
 Windows App Certification KitはPASS 23・WARNING 1・FAIL 0（高DPIの警告は原因が分かっていない。`docs/quality/gate-proofs.md`第16節）。
 掲載用の画像は`docs/images/store/`、掲載文と年齢区分の根拠は`docs/release/store-listing.md`にある。アプリの表示は英語だけになった（Issue #52）。
