@@ -111,23 +111,25 @@ void SettingsWindow::place(RECT desired, HMONITOR monitor)
 
 SettingsWindow::~SettingsWindow()
 {
-    // 先に入力を戻してから前面へ返す。順を逆にすると別のアプリが前へ出る。
-    if (owner_)
-    {
-        EnableWindow(owner_, TRUE);
-    }
-    if (window_)
-    {
-        DestroyWindow(window_);
-    }
-    if (owner_)
-    {
-        SetForegroundWindow(owner_);
-    }
+    close();
     if (class_)
     {
         UnregisterClassW(class_name, instance_);
     }
+}
+
+void SettingsWindow::close()
+{
+    // 閉じる経路はこの 1 つだけ（Esc・WM_CLOSE・×・デストラクタ）。
+    // 先に入力をオーナーへ戻してから壊す。オーナーが無効のまま前面の窓が消えると、
+    // Windows は別のアプリを前へ出す（Issue #74。gate-proofs 第 18 節で実測）。
+    if (!window_)
+    {
+        return;
+    }
+    EnableWindow(owner_, TRUE);
+    DestroyWindow(window_);
+    SetForegroundWindow(owner_);
 }
 
 bool SettingsWindow::is_open() const noexcept
@@ -188,11 +190,11 @@ LRESULT SettingsWindow::dispatch(UINT message, WPARAM word, LPARAM data)
     case WM_KEYDOWN:
         if (word == VK_ESCAPE)
         {
-            DestroyWindow(window_);
+            close();
         }
         return 0;
     case WM_CLOSE:
-        DestroyWindow(window_);
+        close();
         return 0;
     case WM_ERASEBKGND:
         return 1;
@@ -244,7 +246,7 @@ void SettingsWindow::activate(SettingsHitArea area)
     case SettingsHitArea::none:
         return;
     case SettingsHitArea::close:
-        DestroyWindow(window_);
+        close();
         return;
     case SettingsHitArea::theme_dark:
         controller_.select_theme(Theme::dark);

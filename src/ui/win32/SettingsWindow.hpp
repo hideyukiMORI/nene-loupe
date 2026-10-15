@@ -35,6 +35,7 @@ class SettingsWindow final
     LRESULT hit_result(LPARAM data) const;
     void render();
     void activate(SettingsHitArea area);
+    void close();
     void change_dpi(WPARAM word, LPARAM data);
     void refit_to_current_work_area();
     HINSTANCE instance_;
